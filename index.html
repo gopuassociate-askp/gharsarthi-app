@@ -1,0 +1,451 @@
+<!doctype html>
+<html lang="hi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>घर सारथी</title>
+<meta name="theme-color" content="#0f5c58">
+<link rel="manifest" href="./manifest.json">
+<link rel="icon" href="./icon-192.png">
+<link rel="apple-touch-icon" href="./icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="घर सारथी">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #fbf6ef; --card: #ffffff; --ink: #1f2a2a; --muted: #5d6b6a; --line: #e8dfd2;
+    --brand: #0f5c58; --brand-soft: #e3f0ee; --warm: #e0703a; --warm-soft: #fbe9df;
+    --ok: #1e7d4f; --ok-soft: #e2f3ea; --wait: #9a6a00; --wait-soft: #fbf0d6; --bad: #b3261e; --bad-soft: #fbe3e1;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--bg); color: var(--ink); }
+  body { font-family: 'Noto Sans Devanagari', system-ui, -apple-system, 'Segoe UI', sans-serif; font-size: 17px; line-height: 1.5;
+         padding-bottom: calc(76px + env(safe-area-inset-bottom)); }
+  header { background: var(--brand); color: #fff; padding: calc(14px + env(safe-area-inset-top)) 16px 14px; display: flex; align-items: center; gap: 12px; }
+  header svg { width: 40px; height: 40px; border-radius: 10px; flex: none; }
+  header h1 { font-size: 20px; margin: 0; line-height: 1.2; }
+  header p { margin: 0; font-size: 13px; opacity: .85; }
+  main { max-width: 560px; margin: 0 auto; padding: 16px; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 16px; margin-bottom: 14px; }
+  .card h2 { font-size: 18px; margin: 0 0 8px; }
+  .muted { color: var(--muted); font-size: 15px; }
+  .pill { display: inline-block; padding: 4px 12px; border-radius: 999px; font-weight: 600; font-size: 15px; }
+  .pill.ok { background: var(--ok-soft); color: var(--ok); }
+  .pill.wait { background: var(--wait-soft); color: var(--wait); }
+  .pill.bad { background: var(--bad-soft); color: var(--bad); }
+  .status-big { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+  .times { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 10px; }
+  .time { background: var(--brand-soft); border-radius: 12px; padding: 10px 6px; text-align: center; }
+  .time b { display: block; font-size: 20px; color: var(--brand); }
+  .time span { font-size: 13px; color: var(--muted); }
+  ul.plain { padding-left: 20px; margin: 6px 0 0; }
+  ul.plain li { margin: 4px 0; }
+  table { width: 100%; border-collapse: collapse; font-size: 15px; }
+  th, td { text-align: left; padding: 10px 6px; border-bottom: 1px solid var(--line); }
+  th { color: var(--muted); font-weight: 600; font-size: 13px; }
+  .btn { display: block; width: 100%; border: 0; border-radius: 14px; padding: 14px 16px; font: inherit; font-weight: 600; font-size: 17px;
+         text-align: center; text-decoration: none; cursor: pointer; margin-top: 10px; }
+  .btn.primary { background: var(--brand); color: #fff; }
+  .btn.secondary { background: var(--brand-soft); color: var(--brand); }
+  .btn.danger { background: var(--bad); color: #fff; font-size: 20px; }
+  .btn.warm { background: var(--warm); color: #fff; }
+  label { display: block; font-weight: 600; font-size: 15px; margin: 14px 0 6px; }
+  label .req { color: var(--bad); }
+  input, select, textarea { width: 100%; font: inherit; font-size: 17px; padding: 12px; border: 1px solid #cfc4b4; border-radius: 12px; background: #fff; color: var(--ink); }
+  textarea { min-height: 80px; }
+  .check { display: flex; gap: 10px; align-items: flex-start; font-weight: 400; font-size: 15px; margin: 10px 0; }
+  .check input { width: 22px; height: 22px; flex: none; margin-top: 2px; }
+  fieldset { border: 0; padding: 0; margin: 0; }
+  legend { font-weight: 700; font-size: 17px; color: var(--brand); margin-top: 18px; }
+  .note { background: var(--warm-soft); border-radius: 12px; padding: 12px; font-size: 15px; }
+  .code { font-size: 28px; font-weight: 700; letter-spacing: 2px; color: var(--brand); text-align: center; padding: 10px; background: var(--brand-soft); border-radius: 12px; }
+  .err { color: var(--bad); font-size: 15px; margin-top: 8px; }
+  nav { position: fixed; left: 0; right: 0; bottom: 0; background: #fff; border-top: 1px solid var(--line); display: flex;
+        padding-bottom: env(safe-area-inset-bottom); }
+  nav button { flex: 1; border: 0; background: none; font: inherit; font-size: 12px; color: var(--muted); padding: 8px 2px 10px; cursor: pointer; }
+  nav button svg { display: block; margin: 0 auto 2px; width: 24px; height: 24px; }
+  nav button.on { color: var(--brand); font-weight: 700; }
+  .hidden { display: none !important; }
+  .row { display: flex; justify-content: space-between; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--line); }
+  .row:last-child { border-bottom: 0; }
+  .row span:first-child { color: var(--muted); }
+</style>
+</head>
+<body>
+<header>
+  <svg viewBox="0 0 512 512" aria-hidden="true"><rect width="512" height="512" fill="#fbf6ef"/><path d="M256 104 L408 228 L380 228 L380 392 L132 392 L132 228 L104 228 Z" fill="#0f5c58"/><path d="M256 352 C 214 320, 176 292, 176 256 C 176 232, 194 214, 216 214 C 234 214, 248 224, 256 238 C 264 224, 278 214, 296 214 C 318 214, 336 232, 336 256 C 336 292, 298 320, 256 352 Z" fill="#e0703a"/></svg>
+  <div><h1>घर सारथी</h1><p>स्नेहा – आपके अपनों का रोज़ का साथी</p></div>
+</header>
+
+<main>
+  <!-- Welcome: no code saved yet -->
+  <section id="v-welcome" class="view">
+    <div class="card">
+      <h2>नमस्ते 🙏</h2>
+      <p>स्नेहा रोज़ आपके माता-पिता को उनके अपने फ़ोन पर कॉल करती है, खाना और दवाई का हालचाल पूछती है, और कुछ गड़बड़ लगे तो तुरंत आपको फ़ोन करती है।</p>
+      <p class="muted">Sneha calls your parent every day on their own phone, checks on meals and medicines, and phones you at once if something sounds wrong.</p>
+      <button class="btn primary" data-go="signup">नया पंजीकरण / Sign up</button>
+      <button class="btn secondary" data-go="login">मेरे पास कोड है / I have a code</button>
+    </div>
+  </section>
+
+  <!-- Enter code -->
+  <section id="v-login" class="view hidden">
+    <div class="card">
+      <h2>अपना कोड डालें / Enter your code</h2>
+      <p class="muted">पंजीकरण के बाद मिला कोड, जैसे GS-4K7P9QX2</p>
+      <input id="code-in" autocomplete="off" autocapitalize="characters" placeholder="GS-XXXXXXXX">
+      <div id="login-err" class="err"></div>
+      <button class="btn primary" id="login-go">आगे बढ़ें / Continue</button>
+      <button class="btn secondary" data-go="welcome">वापस / Back</button>
+    </div>
+  </section>
+
+  <!-- Home -->
+  <section id="v-home" class="view hidden">
+    <div class="card">
+      <div class="status-big"><h2 id="h-elder">—</h2><span id="h-status" class="pill wait">—</span></div>
+      <p id="h-status-text" class="muted"></p>
+      <div class="times">
+        <div class="time"><b id="t-breakfast">—</b><span>नाश्ता</span></div>
+        <div class="time"><b id="t-lunch">—</b><span>खाना</span></div>
+        <div class="time"><b id="t-medicine">—</b><span>दवाई</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <h2>आपकी सेवा / Your service</h2>
+      <div class="row"><span>प्लान / Plan</span><b id="h-plan">—</b></div>
+      <div class="row"><span>कब से / Since</span><b id="h-since">—</b></div>
+      <div class="row"><span>अगला भुगतान / Next payment</span><b id="h-next">—</b></div>
+      <div class="row"><span>आपात संपर्क / Emergency contacts</span><b id="h-contacts">—</b></div>
+      <div class="row"><span>आपका कोड / Your code</span><b id="h-code">—</b></div>
+    </div>
+    <p id="h-updated" class="muted" style="text-align:center"></p>
+  </section>
+
+  <!-- Payments -->
+  <section id="v-pay" class="view hidden">
+    <div class="card">
+      <h2>भुगतान / Payments</h2>
+      <div id="pay-empty" class="note">अभी कोई भुगतान नहीं। फ़ाउंडिंग फ़ैमिली के लिए सेवा मुफ़्त है।<br><span class="muted">No payments yet. The service is free for founding families.</span></div>
+      <table id="pay-table" class="hidden"><thead><tr><th>तारीख / Date</th><th>राशि / Amount</th><th>स्थिति / Status</th></tr></thead><tbody></tbody></table>
+    </div>
+  </section>
+
+  <!-- What Sneha does -->
+  <section id="v-sneha" class="view hidden">
+    <div class="card">
+      <h2>स्नेहा क्या करती है / What Sneha does</h2>
+      <ul class="plain">
+        <li>दिन में 3 बार कॉल: नाश्ता, दोपहर का खाना, रात की दवाई</li>
+        <li>प्यार से बात करती है, पुराने गाने और यादें सुनती है</li>
+        <li>दर्द, चक्कर, गिरना, साँस की तकलीफ़ सुनते ही परिवार को तुरंत फ़ोन</li>
+        <li>कॉल न उठे या दवाई न ली हो, तो दोबारा कॉल, फिर परिवार को ख़बर</li>
+        <li>हर ज़रूरी बात का ईमेल परिवार को</li>
+      </ul>
+      <p class="muted">3 calls a day, a warm chat, an immediate call to family on emergency words, a second call when a call is missed or medicine is not taken, and an email for anything worth knowing.</p>
+    </div>
+    <div class="card">
+      <h2>स्नेहा क्या नहीं करती / What Sneha does not do</h2>
+      <ul class="plain">
+        <li>वह एम्बुलेंस या डॉक्टर नहीं है। आपात स्थिति में पहले 108 / 112 पर कॉल करें।</li>
+        <li>दवाई या इलाज की सलाह नहीं देती।</li>
+        <li>कभी बैंक, OTP या पैसों की बात नहीं पूछती।</li>
+      </ul>
+    </div>
+  </section>
+
+
+  <!-- Medicines -->
+  <section id="v-meds" class="view hidden">
+    <div class="card">
+      <h2>दवाइयाँ / Medicines</h2>
+      <p class="muted">स्नेहा अपनी रोज़ की कॉल में इन्हें नाम लेकर याद दिलाएगी। वह कभी दवाई बदलने या छोड़ने को नहीं कहेगी।<br>Sneha reminds by name in her daily calls; she never changes or skips a dose.</p>
+      <div id="meds-list"></div>
+      <p id="meds-empty" class="note hidden">अभी कोई दवाई नहीं जोड़ी गई। / No medicines added yet.</p>
+    </div>
+    <div class="card">
+      <h2>दवाई जोड़ें / Add a medicine</h2>
+      <form id="med-form" novalidate>
+        <label for="m-name">दवाई का नाम (पत्ते पर जैसा लिखा है) <span class="req">*</span></label>
+        <input id="m-name" name="name" placeholder="Amlodipine 5">
+        <label for="m-simple">स्नेहा इसे कैसे बोले? / How should Sneha call it?</label>
+        <input id="m-simple" name="simple" placeholder="बीपी वाली गोली, शुगर की गोली">
+        <label for="m-dose">कितनी / Dose</label>
+        <input id="m-dose" name="dose" placeholder="1 गोली">
+        <label>कब लेनी है? / When? <span class="req">*</span></label>
+        <label class="check"><input type="checkbox" name="times" value="morning"> <span>सुबह (नाश्ते वाली कॉल में) / Morning</span></label>
+        <label class="check"><input type="checkbox" name="times" value="afternoon"> <span>दोपहर (खाने वाली कॉल में) / Afternoon</span></label>
+        <label class="check"><input type="checkbox" name="times" value="evening"> <span>शाम / Evening</span></label>
+        <label class="check"><input type="checkbox" name="times" value="night"> <span>रात (दवाई वाली कॉल में) / Night</span></label>
+        <label for="m-food">खाने से पहले या बाद? / Before or after food?</label>
+        <select id="m-food" name="food"><option value="after">खाने के बाद / After food</option><option value="before">खाने से पहले / Before food</option><option value="any">कभी भी / Any time</option></select>
+        <label for="m-end">कब तक? (कोर्स हो तो) / Until (for a course)</label>
+        <input id="m-end" name="end_date" type="date">
+        <label for="m-stock">कितनी गोलियाँ बची हैं? / Tablets left (for refill reminders)</label>
+        <input id="m-stock" name="stock" type="number" inputmode="numeric" placeholder="30">
+        <label class="check"><input type="checkbox" id="m-consent"> <span>मैं दवाइयों की जानकारी याद दिलाने के लिए रखने की अनुमति देता/देती हूँ। / I allow keeping medicine details for reminders.</span></label>
+        <div id="med-err" class="err"></div>
+        <button class="btn primary" type="submit">जोड़ें / Add</button>
+      </form>
+    </div>
+  </section>
+
+  <!-- Help -->
+  <section id="v-help" class="view hidden">
+    <div class="card">
+      <h2>आपात स्थिति / Emergency</h2>
+      <a class="btn danger" href="tel:108">📞 108 एम्बुलेंस</a>
+      <a class="btn danger" href="tel:112">📞 112 आपात सहायता</a>
+      <a class="btn secondary" href="tel:14567">📞 14567 एल्डरलाइन (बुज़ुर्ग हेल्पलाइन)</a>
+    </div>
+    <div class="card">
+      <h2>होम स्क्रीन पर लगाएँ / Add to home screen</h2>
+      <p><b>Android:</b> Chrome में ⋮ मेनू → "Add to Home screen" / "Install app"</p>
+      <p><b>iPhone:</b> Safari में शेयर बटन ⬆️ → "Add to Home Screen"</p>
+      <button id="install-btn" class="btn warm hidden">अभी इंस्टॉल करें / Install now</button>
+    </div>
+    <div class="card">
+      <button class="btn secondary" id="logout">दूसरा कोड डालें / Use another code</button>
+    </div>
+  </section>
+
+  <!-- Sign up -->
+  <section id="v-signup" class="view hidden">
+    <div class="card">
+      <h2>पंजीकरण / Sign up</h2>
+      <p class="muted">लगभग 5 मिनट। * वाले सवाल ज़रूरी हैं।</p>
+      <form id="signup-form" novalidate></form>
+      <div id="signup-err" class="err"></div>
+    </div>
+  </section>
+
+  <!-- Signed up -->
+  <section id="v-done" class="view hidden">
+    <div class="card">
+      <h2>धन्यवाद! / Thank you!</h2>
+      <p>आपका पंजीकरण मिल गया। हम 1–2 दिन में आपको फ़ोन करके जानकारी पक्की करेंगे। उसके बाद स्नेहा पहले एक स्वागत कॉल करेगी।</p>
+      <p>आपका कोड / Your code:</p>
+      <div class="code" id="done-code">—</div>
+      <p class="note">इस कोड को सँभाल कर रखें। इसी से आप ऐप में अपनी सेवा देख सकते हैं।<br><span class="muted">Keep this code safe; it opens your service in this app.</span></p>
+      <div id="done-notes" class="err"></div>
+      <button class="btn primary" data-go="home">मेरी सेवा देखें / See my service</button>
+    </div>
+  </section>
+</main>
+
+<nav id="tabs" class="hidden">
+  <button data-go="home" class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11 12 4l9 7v9H3z"/></svg>सेवा</button>
+  <button data-go="pay"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="M3 10h18"/></svg>भुगतान</button>
+  <button data-go="meds"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="9" width="18" height="7" rx="3.5"/><path d="M12 9v7"/></svg>दवाई</button>
+  <button data-go="sneha"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2"/></svg>स्नेहा</button>
+  <button data-go="help"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v6M12 16v.5"/></svg>मदद</button>
+</nav>
+
+<script>
+const FIELDS = [{"key":"family_name","label":"आपका नाम / Your name","type":"text","required":true},{"key":"relation","label":"बुज़ुर्ग से आपका रिश्ता / Your relation to the elder","type":"dropdown","options":["मैं स्वयं (बुज़ुर्ग) / Myself (the elder)","बेटा / Son","बेटी / Daughter","बहू / Daughter-in-law","दामाद / Son-in-law","पोता-पोती / Grandchild","अन्य / Other"],"required":true},{"key":"family_phone","label":"आपका मोबाइल नंबर / Your mobile","type":"text","placeholder":"98XXXXXXXX","required":true},{"key":"family_email","label":"आपका ईमेल / Your email","type":"email","required":true},{"key":"city","label":"शहर / City","type":"text","required":true},{"key":"elder_name","label":"बुज़ुर्ग का नाम / Elder's name","type":"text","required":true},{"key":"elder_gender","label":"बुज़ुर्ग हैं / The elder is","type":"dropdown","options":["पुरुष / Male","महिला / Female"],"required":true},{"key":"address_as","label":"स्नेहा उन्हें प्यार से क्या कहकर बुलाए? / What would they love Sneha to call them?","type":"dropdown","options":["पापा जी","पिता जी","बाबू जी","बाउजी","दादा जी","नाना जी","अंकल जी","ताऊ जी","चाचा जी","मामा जी","भाई साहब","मम्मी जी","माता जी","अम्मा जी","माँ जी","बीजी","दादी जी","नानी जी","आंटी जी","ताई जी","चाची जी","मामी जी","बहन जी","अन्य (नीचे लिखें) / Other (write below)"],"required":true},{"key":"address_as_other","label":"अन्य हो तो यहाँ लिखें / If other, write it here","type":"text","placeholder":"जैसे: शर्मा जी, बड़े पापा","required":false},{"key":"sneha_intro","label":"स्नेहा अपना परिचय कैसे दे? / How should Sneha introduce herself?","type":"dropdown","options":["आपकी बेटी स्नेहा","आपकी पोती स्नेहा","आपकी नातिन स्नेहा","आपकी बहू स्नेहा","घर सारथी से स्नेहा"],"required":true},{"key":"elder_age","label":"उम्र / Age","type":"number","required":true},{"key":"elder_phone","label":"बुज़ुर्ग का मोबाइल नंबर / Elder's mobile","type":"text","placeholder":"98XXXXXXXX","required":true},{"key":"phone_type","label":"उनका फ़ोन / Their phone","type":"dropdown","options":["कीपैड / Keypad","एंड्रॉयड / Android","आईफ़ोन / iPhone"],"required":true},{"key":"language","label":"भाषा / Language","type":"dropdown","options":["हिंदी / Hindi"],"required":true},{"key":"wake_time","label":"सुबह उठने का समय / Wake-up time","type":"text","placeholder":"6:30 AM","required":false},{"key":"breakfast_time","label":"नाश्ते का समय / Breakfast time","type":"text","placeholder":"9:30 AM","required":true},{"key":"lunch_time","label":"दोपहर के खाने का समय / Lunch time","type":"text","placeholder":"1:30 PM","required":true},{"key":"medicine_time","label":"रात की दवाई का समय / Night medicine time","type":"text","placeholder":"8:30 PM","required":true},{"key":"no_call_hours","label":"किस समय कॉल न करें? / When should Sneha not call?","type":"text","placeholder":"2:30 PM to 4 PM (आराम / rest)","required":false},{"key":"health_notes","label":"स्वास्थ्य (वैकल्पिक) / Health, optional","type":"textarea","placeholder":"BP, शुगर, कम सुनाई देता है","required":false},{"key":"contact2_name","label":"देखभाल करने वाले 1: नाम / Caretaker 1: name (needed if you are the elder)","type":"text","required":false},{"key":"contact2_relation","label":"देखभाल करने वाले 1: रिश्ता / relation","type":"text","placeholder":"भतीजा, पड़ोसी, बेटा","required":false},{"key":"contact2_phone","label":"देखभाल करने वाले 1: मोबाइल / mobile","type":"text","required":false},{"key":"contact2_role","label":"देखभाल करने वाले 1: किस काम के लिए? / for what?","type":"dropdown","options":["आपात स्थिति और रोज़ की ख़बर / Emergencies and daily updates","सिर्फ़ आपात स्थिति / Emergencies only","सिर्फ़ रोज़ की ख़बर / Daily updates only"],"required":false},{"key":"contact3_name","label":"देखभाल करने वाले 2: नाम / Caretaker 2: name","type":"text","required":false},{"key":"contact3_relation","label":"देखभाल करने वाले 2: रिश्ता / relation","type":"text","required":false},{"key":"contact3_phone","label":"देखभाल करने वाले 2: मोबाइल / mobile","type":"text","required":false},{"key":"contact3_role","label":"देखभाल करने वाले 2: किस काम के लिए? / for what?","type":"dropdown","options":["आपात स्थिति और रोज़ की ख़बर / Emergencies and daily updates","सिर्फ़ आपात स्थिति / Emergencies only","सिर्फ़ रोज़ की ख़बर / Daily updates only"],"required":false},{"key":"plan","label":"प्लान / Plan","type":"dropdown","options":["फ़ाउंडिंग फ़ैमिली (मुफ़्त) / Founding family (free)"],"required":true},{"key":"consent","label":"सहमति / Consent","type":"checkbox","required":true,"options":["बुज़ुर्ग को इसकी जानकारी है और वे सहमत हैं / The elder knows and agrees","घर सारथी एम्बुलेंस या डॉक्टर नहीं है; आपात स्थिति में पहले 108/112 पर कॉल करें / Ghar Sarthi is not an ambulance or doctor; in an emergency call 108/112 first","सुरक्षा के लिए कॉल रिकॉर्ड हो सकती हैं; जानकारी निजी रहेगी और माँगने पर मिटा दी जाएगी / Calls may be recorded for safety; data stays private and is deleted on request"]},{"key":"health_consent","label":"स्वास्थ्य जानकारी (वैकल्पिक) / Health details, optional","type":"checkbox","required":false,"options":["दवाइयों और बीपी/शुगर की जानकारी रखने और याद दिलाने की अनुमति / Allow keeping medicine and BP/sugar details for reminders"]}];
+// The page is hosted on a normal web host; n8n runs only these two services.
+const API_BASE = 'https://gharsarthi.app.n8n.cloud/webhook';
+const API = { signup: API_BASE + '/app-signup', status: API_BASE + '/app-status', meds: API_BASE + '/app-medicines',
+  medAdd: API_BASE + '/app-medicine-add', medRemove: API_BASE + '/app-medicine-remove' };
+const STATUS = {
+  'New':         ['wait', 'पंजीकरण मिला', 'हम जल्द आपको फ़ोन करेंगे। / Received; we will call you soon.'],
+  'Needs check': ['wait', 'जाँच बाकी', 'कुछ जानकारी पक्की करनी है; हम फ़ोन करेंगे। / We need to check a few details.'],
+  'Verified':    ['wait', 'सत्यापित', 'स्नेहा जल्द स्वागत कॉल करेगी। / Sneha will make a welcome call soon.'],
+  'Active':      ['ok',   'सक्रिय ✓', 'स्नेहा रोज़ कॉल कर रही है। / Sneha is calling every day.'],
+  'Paused':      ['bad',  'रुकी हुई', 'सेवा अभी रुकी है। / The service is paused.'],
+  'Declined':    ['bad',  'बंद', 'सेवा शुरू नहीं हुई। / The service did not start.'],
+};
+const $ = (s) => document.querySelector(s);
+const store = {
+  get: (k) => { try { return localStorage.getItem(k); } catch (e) { return null; } },
+  set: (k, v) => { try { localStorage.setItem(k, v); } catch (e) {} },
+  del: (k) => { try { localStorage.removeItem(k); } catch (e) {} },
+};
+
+function show(view) {
+  document.querySelectorAll('.view').forEach((v) => v.classList.add('hidden'));
+  $('#v-' + view).classList.remove('hidden');
+  const tabbed = ['home', 'pay', 'meds', 'sneha', 'help'].includes(view);
+  $('#tabs').classList.toggle('hidden', !tabbed);
+  document.querySelectorAll('nav button').forEach((b) => b.classList.toggle('on', b.dataset.go === view));
+  window.scrollTo(0, 0);
+  if (view === 'home') loadStatus();
+  if (view === 'meds') loadMeds();
+}
+document.addEventListener('click', (e) => {
+  const b = e.target.closest('[data-go]');
+  if (b) { e.preventDefault(); show(b.dataset.go); }
+});
+
+// ---- sign-up form, built from the same field list as the n8n form ----
+function buildForm() {
+  const f = $('#signup-form');
+  const groups = [
+    ['आपकी जानकारी / About you', ['family_name', 'relation', 'family_phone', 'family_email', 'city']],
+    ['बुज़ुर्ग की जानकारी / About the elder', ['elder_name', 'elder_gender', 'address_as', 'address_as_other', 'sneha_intro', 'elder_age', 'elder_phone', 'phone_type', 'language']],
+    ['दिनचर्या / Daily routine', ['wake_time', 'breakfast_time', 'lunch_time', 'medicine_time', 'no_call_hours']],
+    ['स्वास्थ्य / Health', ['health_notes']],
+    ['देखभाल कौन करेगा? / Who takes care?', ['contact2_name', 'contact2_relation', 'contact2_phone', 'contact2_role', 'contact3_name', 'contact3_relation', 'contact3_phone', 'contact3_role']],
+    ['प्लान और सहमति / Plan and consent', ['plan', 'consent', 'health_consent']],
+  ];
+  const byKey = Object.fromEntries(FIELDS.map((x) => [x.key, x]));
+  let html = '';
+  for (const [title, keys] of groups) {
+    html += `<fieldset><legend>${title}</legend>`;
+    for (const k of keys) {
+      const x = byKey[k]; if (!x) continue;
+      const req = x.required ? ' <span class="req">*</span>' : '';
+      const ph = x.placeholder ? ` placeholder="${x.placeholder}"` : '';
+      if (x.type === 'checkbox') {
+        html += `<label>${x.label}${req}</label>` + x.options.map((o, i) =>
+          `<label class="check"><input type="checkbox" name="${k}" value="${o.replace(/"/g, '&quot;')}"> <span>${o}</span></label>`).join('');
+      } else if (x.type === 'dropdown') {
+        html += `<label for="f-${k}">${x.label}${req}</label><select id="f-${k}" name="${k}">` +
+          (x.options.length > 1 ? '<option value="">चुनें / Choose</option>' : '') +
+          x.options.map((o) => `<option>${o}</option>`).join('') + '</select>';
+      } else if (x.type === 'textarea') {
+        html += `<label for="f-${k}">${x.label}${req}</label><textarea id="f-${k}" name="${k}"${ph}></textarea>`;
+      } else {
+        const t = x.type === 'number' ? 'number' : x.type === 'email' ? 'email' : /phone/.test(k) ? 'tel' : 'text';
+        html += `<label for="f-${k}">${x.label}${req}</label><input id="f-${k}" name="${k}" type="${t}"${ph}${t === 'tel' ? ' inputmode="numeric"' : ''}>`;
+      }
+    }
+    html += '</fieldset>';
+  }
+  html += '<button class="btn primary" type="submit">जमा करें / Submit</button>';
+  f.innerHTML = html;
+  f.addEventListener('submit', submitForm);
+}
+
+async function submitForm(e) {
+  e.preventDefault();
+  const fd = new FormData(e.target);
+  const data = {};
+  for (const x of FIELDS) data[x.key] = x.type === 'checkbox' ? fd.getAll(x.key) : (fd.get(x.key) || '').trim();
+  const missing = FIELDS.filter((x) => x.required && (x.type === 'checkbox' ? data[x.key].length < x.options.length : !data[x.key]));
+  if (missing.length) {
+    $('#signup-err').textContent = 'कृपया ये भरें / Please fill: ' + missing.map((x) => x.label.split(' / ')[0]).join(', ');
+    return;
+  }
+  $('#signup-err').textContent = 'भेज रहे हैं… / Sending…';
+  try {
+    const r = await fetch(API.signup, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(data) });
+    const j = await r.json();
+    if (!j.ok) throw new Error(j.error || 'failed');
+    store.set('gs_code', j.code);
+    $('#done-code').textContent = j.code;
+    $('#done-notes').textContent = j.status === 'Needs check' ? 'कुछ जानकारी ठीक नहीं लगी; हम फ़ोन करके पक्की करेंगे। / Some details need checking; we will call you.' : '';
+    $('#signup-err').textContent = '';
+    show('done');
+  } catch (err) {
+    $('#signup-err').textContent = 'भेज नहीं पाए। इंटरनेट देखकर फिर कोशिश करें। / Could not send. Check the internet and try again.';
+  }
+}
+
+// ---- status ----
+function fmtDate(s) {
+  if (!s) return '—';
+  const d = new Date(s); if (isNaN(d)) return s;
+  return d.toLocaleDateString('hi-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+}
+async function loadStatus() {
+  const code = store.get('gs_code');
+  if (!code) return show('welcome');
+  $('#h-code').textContent = code;
+  try {
+    const r = await fetch(API.status + '?code=' + encodeURIComponent(code));
+    const j = await r.json();
+    if (!j.ok) { $('#login-err').textContent = 'यह कोड नहीं मिला / Code not found'; store.del('gs_code'); return show('login'); }
+    render(j);
+    store.set('gs_last', JSON.stringify(j));
+    $('#h-updated').textContent = 'अभी अपडेट हुआ / Updated just now';
+  } catch (e) {
+    const last = store.get('gs_last');
+    if (last) { render(JSON.parse(last)); $('#h-updated').textContent = 'इंटरनेट नहीं; पिछली जानकारी / Offline: last known details'; }
+  }
+}
+function render(j) {
+  const f = j.family;
+  const [cls, label, text] = STATUS[f.status] || ['wait', f.status, ''];
+  $('#h-elder').textContent = f.address_as || f.elder_name || '—';
+  const pill = $('#h-status'); pill.className = 'pill ' + cls; pill.textContent = label;
+  $('#h-status-text').textContent = text;
+  $('#t-breakfast').textContent = f.times.breakfast || '—';
+  $('#t-lunch').textContent = f.times.lunch || '—';
+  $('#t-medicine').textContent = f.times.medicine || '—';
+  $('#h-plan').textContent = (f.plan || '—').split(' / ')[0];
+  $('#h-since').textContent = fmtDate(f.since);
+  $('#h-next').textContent = f.next_payment ? fmtDate(f.next_payment) : 'मुफ़्त / Free';
+  $('#h-contacts').textContent = f.contacts.join(', ') || '—';
+  const tb = $('#pay-table tbody'); tb.innerHTML = '';
+  const pays = j.payments || [];
+  $('#pay-empty').classList.toggle('hidden', pays.length > 0);
+  $('#pay-table').classList.toggle('hidden', pays.length === 0);
+  for (const p of pays) {
+    const st = p.status === 'paid' ? '<span class="pill ok">✓</span>' : `<span class="pill wait">${p.status}</span>`;
+    tb.insertAdjacentHTML('beforeend', `<tr><td>${fmtDate(p.paid_on)}</td><td>₹${p.amount}</td><td>${st}</td></tr>`);
+  }
+}
+
+
+// ---- medicines ----
+const TIME_HI = { morning: 'सुबह', afternoon: 'दोपहर', evening: 'शाम', night: 'रात' };
+const FOOD_HI = { after: 'खाने के बाद', before: 'खाने से पहले', any: '' };
+const esc = (t) => String(t == null ? '' : t).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+async function loadMeds() {
+  const code = store.get('gs_code'); if (!code) return show('welcome');
+  try {
+    const j = await (await fetch(API.meds + '?code=' + encodeURIComponent(code))).json();
+    if (!j.ok) return;
+    const list = $('#meds-list'); list.innerHTML = '';
+    $('#meds-empty').classList.toggle('hidden', j.medicines.length > 0);
+    for (const m of j.medicines) {
+      const when = m.times.map((t) => TIME_HI[t] || t).join(', ');
+      list.insertAdjacentHTML('beforeend', `<div class="row"><span><b style="color:var(--ink)">${esc(m.simple)}</b><br>${esc(m.name)} · ${esc(m.dose)}<br>${esc(when)}${FOOD_HI[m.food] ? ' · ' + FOOD_HI[m.food] : ''}${m.stock != null ? ' · ' + esc(m.stock) + ' बची' : ''}</span>
+        <button class="btn secondary" style="width:auto;margin:0;padding:8px 12px;font-size:14px" data-remove="${esc(m.id)}">हटाएँ</button></div>`);
+    }
+  } catch (e) { $('#meds-empty').textContent = 'इंटरनेट नहीं / Offline'; $('#meds-empty').classList.remove('hidden'); }
+}
+$('#med-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const fd = new FormData(e.target);
+  const body = { code: store.get('gs_code'), name: (fd.get('name') || '').trim(), simple: (fd.get('simple') || '').trim(), dose: (fd.get('dose') || '').trim(),
+    times: fd.getAll('times'), food: fd.get('food'), end_date: fd.get('end_date') || '', stock: fd.get('stock') || '' };
+  if (!body.name || !body.times.length) { $('#med-err').textContent = 'नाम और समय ज़रूरी हैं / Name and time are needed'; return; }
+  if (!$('#m-consent').checked) { $('#med-err').textContent = 'कृपया अनुमति वाला बॉक्स चुनें / Please tick the permission box'; return; }
+  $('#med-err').textContent = 'जोड़ रहे हैं… / Adding…';
+  try {
+    const j = await (await fetch(API.medAdd, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(body) })).json();
+    if (!j.ok) throw new Error(j.problems);
+    e.target.reset(); $('#med-err').textContent = ''; loadMeds();
+  } catch (err) { $('#med-err').textContent = 'जोड़ नहीं पाए, फिर कोशिश करें / Could not add, try again'; }
+});
+document.addEventListener('click', async (e) => {
+  const b = e.target.closest('[data-remove]'); if (!b) return;
+  if (!confirm('यह दवाई हटाएँ? / Remove this medicine?')) return;
+  await fetch(API.medRemove, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ code: store.get('gs_code'), id: b.dataset.remove }) }).catch(() => {});
+  loadMeds();
+});
+
+$('#login-go').addEventListener('click', () => {
+  const c = $('#code-in').value.trim().toUpperCase().replace(/\s/g, '');
+  if (!/^GS-[A-Z0-9]{8}$/.test(c)) { $('#login-err').textContent = 'कोड ऐसा दिखना चाहिए: GS-XXXXXXXX'; return; }
+  store.set('gs_code', c); $('#login-err').textContent = ''; show('home');
+});
+$('#logout').addEventListener('click', () => { store.del('gs_code'); store.del('gs_last'); show('welcome'); });
+
+// ---- install ----
+let installEvt = null;
+window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); installEvt = e; $('#install-btn').classList.remove('hidden'); });
+$('#install-btn').addEventListener('click', async () => { if (installEvt) { installEvt.prompt(); installEvt = null; $('#install-btn').classList.add('hidden'); } });
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(() => {});
+
+buildForm();
+const params = new URLSearchParams(location.search);
+if (params.get('code')) store.set('gs_code', params.get('code').toUpperCase());
+show(store.get('gs_code') ? 'home' : (params.get('view') === 'signup' ? 'signup' : 'welcome'));
+</script>
+</body>
+</html>

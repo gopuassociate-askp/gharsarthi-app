@@ -1,0 +1,15 @@
+{
+  "name": "घर सारथी – Ghar Sarthi",
+  "short_name": "घर सारथी",
+  "description": "स्नेहा रोज़ आपके माता-पिता का हालचाल पूछती है। Sneha checks on your parents every day.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#fbf6ef",
+  "theme_color": "#0f5c58",
+  "lang": "hi",
+  "icons": [
+    { "src": "./icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "./icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}
