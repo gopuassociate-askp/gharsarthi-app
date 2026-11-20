@@ -91,6 +91,14 @@
   th { color: var(--muted); font-weight: 600; font-size: 14px; }
   .btn { display: block; width: 100%; border: 0; border-radius: 18px; padding: 16px; font: inherit; font-weight: 700; font-size: 19px;
          text-align: center; text-decoration: none; cursor: pointer; margin-top: 12px; }
+  .btn { transition: transform .08s ease, filter .08s ease, box-shadow .08s ease; -webkit-tap-highlight-color: transparent; touch-action: manipulation; user-select: none; }
+  .btn:active, .btn.pressed { transform: scale(.96); filter: brightness(.88); box-shadow: none; }
+  .btn[disabled] { opacity: .65; cursor: wait; }
+  nav button:active, .link:active, .photo:active { transform: scale(.92); }
+  nav button { transition: transform .08s ease; -webkit-tap-highlight-color: transparent; }
+  .btn.listening { background: #b91c1c; color: #fff; animation: pulse 1.2s ease-in-out infinite; }
+  @keyframes pulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(185, 28, 28, .45); } 50% { box-shadow: 0 0 0 10px rgba(185, 28, 28, 0); } }
+  @media (prefers-reduced-motion: reduce) { .btn.listening { animation: none; } }
   .btn.primary { background: linear-gradient(120deg, #c2410c, #ea580c); color: #fff; box-shadow: 0 3px 10px rgba(194, 65, 12, .3); }
   .btn.secondary { background: var(--brand-soft); color: var(--brand); }
   .btn.danger { background: var(--bad); color: #fff; font-size: 22px; }
@@ -379,6 +387,19 @@ function show(view) {
   if (view === 'home') loadStatus();
   if (view === 'meds') loadMeds();
 }
+// A short buzz and a visible press on every button, so elders know the tap worked.
+document.addEventListener('pointerdown', (e) => {
+  const b = e.target.closest('.btn, nav button, .link, .photo, [data-remove]');
+  if (!b) return;
+  b.classList.add('pressed');
+  try { if (navigator.vibrate) navigator.vibrate(15); } catch (err) {}
+  setTimeout(() => b.classList.remove('pressed'), 160);
+});
+function busy(btn, on, text) {
+  if (!btn) return;
+  if (on) { btn.dataset.label = btn.textContent; btn.textContent = text || 'रुकिए… / Please wait…'; btn.disabled = true; }
+  else { btn.textContent = btn.dataset.label || btn.textContent; btn.disabled = false; }
+}
 document.addEventListener('click', (e) => {
   const b = e.target.closest('[data-go]');
   if (b) { e.preventDefault(); show(b.dataset.go); }
@@ -435,6 +456,7 @@ async function submitForm(e) {
     return;
   }
   $('#signup-err').textContent = 'भेज रहे हैं… / Sending…';
+  const sb = e.target.querySelector('button[type=submit]'); busy(sb, true, 'भेज रहे हैं… / Sending…');
   try {
     const r = await fetch(API.signup, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(data) });
     const j = await r.json();
@@ -446,7 +468,7 @@ async function submitForm(e) {
     show('done');
   } catch (err) {
     $('#signup-err').textContent = 'भेज नहीं पाए। इंटरनेट देखकर फिर कोशिश करें। / Could not send. Check the internet and try again.';
-  }
+  } finally { busy(sb, false); }
 }
 
 // ---- status ----
@@ -577,26 +599,57 @@ $('#msg-send').addEventListener('click', async () => {
   if (!from_name || text.length < 2) { $('#msg-err').textContent = 'नाम और संदेश लिखिए / Please add your name and a message'; return; }
   store.set('gs_from', from_name);
   $('#msg-err').textContent = 'भेज रहे हैं… / Sending…';
+  stopListening();
+  busy($('#msg-send'), true, 'भेज रहे हैं… / Sending…');
   try {
     const j = await (await fetch(API.message, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
       body: JSON.stringify({ code: store.get('gs_code'), from_name, text }) })).json();
     if (!j.ok) throw new Error(j.problems);
     $('#msg-text').value = ''; $('#msg-err').textContent = 'भेज दिया ✓ स्नेहा अगली कॉल में सुनाएगी।'; loadStatus();
   } catch (e) { $('#msg-err').textContent = 'भेज नहीं पाए, फिर कोशिश करें / Could not send, try again'; }
+  finally { busy($('#msg-send'), false); }
 });
 // Speak-to-write uses the phone's own speech typing (free, nothing is recorded by us).
+// Elders pause while speaking, so it keeps listening until "रोकें / Stop" is
+// tapped (up to a minute), restarts when the phone stops on its own, and
+// shows the words as they come.
 const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+let rec = null, wantListening = false, baseText = '', heard = '', stopTimer = null, restarts = 0;
+const MIC_IDLE = '🎤 बोलकर लिखें / Speak', MIC_ON = '🔴 सुन रही हूँ… रोकें / Stop';
+function stopListening() {
+  wantListening = false; clearTimeout(stopTimer);
+  if (rec) { try { rec.stop(); } catch (e) {} }
+  const mic = $('#msg-mic'); mic.textContent = MIC_IDLE; mic.classList.remove('listening');
+}
+function startRec() {
+  rec = new SR(); rec.lang = 'hi-IN'; rec.continuous = true; rec.interimResults = true; rec.maxAlternatives = 1;
+  rec.onresult = (ev) => {
+    let interim = '';
+    for (let i = ev.resultIndex; i < ev.results.length; i++) {
+      const t = ev.results[i][0].transcript;
+      if (ev.results[i].isFinal) heard += (heard ? ' ' : '') + t.trim(); else interim += t;
+    }
+    $('#msg-text').value = [baseText, heard, interim.trim()].filter(Boolean).join(' ');
+  };
+  // restart after a short breath; give up after many quick restarts (e.g. mic blocked)
+  rec.onend = () => { if (!wantListening) return; if (++restarts > 40) { stopListening(); return; }
+    setTimeout(() => { if (wantListening) { try { startRec(); } catch (e) { stopListening(); } } }, 300); };
+  rec.onerror = (ev) => {
+    if (ev.error === 'no-speech' || ev.error === 'aborted') return; // a pause: keep going
+    stopListening(); $('#msg-err').textContent = 'माइक नहीं चला; लिखकर भेजें / Mic did not work; please type';
+  };
+  rec.start();
+}
 if (SR) {
   const mic = $('#msg-mic'); mic.classList.remove('hidden');
   mic.addEventListener('click', () => {
-    const r = new SR(); r.lang = 'hi-IN'; r.interimResults = false; r.maxAlternatives = 1;
-    mic.textContent = '🎙️ सुन रही हूँ… / Listening…';
-    r.onresult = (ev) => { const t = ev.results[0][0].transcript; const box = $('#msg-text'); box.value = (box.value ? box.value + ' ' : '') + t; };
-    r.onend = () => { mic.textContent = '🎤 बोलकर लिखें / Speak'; };
-    r.onerror = () => { mic.textContent = '🎤 बोलकर लिखें / Speak'; $('#msg-err').textContent = 'माइक नहीं चला; लिखकर भेजें / Mic did not work; please type'; };
-    r.start();
+    if (wantListening) { stopListening(); return; }
+    baseText = $('#msg-text').value.trim(); heard = ''; restarts = 0; wantListening = true;
+    mic.textContent = MIC_ON; mic.classList.add('listening'); $('#msg-err').textContent = '';
+    stopTimer = setTimeout(stopListening, 60000);
+    try { startRec(); } catch (e) { stopListening(); }
   });
-}
+} else { window.stopListening = () => {}; }
 
 // ---- medicines ----
 const TIME_HI = { morning: 'सुबह', afternoon: 'दोपहर', evening: 'शाम', night: 'रात' };
@@ -624,11 +677,13 @@ $('#med-form').addEventListener('submit', async (e) => {
   if (!body.name || !body.times.length) { $('#med-err').textContent = 'नाम और समय ज़रूरी हैं / Name and time are needed'; return; }
   if (!$('#m-consent').checked) { $('#med-err').textContent = 'कृपया अनुमति वाला बॉक्स चुनें / Please tick the permission box'; return; }
   $('#med-err').textContent = 'जोड़ रहे हैं… / Adding…';
+  const mb = e.target.querySelector('button[type=submit]'); busy(mb, true, 'जोड़ रहे हैं… / Adding…');
   try {
     const j = await (await fetch(API.medAdd, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(body) })).json();
     if (!j.ok) throw new Error(j.problems);
     e.target.reset(); $('#med-err').textContent = ''; loadMeds();
   } catch (err) { $('#med-err').textContent = 'जोड़ नहीं पाए, फिर कोशिश करें / Could not add, try again'; }
+  finally { busy(mb, false); }
 });
 document.addEventListener('click', async (e) => {
   const b = e.target.closest('[data-remove]'); if (!b) return;
