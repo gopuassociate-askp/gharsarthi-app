@@ -191,6 +191,19 @@
       <input id="photo-in" type="file" accept="image/*" class="hidden">
     </div>
 
+
+    <div class="card" id="msg-card">
+      <h2>💌 <span id="msg-title">अपनों का संदेश</span></h2>
+      <p class="muted">यहाँ बोलकर या लिखकर संदेश भेजिए। स्नेहा अगली कॉल में इसे प्यार से पढ़कर सुनाएगी।<br>Speak or type a message; Sneha reads it out in her next call.</p>
+      <label for="msg-from">आपका नाम / Your name</label>
+      <input id="msg-from" placeholder="जैसे: सत्येंद्र" autocomplete="name">
+      <label for="msg-text">संदेश / Message</label>
+      <textarea id="msg-text" maxlength="300" placeholder="पापा, आज मेरी मीटिंग थी, शाम को फ़ोन करूँगा।"></textarea>
+      <button class="btn warm hidden" id="msg-mic" type="button">🎤 बोलकर लिखें / Speak</button>
+      <button class="btn primary" id="msg-send" type="button">संदेश भेजें / Send</button>
+      <div id="msg-err" class="err"></div>
+      <div id="msg-list"></div>
+    </div>
     <div class="card">
       <h2>आज स्नेहा कब फ़ोन करेगी? 🪔</h2>
       <div class="diyas">
@@ -339,7 +352,7 @@
 const FIELDS = [{"key":"family_name","label":"आपका नाम / Your name","type":"text","required":true},{"key":"relation","label":"बुज़ुर्ग से आपका रिश्ता / Your relation to the elder","type":"dropdown","options":["मैं स्वयं (बुज़ुर्ग) / Myself (the elder)","बेटा / Son","बेटी / Daughter","बहू / Daughter-in-law","दामाद / Son-in-law","पोता-पोती / Grandchild","अन्य / Other"],"required":true},{"key":"family_phone","label":"आपका मोबाइल नंबर / Your mobile","type":"text","placeholder":"98XXXXXXXX","required":true},{"key":"family_email","label":"आपका ईमेल / Your email","type":"email","required":true},{"key":"city","label":"शहर / City","type":"text","required":true},{"key":"elder_name","label":"बुज़ुर्ग का नाम / Elder's name","type":"text","required":true},{"key":"elder_gender","label":"बुज़ुर्ग हैं / The elder is","type":"dropdown","options":["पुरुष / Male","महिला / Female"],"required":true},{"key":"address_as","label":"स्नेहा उन्हें प्यार से क्या कहकर बुलाए? / What would they love Sneha to call them?","type":"dropdown","options":["पापा जी","पिता जी","बाबू जी","बाउजी","दादा जी","नाना जी","अंकल जी","ताऊ जी","चाचा जी","मामा जी","भाई साहब","मम्मी जी","माता जी","अम्मा जी","माँ जी","बीजी","दादी जी","नानी जी","आंटी जी","ताई जी","चाची जी","मामी जी","बहन जी","अन्य (नीचे लिखें) / Other (write below)"],"required":true},{"key":"address_as_other","label":"अन्य हो तो यहाँ लिखें / If other, write it here","type":"text","placeholder":"जैसे: शर्मा जी, बड़े पापा","required":false},{"key":"sneha_intro","label":"स्नेहा अपना परिचय कैसे दे? / How should Sneha introduce herself?","type":"dropdown","options":["आपकी बेटी स्नेहा","आपकी पोती स्नेहा","आपकी नातिन स्नेहा","आपकी बहू स्नेहा","घर सारथी से स्नेहा"],"required":true},{"key":"elder_age","label":"उम्र / Age","type":"number","required":true},{"key":"elder_phone","label":"बुज़ुर्ग का मोबाइल नंबर / Elder's mobile","type":"text","placeholder":"98XXXXXXXX","required":true},{"key":"phone_type","label":"उनका फ़ोन / Their phone","type":"dropdown","options":["कीपैड / Keypad","एंड्रॉयड / Android","आईफ़ोन / iPhone"],"required":true},{"key":"language","label":"भाषा / Language","type":"dropdown","options":["हिंदी / Hindi"],"required":true},{"key":"wake_time","label":"सुबह उठने का समय / Wake-up time","type":"text","placeholder":"6:30 AM","required":false},{"key":"breakfast_time","label":"नाश्ते का समय / Breakfast time","type":"text","placeholder":"9:30 AM","required":true},{"key":"lunch_time","label":"दोपहर के खाने का समय / Lunch time","type":"text","placeholder":"1:30 PM","required":true},{"key":"medicine_time","label":"रात की दवाई का समय / Night medicine time","type":"text","placeholder":"8:30 PM","required":true},{"key":"no_call_hours","label":"किस समय कॉल न करें? / When should Sneha not call?","type":"text","placeholder":"2:30 PM to 4 PM (आराम / rest)","required":false},{"key":"health_notes","label":"स्वास्थ्य (वैकल्पिक) / Health, optional","type":"textarea","placeholder":"BP, शुगर, कम सुनाई देता है","required":false},{"key":"contact2_name","label":"देखभाल करने वाले 1: नाम / Caretaker 1: name (needed if you are the elder)","type":"text","required":false},{"key":"contact2_relation","label":"देखभाल करने वाले 1: रिश्ता / relation","type":"text","placeholder":"भतीजा, पड़ोसी, बेटा","required":false},{"key":"contact2_phone","label":"देखभाल करने वाले 1: मोबाइल / mobile","type":"text","required":false},{"key":"contact2_role","label":"देखभाल करने वाले 1: किस काम के लिए? / for what?","type":"dropdown","options":["आपात स्थिति और रोज़ की ख़बर / Emergencies and daily updates","सिर्फ़ आपात स्थिति / Emergencies only","सिर्फ़ रोज़ की ख़बर / Daily updates only"],"required":false},{"key":"contact3_name","label":"देखभाल करने वाले 2: नाम / Caretaker 2: name","type":"text","required":false},{"key":"contact3_relation","label":"देखभाल करने वाले 2: रिश्ता / relation","type":"text","required":false},{"key":"contact3_phone","label":"देखभाल करने वाले 2: मोबाइल / mobile","type":"text","required":false},{"key":"contact3_role","label":"देखभाल करने वाले 2: किस काम के लिए? / for what?","type":"dropdown","options":["आपात स्थिति और रोज़ की ख़बर / Emergencies and daily updates","सिर्फ़ आपात स्थिति / Emergencies only","सिर्फ़ रोज़ की ख़बर / Daily updates only"],"required":false},{"key":"plan","label":"प्लान / Plan","type":"dropdown","options":["फ़ाउंडिंग फ़ैमिली (मुफ़्त) / Founding family (free)"],"required":true},{"key":"consent","label":"सहमति / Consent","type":"checkbox","required":true,"options":["बुज़ुर्ग को इसकी जानकारी है और वे सहमत हैं / The elder knows and agrees","घर सारथी एम्बुलेंस या डॉक्टर नहीं है; आपात स्थिति में पहले 108/112 पर कॉल करें / Ghar Sarthi is not an ambulance or doctor; in an emergency call 108/112 first","सुरक्षा के लिए कॉल रिकॉर्ड हो सकती हैं; जानकारी निजी रहेगी और माँगने पर मिटा दी जाएगी / Calls may be recorded for safety; data stays private and is deleted on request"]},{"key":"health_consent","label":"स्वास्थ्य जानकारी (वैकल्पिक) / Health details, optional","type":"checkbox","required":false,"options":["दवाइयों और बीपी/शुगर की जानकारी रखने और याद दिलाने की अनुमति / Allow keeping medicine and BP/sugar details for reminders"]}];
 // The page is hosted on a normal web host; n8n runs only these two services.
 const API_BASE = 'https://gharsarthi.app.n8n.cloud/webhook';
-const API = { signup: API_BASE + '/app-signup', status: API_BASE + '/app-status', meds: API_BASE + '/app-medicines',
+const API = { signup: API_BASE + '/app-signup', status: API_BASE + '/app-status', meds: API_BASE + '/app-medicines', message: API_BASE + '/app-message',
   medAdd: API_BASE + '/app-medicine-add', medRemove: API_BASE + '/app-medicine-remove' };
 const STATUS = {
   'New':         ['wait', 'पंजीकरण मिला', 'हम जल्द आपको फ़ोन करेंगे। / Received; we will call you soon.'],
@@ -468,6 +481,7 @@ function render(j) {
   $('#t-lunch').textContent = f.times.lunch || '—';
   $('#t-medicine').textContent = f.times.medicine || '—';
   decorate(f);
+  renderMessages(j.messages, f.address_as || f.elder_name);
   $('#h-plan').textContent = (f.plan || '—').split(' / ')[0];
   $('#h-since').textContent = fmtDate(f.since);
   $('#h-next').textContent = f.next_payment ? fmtDate(f.next_payment) : 'मुफ़्त / Free';
@@ -546,6 +560,43 @@ $('#photo-in').addEventListener('change', (e) => {
   };
   img.src = url;
 });
+
+// ---- messages from family: spoken or typed text, read out by Sneha ----
+function renderMessages(list, who) {
+  $('#msg-title').textContent = `${who || 'अपनों'} के लिए संदेश`;
+  const box = $('#msg-list'); box.innerHTML = '';
+  for (const m of list || []) {
+    const st = m.status === 'delivered' ? '<span class="pill ok">पहुँच गया ✓</span>' : '<span class="pill wait">अगली कॉल में</span>';
+    box.insertAdjacentHTML('beforeend', `<div class="row" style="display:block"><div style="display:flex;justify-content:space-between;gap:8px"><b style="color:var(--ink)">${esc(m.from)}</b>${st}</div>
+      <div>${esc(m.text)}</div>${m.reply ? `<div class="note" style="margin-top:6px">💬 जवाब: ${esc(m.reply)}</div>` : ''}</div>`);
+  }
+}
+$('#msg-from').value = store.get('gs_from') || '';
+$('#msg-send').addEventListener('click', async () => {
+  const from_name = $('#msg-from').value.trim(), text = $('#msg-text').value.trim();
+  if (!from_name || text.length < 2) { $('#msg-err').textContent = 'नाम और संदेश लिखिए / Please add your name and a message'; return; }
+  store.set('gs_from', from_name);
+  $('#msg-err').textContent = 'भेज रहे हैं… / Sending…';
+  try {
+    const j = await (await fetch(API.message, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ code: store.get('gs_code'), from_name, text }) })).json();
+    if (!j.ok) throw new Error(j.problems);
+    $('#msg-text').value = ''; $('#msg-err').textContent = 'भेज दिया ✓ स्नेहा अगली कॉल में सुनाएगी।'; loadStatus();
+  } catch (e) { $('#msg-err').textContent = 'भेज नहीं पाए, फिर कोशिश करें / Could not send, try again'; }
+});
+// Speak-to-write uses the phone's own speech typing (free, nothing is recorded by us).
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+if (SR) {
+  const mic = $('#msg-mic'); mic.classList.remove('hidden');
+  mic.addEventListener('click', () => {
+    const r = new SR(); r.lang = 'hi-IN'; r.interimResults = false; r.maxAlternatives = 1;
+    mic.textContent = '🎙️ सुन रही हूँ… / Listening…';
+    r.onresult = (ev) => { const t = ev.results[0][0].transcript; const box = $('#msg-text'); box.value = (box.value ? box.value + ' ' : '') + t; };
+    r.onend = () => { mic.textContent = '🎤 बोलकर लिखें / Speak'; };
+    r.onerror = () => { mic.textContent = '🎤 बोलकर लिखें / Speak'; $('#msg-err').textContent = 'माइक नहीं चला; लिखकर भेजें / Mic did not work; please type'; };
+    r.start();
+  });
+}
 
 // ---- medicines ----
 const TIME_HI = { morning: 'सुबह', afternoon: 'दोपहर', evening: 'शाम', night: 'रात' };
