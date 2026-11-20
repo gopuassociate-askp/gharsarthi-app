@@ -221,7 +221,8 @@
       <label for="up-text">संदेश / Message</label>
       <textarea id="up-text" maxlength="300" placeholder="बेटा, मेरी दवाई ख़त्म होने वाली है।"></textarea>
       <button class="btn warm hidden" id="up-mic" type="button">🎤 बोलकर लिखें / Speak</button>
-      <label class="check"><input type="checkbox" id="up-urgent"> <span><b>ज़रूरी है – अभी फ़ोन करवाएँ</b><br>Urgent: phone my family now</span></label>
+      <label class="check"><input type="checkbox" id="up-urgent"> <span><b>तुरंत चाहिए – अभी फ़ोन करवाएँ</b><br>Urgent: phone my family now</span></label>
+      <p class="note">स्नेहा ख़ुद समझ लेती है: 🛒 दूध-सब्ज़ी जैसी चीज़ें = संदेश; 💊 दवाई, डॉक्टर, गैस = संदेश, जवाब न आए तो एक फ़ोन; 🚨 तबीयत ख़राब = तुरंत फ़ोन।</p>
       <button class="btn primary" id="up-send" type="button">परिवार को भेजें / Send to family</button>
       <div id="up-err" class="err"></div>
     </div>
@@ -347,6 +348,18 @@
     </div>
   </section>
 
+  <!-- The family tapped ✅ in a need email -->
+  <section id="v-seen" class="view hidden">
+    <div class="card">
+      <h2>✅ संदेश देख लिया / Seen</h2>
+      <p id="seen-text">घर के बुज़ुर्ग ने आपको संदेश भेजा था। नीचे दबाकर बताइए कि आप इसका ध्यान रखेंगे – स्नेहा उन्हें बता देगी, और आपको इसके लिए फ़ोन नहीं आएगा।</p>
+      <p class="muted">Tap to tell them you will take care of it. Sneha will let them know, and nobody will be phoned about it.</p>
+      <button class="btn primary" id="seen-btn" type="button">✅ हाँ, मैं ध्यान रखूँगा / रखूँगी</button>
+      <div id="seen-err" class="err"></div>
+      <button class="btn secondary hidden" id="seen-home" type="button" data-go="welcome">ऐप खोलें / Open the app</button>
+    </div>
+  </section>
+
   <!-- Signed up -->
   <section id="v-done" class="view hidden">
     <div class="card">
@@ -374,7 +387,13 @@ const FIELDS = [{"key":"family_name","label":"आपका नाम / Your name
 // The page is hosted on a normal web host; n8n runs only these two services.
 const API_BASE = 'https://gharsarthi.app.n8n.cloud/webhook';
 const API = { signup: API_BASE + '/app-signup', status: API_BASE + '/app-status', meds: API_BASE + '/app-medicines', message: API_BASE + '/app-message',
-  medAdd: API_BASE + '/app-medicine-add', medRemove: API_BASE + '/app-medicine-remove' };
+  medAdd: API_BASE + '/app-medicine-add', medRemove: API_BASE + '/app-medicine-remove', seen: API_BASE + '/app-seen' };
+// What happens to a message from the elder, by level (config/needs.json).
+const LEVEL = {
+  urgent:    ['bad',  '🚨 तुरंत', 'भेज दिया ✓ स्नेहा अभी घर वालों को फ़ोन कर रही है, जब तक कोई सुन न ले।'],
+  important: ['wait', '💊 ज़रूरी', 'भेज दिया ✓ घर वालों को संदेश गया। एक घंटे में किसी ने नहीं देखा तो स्नेहा एक बार फ़ोन करेगी।'],
+  general:   ['ok',   '🛒 सामान्य', 'भेज दिया ✓ घर वालों को संदेश मिल गया।'],
+};
 const STATUS = {
   'New':         ['wait', 'पंजीकरण मिला', 'हम जल्द आपको फ़ोन करेंगे। / Received; we will call you soon.'],
   'Needs check': ['wait', 'जाँच बाकी', 'कुछ जानकारी पक्की करनी है; हम फ़ोन करेंगे। / We need to check a few details.'],
@@ -603,10 +622,14 @@ function renderMessages(list, who) {
   const box = $('#msg-list'); box.innerHTML = '';
   for (const m of list || []) {
     const up = m.direction === 'to_family';
-    const st = up ? `<span class="pill ok">${m.urgent ? '📞 ज़रूरी · ' : ''}परिवार को भेजा ✓</span>`
+    const lv = LEVEL[m.level] || (m.urgent ? LEVEL.urgent : null);
+    const st = up ? `<span class="pill ${lv ? lv[0] : 'ok'}">${lv ? lv[1] : 'परिवार को भेजा ✓'}</span>`
       : m.status === 'delivered' ? '<span class="pill ok">पहुँच गया ✓</span>' : '<span class="pill wait">अगली कॉल में</span>';
+    const seen = !up ? '' : m.ack_by ? `<div class="note" style="margin-top:6px">✅ ${esc(m.ack_by)} ने देख लिया</div>`
+      : m.call_note ? `<div class="note" style="margin-top:6px">📞 ${esc(m.call_note)}</div>`
+      : m.level ? '<div class="muted" style="margin-top:6px">⏳ अभी किसी ने देखा नहीं</div>' : '';
     box.insertAdjacentHTML('beforeend', `<div class="row" style="display:block"><div style="display:flex;justify-content:space-between;gap:8px"><b style="color:var(--ink)">${up ? '📮 ' : '💌 '}${esc(m.from)}</b>${st}</div>
-      <div>${esc(m.text)}</div>${m.reply ? `<div class="note" style="margin-top:6px">💬 जवाब: ${esc(m.reply)}</div>` : ''}</div>`);
+      <div>${esc(m.text)}</div>${m.reply ? `<div class="note" style="margin-top:6px">💬 जवाब: ${esc(m.reply)}</div>` : ''}${seen}</div>`);
   }
 }
 $('#msg-from').value = store.get('gs_from') || '';
@@ -684,7 +707,7 @@ $('#up-send').addEventListener('click', async () => {
       body: JSON.stringify({ code: store.get('gs_code'), from_name, text, direction: 'to_family', urgent }) })).json();
     if (!j.ok) throw new Error(j.problems);
     $('#up-text').value = ''; $('#up-urgent').checked = false;
-    $('#up-err').textContent = urgent ? 'भेज दिया ✓ परिवार को अभी फ़ोन जा रहा है।' : 'भेज दिया ✓ परिवार को मिल गया।';
+    $('#up-err').textContent = (LEVEL[j.level] || LEVEL[urgent ? 'urgent' : 'general'])[2];
     loadStatus();
   } catch (e) { $('#up-err').textContent = 'भेज नहीं पाए, फिर कोशिश करें / Could not send, try again'; }
   finally { busy($('#up-send'), false); }
@@ -744,10 +767,26 @@ window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); inst
 $('#install-btn').addEventListener('click', async () => { if (installEvt) { installEvt.prompt(); installEvt = null; $('#install-btn').classList.add('hidden'); } });
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(() => {});
 
+// ---- ✅ seen link from a need email: ?ack=<message id>&t=<secret>&by=<family member> ----
+$('#seen-btn').addEventListener('click', async () => {
+  busy($('#seen-btn'), true, 'भेज रहे हैं… / Sending…');
+  try {
+    const j = await (await fetch(API.seen, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ id: params.get('ack'), t: params.get('t'), by: params.get('by') }) })).json();
+    if (!j.ok) { $('#seen-err').textContent = 'यह लिंक सही नहीं है या पुराना है। / This link is not valid.'; return; }
+    $('#seen-text').innerHTML = `${esc(j.elder_name)} का संदेश: <b>"${esc(j.text)}"</b>`;
+    $('#seen-err').textContent = j.already ? `पहले ही देख लिया गया: ${j.ack_by} ✓` : `धन्यवाद ${j.ack_by}! स्नेहा ${j.elder_name} को बता देगी कि आप ध्यान रख रहे हैं। ✓`;
+    $('#seen-btn').classList.add('hidden');
+    $('#seen-home').classList.remove('hidden');
+    $('#seen-home').dataset.go = store.get('gs_code') ? 'home' : 'welcome';
+  } catch (e) { $('#seen-err').textContent = 'भेज नहीं पाए, इंटरनेट देखकर फिर दबाइए / Could not send, try again'; }
+  finally { busy($('#seen-btn'), false); }
+});
+
 buildForm();
 const params = new URLSearchParams(location.search);
 if (params.get('code')) store.set('gs_code', params.get('code').toUpperCase());
-show(store.get('gs_code') ? 'home' : (params.get('view') === 'signup' ? 'signup' : 'welcome'));
+show(params.get('ack') ? 'seen' : store.get('gs_code') ? 'home' : (params.get('view') === 'signup' ? 'signup' : 'welcome'));
 </script>
 </body>
 </html>
