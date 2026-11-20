@@ -212,6 +212,19 @@
       <div id="msg-err" class="err"></div>
       <div id="msg-list"></div>
     </div>
+
+    <div class="card" id="up-card">
+      <h2>📮 परिवार को संदेश / Message to family</h2>
+      <p class="muted">कुछ कहना है? बोलकर या लिखकर भेजिए – बच्चों को तुरंत मिल जाएगा।<br>Speak or type; your family gets it at once.</p>
+      <label for="up-from">आपका नाम / Your name</label>
+      <input id="up-from" placeholder="जैसे: पापा जी">
+      <label for="up-text">संदेश / Message</label>
+      <textarea id="up-text" maxlength="300" placeholder="बेटा, मेरी दवाई ख़त्म होने वाली है।"></textarea>
+      <button class="btn warm hidden" id="up-mic" type="button">🎤 बोलकर लिखें / Speak</button>
+      <label class="check"><input type="checkbox" id="up-urgent"> <span><b>ज़रूरी है – अभी फ़ोन करवाएँ</b><br>Urgent: phone my family now</span></label>
+      <button class="btn primary" id="up-send" type="button">परिवार को भेजें / Send to family</button>
+      <div id="up-err" class="err"></div>
+    </div>
     <div class="card">
       <h2>आज स्नेहा कब फ़ोन करेगी? 🪔</h2>
       <div class="diyas">
@@ -504,6 +517,7 @@ function render(j) {
   $('#t-medicine').textContent = f.times.medicine || '—';
   decorate(f);
   renderMessages(j.messages, f.address_as || f.elder_name);
+  if (!$('#up-from').value) $('#up-from').value = store.get('gs_elder_from') || f.address_as || '';
   $('#h-plan').textContent = (f.plan || '—').split(' / ')[0];
   $('#h-since').textContent = fmtDate(f.since);
   $('#h-next').textContent = f.next_payment ? fmtDate(f.next_payment) : 'मुफ़्त / Free';
@@ -588,8 +602,10 @@ function renderMessages(list, who) {
   $('#msg-title').textContent = `${who || 'अपनों'} के लिए संदेश`;
   const box = $('#msg-list'); box.innerHTML = '';
   for (const m of list || []) {
-    const st = m.status === 'delivered' ? '<span class="pill ok">पहुँच गया ✓</span>' : '<span class="pill wait">अगली कॉल में</span>';
-    box.insertAdjacentHTML('beforeend', `<div class="row" style="display:block"><div style="display:flex;justify-content:space-between;gap:8px"><b style="color:var(--ink)">${esc(m.from)}</b>${st}</div>
+    const up = m.direction === 'to_family';
+    const st = up ? `<span class="pill ok">${m.urgent ? '📞 ज़रूरी · ' : ''}परिवार को भेजा ✓</span>`
+      : m.status === 'delivered' ? '<span class="pill ok">पहुँच गया ✓</span>' : '<span class="pill wait">अगली कॉल में</span>';
+    box.insertAdjacentHTML('beforeend', `<div class="row" style="display:block"><div style="display:flex;justify-content:space-between;gap:8px"><b style="color:var(--ink)">${up ? '📮 ' : '💌 '}${esc(m.from)}</b>${st}</div>
       <div>${esc(m.text)}</div>${m.reply ? `<div class="note" style="margin-top:6px">💬 जवाब: ${esc(m.reply)}</div>` : ''}</div>`);
   }
 }
@@ -612,14 +628,14 @@ $('#msg-send').addEventListener('click', async () => {
 // Speak-to-write uses the phone's own speech typing (free, nothing is recorded by us).
 // Elders pause while speaking, so it keeps listening until "रोकें / Stop" is
 // tapped (up to a minute), restarts when the phone stops on its own, and
-// shows the words as they come.
+// shows the words as they come. One microphone at a time.
 const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-let rec = null, wantListening = false, baseText = '', heard = '', stopTimer = null, restarts = 0;
 const MIC_IDLE = '🎤 बोलकर लिखें / Speak', MIC_ON = '🔴 सुन रही हूँ… रोकें / Stop';
+let rec = null, micBtn = null, micBox = null, wantListening = false, baseText = '', heard = '', stopTimer = null, restarts = 0, micErr = null;
 function stopListening() {
   wantListening = false; clearTimeout(stopTimer);
   if (rec) { try { rec.stop(); } catch (e) {} }
-  const mic = $('#msg-mic'); mic.textContent = MIC_IDLE; mic.classList.remove('listening');
+  if (micBtn) { micBtn.textContent = MIC_IDLE; micBtn.classList.remove('listening'); }
 }
 function startRec() {
   rec = new SR(); rec.lang = 'hi-IN'; rec.continuous = true; rec.interimResults = true; rec.maxAlternatives = 1;
@@ -629,27 +645,50 @@ function startRec() {
       const t = ev.results[i][0].transcript;
       if (ev.results[i].isFinal) heard += (heard ? ' ' : '') + t.trim(); else interim += t;
     }
-    $('#msg-text').value = [baseText, heard, interim.trim()].filter(Boolean).join(' ');
+    micBox.value = [baseText, heard, interim.trim()].filter(Boolean).join(' ');
   };
   // restart after a short breath; give up after many quick restarts (e.g. mic blocked)
   rec.onend = () => { if (!wantListening) return; if (++restarts > 40) { stopListening(); return; }
     setTimeout(() => { if (wantListening) { try { startRec(); } catch (e) { stopListening(); } } }, 300); };
   rec.onerror = (ev) => {
     if (ev.error === 'no-speech' || ev.error === 'aborted') return; // a pause: keep going
-    stopListening(); $('#msg-err').textContent = 'माइक नहीं चला; लिखकर भेजें / Mic did not work; please type';
+    stopListening(); if (micErr) micErr.textContent = 'माइक नहीं चला; लिखकर भेजें / Mic did not work; please type';
   };
   rec.start();
 }
-if (SR) {
-  const mic = $('#msg-mic'); mic.classList.remove('hidden');
-  mic.addEventListener('click', () => {
-    if (wantListening) { stopListening(); return; }
-    baseText = $('#msg-text').value.trim(); heard = ''; restarts = 0; wantListening = true;
-    mic.textContent = MIC_ON; mic.classList.add('listening'); $('#msg-err').textContent = '';
+function attachMic(btnSel, boxSel, errSel) {
+  const btn = $(btnSel); if (!SR || !btn) return;
+  btn.classList.remove('hidden');
+  btn.addEventListener('click', () => {
+    if (wantListening && micBtn === btn) { stopListening(); return; }
+    stopListening();
+    micBtn = btn; micBox = $(boxSel); micErr = $(errSel);
+    baseText = micBox.value.trim(); heard = ''; restarts = 0; wantListening = true;
+    btn.textContent = MIC_ON; btn.classList.add('listening'); micErr.textContent = '';
     stopTimer = setTimeout(stopListening, 60000);
     try { startRec(); } catch (e) { stopListening(); }
   });
-} else { window.stopListening = () => {}; }
+}
+attachMic('#msg-mic', '#msg-text', '#msg-err');
+attachMic('#up-mic', '#up-text', '#up-err');
+
+// ---- message from the elder to the family ----
+$('#up-send').addEventListener('click', async () => {
+  const from_name = $('#up-from').value.trim(), text = $('#up-text').value.trim(), urgent = $('#up-urgent').checked;
+  if (!from_name || text.length < 2) { $('#up-err').textContent = 'नाम और संदेश लिखिए / Please add your name and a message'; return; }
+  store.set('gs_elder_from', from_name);
+  stopListening();
+  busy($('#up-send'), true, 'भेज रहे हैं… / Sending…');
+  try {
+    const j = await (await fetch(API.message, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ code: store.get('gs_code'), from_name, text, direction: 'to_family', urgent }) })).json();
+    if (!j.ok) throw new Error(j.problems);
+    $('#up-text').value = ''; $('#up-urgent').checked = false;
+    $('#up-err').textContent = urgent ? 'भेज दिया ✓ परिवार को अभी फ़ोन जा रहा है।' : 'भेज दिया ✓ परिवार को मिल गया।';
+    loadStatus();
+  } catch (e) { $('#up-err').textContent = 'भेज नहीं पाए, फिर कोशिश करें / Could not send, try again'; }
+  finally { busy($('#up-send'), false); }
+});
 
 // ---- medicines ----
 const TIME_HI = { morning: 'सुबह', afternoon: 'दोपहर', evening: 'शाम', night: 'रात' };
