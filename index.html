@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>घर सारथी</title>
-<meta name="theme-color" content="#0f5c58">
+<meta name="theme-color" content="#ea580c">
 <link rel="manifest" href="./manifest.json">
 <link rel="icon" href="./icon-192.png">
 <link rel="apple-touch-icon" href="./icon-192.png">
@@ -13,79 +13,146 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
+  /* Warm, festive, home-like: marigold, saffron and cream, never clinical. */
   :root {
-    --bg: #fbf6ef; --card: #ffffff; --ink: #1f2a2a; --muted: #5d6b6a; --line: #e8dfd2;
-    --brand: #0f5c58; --brand-soft: #e3f0ee; --warm: #e0703a; --warm-soft: #fbe9df;
-    --ok: #1e7d4f; --ok-soft: #e2f3ea; --wait: #9a6a00; --wait-soft: #fbf0d6; --bad: #b3261e; --bad-soft: #fbe3e1;
+    --bg: #fff8ee; --card: #ffffff; --ink: #3a2418; --muted: #7a5c48; --line: #f3dcc0;
+    --brand: #c2410c; --brand-2: #ea580c; --brand-soft: #fff1e0; --marigold: #f59e0b; --maroon: #9f1239; --leaf: #4d7c0f;
+    --ok: #15803d; --ok-soft: #dcfce7; --wait: #b45309; --wait-soft: #fef3c7; --bad: #b91c1c; --bad-soft: #fee2e2;
   }
   * { box-sizing: border-box; }
   html, body { margin: 0; background: var(--bg); color: var(--ink); }
-  body { font-family: 'Noto Sans Devanagari', system-ui, -apple-system, 'Segoe UI', sans-serif; font-size: 17px; line-height: 1.5;
-         padding-bottom: calc(76px + env(safe-area-inset-bottom)); }
-  header { background: var(--brand); color: #fff; padding: calc(14px + env(safe-area-inset-top)) 16px 14px; display: flex; align-items: center; gap: 12px; }
-  header svg { width: 40px; height: 40px; border-radius: 10px; flex: none; }
-  header h1 { font-size: 20px; margin: 0; line-height: 1.2; }
-  header p { margin: 0; font-size: 13px; opacity: .85; }
-  main { max-width: 560px; margin: 0 auto; padding: 16px; }
-  .card { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 16px; margin-bottom: 14px; }
-  .card h2 { font-size: 18px; margin: 0 0 8px; }
-  .muted { color: var(--muted); font-size: 15px; }
-  .pill { display: inline-block; padding: 4px 12px; border-radius: 999px; font-weight: 600; font-size: 15px; }
+  body { font-family: 'Noto Sans Devanagari', system-ui, -apple-system, 'Segoe UI', sans-serif; font-size: 18px; line-height: 1.55;
+         padding-bottom: calc(84px + env(safe-area-inset-bottom)); }
+  header { background: linear-gradient(120deg, #c2410c 0%, #ea580c 55%, #f59e0b 100%); color: #fff;
+           padding: calc(14px + env(safe-area-inset-top)) 16px 12px; display: flex; align-items: center; gap: 12px; }
+  header svg { width: 46px; height: 46px; border-radius: 12px; flex: none; box-shadow: 0 2px 6px rgba(0,0,0,.15); }
+  header h1 { font-size: 22px; margin: 0; line-height: 1.2; letter-spacing: .3px; }
+  header p { margin: 0; font-size: 14px; opacity: .95; }
+  /* Marigold garland (toran) under the header, like a home on a festival day */
+  .toran { height: 30px; background-repeat: repeat-x; background-size: 60px 30px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 30'%3E%3Cpath d='M0 2 Q30 14 60 2' stroke='%234d7c0f' stroke-width='2' fill='none'/%3E%3Cpath d='M12 6 l-5 8 l6 -2z M48 6 l5 8 l-6 -2z' fill='%234d7c0f'/%3E%3Ccircle cx='30' cy='14' r='8' fill='%23f59e0b'/%3E%3Ccircle cx='30' cy='14' r='5' fill='%23ea580c'/%3E%3Ccircle cx='30' cy='24' r='4' fill='%23facc15'/%3E%3C/svg%3E"); }
+  main { max-width: 560px; margin: 0 auto; padding: 8px 16px 16px; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 22px; padding: 18px; margin-bottom: 16px;
+          box-shadow: 0 2px 10px rgba(194, 65, 12, .07); }
+  .card h2 { font-size: 20px; margin: 0 0 8px; color: var(--maroon); }
+  .muted { color: var(--muted); font-size: 16px; }
+  .pill { display: inline-block; padding: 5px 14px; border-radius: 999px; font-weight: 700; font-size: 16px; }
   .pill.ok { background: var(--ok-soft); color: var(--ok); }
   .pill.wait { background: var(--wait-soft); color: var(--wait); }
   .pill.bad { background: var(--bad-soft); color: var(--bad); }
-  .status-big { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
-  .times { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 10px; }
-  .time { background: var(--brand-soft); border-radius: 12px; padding: 10px 6px; text-align: center; }
-  .time b { display: block; font-size: 20px; color: var(--brand); }
-  .time span { font-size: 13px; color: var(--muted); }
-  ul.plain { padding-left: 20px; margin: 6px 0 0; }
-  ul.plain li { margin: 4px 0; }
-  table { width: 100%; border-collapse: collapse; font-size: 15px; }
+
+  /* Greeting card that changes with the time of day */
+  .hero { border-radius: 26px; padding: 20px 18px 18px; margin-bottom: 16px; position: relative; overflow: hidden; color: #4a2410;
+          background: linear-gradient(160deg, #fef3c7, #fdba74); box-shadow: 0 4px 16px rgba(234, 88, 12, .18); }
+  .hero.afternoon { background: linear-gradient(160deg, #fffbeb, #fcd34d); }
+  .hero.evening { background: linear-gradient(160deg, #fed7aa, #fb7185); color: #4c0519; }
+  .hero.night { background: linear-gradient(160deg, #312e81, #6d28d9); color: #fef9c3; }
+  .hero .sky { position: absolute; right: 12px; top: 10px; width: 92px; height: 92px; animation: float 6s ease-in-out infinite; }
+  .hero h2 { font-size: 28px; margin: 0; color: inherit; line-height: 1.25; padding-right: 96px; }
+  .hero .who { font-size: 30px; font-weight: 700; display: block; }
+  .hero p { margin: 10px 0 0; font-size: 18px; padding-right: 8px; }
+  .hero .pill { margin-top: 12px; background: rgba(255,255,255,.75); }
+  @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+  @media (prefers-reduced-motion: reduce) { .hero .sky, .flame { animation: none !important; } }
+
+  /* Family photo in a marigold frame */
+  .photo-wrap { display: flex; align-items: center; gap: 16px; }
+  .photo { width: 112px; height: 112px; border-radius: 50%; flex: none; background: var(--brand-soft) center/cover no-repeat;
+           border: 5px solid var(--marigold); box-shadow: 0 0 0 4px #fde68a; display: flex; align-items: center; justify-content: center;
+           font-size: 40px; cursor: pointer; }
+  .photo-text b { display: block; font-size: 20px; color: var(--maroon); }
+  .link { background: none; border: 0; padding: 0; color: var(--brand); font: inherit; font-weight: 700; text-decoration: underline; cursor: pointer; }
+
+  /* Today's calls as little diyas; the next one glows */
+  .diyas { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 8px; }
+  .diya { background: var(--brand-soft); border-radius: 18px; padding: 10px 6px 12px; text-align: center; border: 2px solid transparent; }
+  .diya svg { width: 46px; height: 46px; display: block; margin: 0 auto 2px; }
+  .diya b { display: block; font-size: 22px; color: var(--brand); }
+  .diya span { font-size: 15px; color: var(--muted); }
+  .diya .flame { fill: #fbbf24; opacity: .35; transform-origin: 24px 22px; }
+  .diya.next { background: #fff7d6; border-color: var(--marigold); box-shadow: 0 0 18px rgba(245, 158, 11, .45); }
+  .diya.next .flame { opacity: 1; animation: flicker 1.6s ease-in-out infinite; }
+  .diya.next span { color: var(--brand); font-weight: 700; }
+  @keyframes flicker { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.12) translateY(-1px); } }
+
+  /* Thought for the day */
+  .thought { background: linear-gradient(135deg, #fff7ed, #ffe4e6); border: 0; text-align: center; }
+  .thought .q { font-size: 21px; font-weight: 600; color: var(--maroon); margin: 4px 0 0; }
+
+  /* Sneha on the welcome screen */
+  .sneha-hero { text-align: center; }
+  .sneha-hero svg { width: 170px; height: 170px; display: block; margin: 0 auto 4px; }
+  .sneha-hero h2 { font-size: 26px; }
+
+  ul.plain { padding-left: 22px; margin: 6px 0 0; }
+  ul.plain li { margin: 6px 0; }
+  table { width: 100%; border-collapse: collapse; font-size: 16px; }
   th, td { text-align: left; padding: 10px 6px; border-bottom: 1px solid var(--line); }
-  th { color: var(--muted); font-weight: 600; font-size: 13px; }
-  .btn { display: block; width: 100%; border: 0; border-radius: 14px; padding: 14px 16px; font: inherit; font-weight: 600; font-size: 17px;
-         text-align: center; text-decoration: none; cursor: pointer; margin-top: 10px; }
-  .btn.primary { background: var(--brand); color: #fff; }
+  th { color: var(--muted); font-weight: 600; font-size: 14px; }
+  .btn { display: block; width: 100%; border: 0; border-radius: 18px; padding: 16px; font: inherit; font-weight: 700; font-size: 19px;
+         text-align: center; text-decoration: none; cursor: pointer; margin-top: 12px; }
+  .btn.primary { background: linear-gradient(120deg, #c2410c, #ea580c); color: #fff; box-shadow: 0 3px 10px rgba(194, 65, 12, .3); }
   .btn.secondary { background: var(--brand-soft); color: var(--brand); }
-  .btn.danger { background: var(--bad); color: #fff; font-size: 20px; }
-  .btn.warm { background: var(--warm); color: #fff; }
-  label { display: block; font-weight: 600; font-size: 15px; margin: 14px 0 6px; }
+  .btn.danger { background: var(--bad); color: #fff; font-size: 22px; }
+  .btn.warm { background: var(--marigold); color: #3a2418; }
+  label { display: block; font-weight: 600; font-size: 16px; margin: 16px 0 6px; }
   label .req { color: var(--bad); }
-  input, select, textarea { width: 100%; font: inherit; font-size: 17px; padding: 12px; border: 1px solid #cfc4b4; border-radius: 12px; background: #fff; color: var(--ink); }
+  input, select, textarea { width: 100%; font: inherit; font-size: 18px; padding: 13px; border: 2px solid #f0d2ad; border-radius: 14px; background: #fff; color: var(--ink); }
+  input:focus, select:focus, textarea:focus { outline: none; border-color: var(--marigold); box-shadow: 0 0 0 3px #fde68a; }
   textarea { min-height: 80px; }
-  .check { display: flex; gap: 10px; align-items: flex-start; font-weight: 400; font-size: 15px; margin: 10px 0; }
-  .check input { width: 22px; height: 22px; flex: none; margin-top: 2px; }
+  .check { display: flex; gap: 10px; align-items: flex-start; font-weight: 400; font-size: 16px; margin: 10px 0; }
+  .check input { width: 24px; height: 24px; flex: none; margin-top: 2px; accent-color: var(--brand); }
   fieldset { border: 0; padding: 0; margin: 0; }
-  legend { font-weight: 700; font-size: 17px; color: var(--brand); margin-top: 18px; }
-  .note { background: var(--warm-soft); border-radius: 12px; padding: 12px; font-size: 15px; }
-  .code { font-size: 28px; font-weight: 700; letter-spacing: 2px; color: var(--brand); text-align: center; padding: 10px; background: var(--brand-soft); border-radius: 12px; }
-  .err { color: var(--bad); font-size: 15px; margin-top: 8px; }
-  nav { position: fixed; left: 0; right: 0; bottom: 0; background: #fff; border-top: 1px solid var(--line); display: flex;
-        padding-bottom: env(safe-area-inset-bottom); }
-  nav button { flex: 1; border: 0; background: none; font: inherit; font-size: 12px; color: var(--muted); padding: 8px 2px 10px; cursor: pointer; }
-  nav button svg { display: block; margin: 0 auto 2px; width: 24px; height: 24px; }
+  legend { font-weight: 700; font-size: 19px; color: var(--maroon); margin-top: 20px; }
+  .note { background: #fff7d6; border-radius: 14px; padding: 12px; font-size: 16px; }
+  .code { font-size: 30px; font-weight: 700; letter-spacing: 2px; color: var(--brand); text-align: center; padding: 12px; background: var(--brand-soft); border-radius: 14px; border: 2px dashed var(--marigold); }
+  .err { color: var(--bad); font-size: 16px; margin-top: 8px; }
+  nav { position: fixed; left: 0; right: 0; bottom: 0; background: #fff; border-top: 3px solid #fde68a; display: flex;
+        padding-bottom: env(safe-area-inset-bottom); box-shadow: 0 -2px 10px rgba(194, 65, 12, .08); }
+  nav button { flex: 1; border: 0; background: none; font: inherit; font-size: 14px; color: var(--muted); padding: 8px 2px 10px; cursor: pointer; }
+  nav button svg { display: block; margin: 0 auto 2px; width: 28px; height: 28px; }
   nav button.on { color: var(--brand); font-weight: 700; }
+  nav button.on svg { filter: drop-shadow(0 0 4px #fde68a); }
   .hidden { display: none !important; }
-  .row { display: flex; justify-content: space-between; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--line); }
+  .row { display: flex; justify-content: space-between; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--line); }
   .row:last-child { border-bottom: 0; }
   .row span:first-child { color: var(--muted); }
 </style>
 </head>
 <body>
 <header>
-  <svg viewBox="0 0 512 512" aria-hidden="true"><rect width="512" height="512" fill="#fbf6ef"/><path d="M256 104 L408 228 L380 228 L380 392 L132 392 L132 228 L104 228 Z" fill="#0f5c58"/><path d="M256 352 C 214 320, 176 292, 176 256 C 176 232, 194 214, 216 214 C 234 214, 248 224, 256 238 C 264 224, 278 214, 296 214 C 318 214, 336 232, 336 256 C 336 292, 298 320, 256 352 Z" fill="#e0703a"/></svg>
-  <div><h1>घर सारथी</h1><p>स्नेहा – आपके अपनों का रोज़ का साथी</p></div>
+  <svg viewBox="0 0 512 512" aria-hidden="true"><rect width="512" height="512" fill="#fff8ee"/><path d="M256 96 L416 226 L384 226 L384 396 L128 396 L128 226 L96 226 Z" fill="#ea580c"/><path d="M256 356 C 214 324, 176 296, 176 260 C 176 236, 194 218, 216 218 C 234 218, 248 228, 256 242 C 264 228, 278 218, 296 218 C 318 218, 336 236, 336 260 C 336 296, 298 324, 256 356 Z" fill="#fff8ee"/><circle cx="256" cy="150" r="22" fill="#facc15"/></svg>
+  <div><h1>घर सारथी</h1><p>स्नेहा – आपकी अपनी, रोज़ आपके साथ</p></div>
 </header>
+<div class="toran" aria-hidden="true"></div>
 
 <main>
   <!-- Welcome: no code saved yet -->
   <section id="v-welcome" class="view">
-    <div class="card">
-      <h2>नमस्ते 🙏</h2>
-      <p>स्नेहा रोज़ आपके माता-पिता को उनके अपने फ़ोन पर कॉल करती है, खाना और दवाई का हालचाल पूछती है, और कुछ गड़बड़ लगे तो तुरंत आपको फ़ोन करती है।</p>
-      <p class="muted">Sneha calls your parent every day on their own phone, checks on meals and medicines, and phones you at once if something sounds wrong.</p>
-      <button class="btn primary" data-go="signup">नया पंजीकरण / Sign up</button>
+    <div class="card sneha-hero">
+      <svg viewBox="0 0 200 200" role="img" aria-label="स्नेहा">
+        <defs><clipPath id="sneha-c"><circle cx="100" cy="100" r="93"/></clipPath></defs>
+        <circle cx="100" cy="100" r="96" fill="#fff1e0"/>
+        <g clip-path="url(#sneha-c)">
+        <circle cx="100" cy="100" r="96" fill="none" stroke="#f59e0b" stroke-width="6" stroke-dasharray="2 10" stroke-linecap="round"/>
+        <path d="M44 196 C 48 150, 70 132, 100 132 C 130 132, 152 150, 156 196 Z" fill="#ea580c"/>
+        <path d="M58 196 C 66 160, 84 146, 100 146 C 116 146, 136 158, 142 196" fill="none" stroke="#facc15" stroke-width="5"/>
+        <rect x="90" y="112" width="20" height="24" rx="8" fill="#c68a5e"/>
+        <path d="M56 92 C 54 52, 80 34, 102 34 C 126 34, 148 52, 146 92 C 146 116, 140 132, 132 140 L 70 140 C 60 130, 56 112, 56 92 Z" fill="#2b1a12"/>
+        <ellipse cx="100" cy="88" rx="34" ry="38" fill="#d79b6c"/>
+        <path d="M66 74 C 74 50, 128 46, 136 76 C 122 62, 86 60, 66 74 Z" fill="#2b1a12"/>
+        <circle cx="100" cy="66" r="3.5" fill="#be123c"/>
+        <path d="M84 86 q4 -4 8 0 M108 86 q4 -4 8 0" stroke="#2b1a12" stroke-width="3" fill="none" stroke-linecap="round"/>
+        <path d="M88 104 q12 10 24 0" stroke="#9f1239" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+        <circle cx="80" cy="98" r="5" fill="#f9a8a8" opacity=".6"/><circle cx="120" cy="98" r="5" fill="#f9a8a8" opacity=".6"/>
+        <circle cx="66" cy="96" r="3" fill="#facc15"/><circle cx="134" cy="96" r="3" fill="#facc15"/>
+        </g>
+        <circle cx="100" cy="100" r="96" fill="none" stroke="#f59e0b" stroke-width="6" stroke-dasharray="2 10" stroke-linecap="round"/>
+      </svg>
+      <h2>नमस्ते, मैं स्नेहा हूँ 🙏</h2>
+      <p>मैं रोज़ आपके अपनों को फ़ोन करके प्यार से हालचाल पूछती हूँ, खाने और दवाई की याद दिलाती हूँ, उनकी पुरानी बातें सुनती हूँ – और कुछ भी गड़बड़ लगे तो तुरंत आपको बताती हूँ।</p>
+      <p class="muted">I call your loved ones every day, remind them about meals and medicines, listen to their stories, and tell you at once if anything seems wrong.</p>
+      <button class="btn primary" data-go="signup">स्नेहा से जुड़ें / Sign up</button>
       <button class="btn secondary" data-go="login">मेरे पास कोड है / I have a code</button>
     </div>
   </section>
@@ -104,21 +171,46 @@
 
   <!-- Home -->
   <section id="v-home" class="view hidden">
+    <div id="hero" class="hero">
+      <svg id="sky" class="sky" viewBox="0 0 100 100" aria-hidden="true"></svg>
+      <h2><span id="greet">नमस्ते</span>,<span id="h-elder" class="who">—</span></h2>
+      <p id="next-call">—</p>
+      <span id="h-status" class="pill wait">—</span>
+      <p id="h-status-text" style="font-size:15px;margin-top:6px"></p>
+    </div>
+
     <div class="card">
-      <div class="status-big"><h2 id="h-elder">—</h2><span id="h-status" class="pill wait">—</span></div>
-      <p id="h-status-text" class="muted"></p>
-      <div class="times">
-        <div class="time"><b id="t-breakfast">—</b><span>नाश्ता</span></div>
-        <div class="time"><b id="t-lunch">—</b><span>खाना</span></div>
-        <div class="time"><b id="t-medicine">—</b><span>दवाई</span></div>
+      <div class="photo-wrap">
+        <div id="photo" class="photo" role="button" tabindex="0" aria-label="परिवार की फ़ोटो लगाएँ">📷</div>
+        <div class="photo-text">
+          <b>आपका परिवार आपके साथ है ❤️</b>
+          <span class="muted" id="photo-hint">अपने परिवार की एक प्यारी-सी फ़ोटो यहाँ लगाइए। यह सिर्फ़ इसी फ़ोन में रहती है।</span><br>
+          <button class="link" id="photo-btn" type="button">फ़ोटो लगाएँ / Add photo</button>
+        </div>
+      </div>
+      <input id="photo-in" type="file" accept="image/*" class="hidden">
+    </div>
+
+    <div class="card">
+      <h2>आज स्नेहा कब फ़ोन करेगी? 🪔</h2>
+      <div class="diyas">
+        <div class="diya" id="d-breakfast"><svg viewBox="0 0 48 48" aria-hidden="true"><path class="flame" d="M24 6 C 30 14, 30 20, 24 24 C 18 20, 18 14, 24 6 Z"/><path d="M6 28 h36 c0 9 -8 14 -18 14 S6 37 6 28 Z" fill="#c2410c"/><path d="M10 30 h28" stroke="#facc15" stroke-width="2"/></svg><b id="t-breakfast">—</b><span>नाश्ता</span></div>
+        <div class="diya" id="d-lunch"><svg viewBox="0 0 48 48" aria-hidden="true"><path class="flame" d="M24 6 C 30 14, 30 20, 24 24 C 18 20, 18 14, 24 6 Z"/><path d="M6 28 h36 c0 9 -8 14 -18 14 S6 37 6 28 Z" fill="#c2410c"/><path d="M10 30 h28" stroke="#facc15" stroke-width="2"/></svg><b id="t-lunch">—</b><span>खाना</span></div>
+        <div class="diya" id="d-medicine"><svg viewBox="0 0 48 48" aria-hidden="true"><path class="flame" d="M24 6 C 30 14, 30 20, 24 24 C 18 20, 18 14, 24 6 Z"/><path d="M6 28 h36 c0 9 -8 14 -18 14 S6 37 6 28 Z" fill="#c2410c"/><path d="M10 30 h28" stroke="#facc15" stroke-width="2"/></svg><b id="t-medicine">—</b><span>दवाई</span></div>
       </div>
     </div>
+
+    <div class="card thought">
+      <span class="muted">आज का सुविचार 🌼</span>
+      <p class="q" id="thought">—</p>
+    </div>
+
     <div class="card">
       <h2>आपकी सेवा / Your service</h2>
       <div class="row"><span>प्लान / Plan</span><b id="h-plan">—</b></div>
       <div class="row"><span>कब से / Since</span><b id="h-since">—</b></div>
       <div class="row"><span>अगला भुगतान / Next payment</span><b id="h-next">—</b></div>
-      <div class="row"><span>आपात संपर्क / Emergency contacts</span><b id="h-contacts">—</b></div>
+      <div class="row"><span>देखभाल करने वाले / Caretakers</span><b id="h-contacts">—</b></div>
       <div class="row"><span>आपका कोड / Your code</span><b id="h-code">—</b></div>
     </div>
     <p id="h-updated" class="muted" style="text-align:center"></p>
@@ -371,10 +463,11 @@ function render(j) {
   const [cls, label, text] = STATUS[f.status] || ['wait', f.status, ''];
   $('#h-elder').textContent = f.address_as || f.elder_name || '—';
   const pill = $('#h-status'); pill.className = 'pill ' + cls; pill.textContent = label;
-  $('#h-status-text').textContent = text;
+  $('#h-status-text').textContent = f.status === 'Active' ? '' : text;
   $('#t-breakfast').textContent = f.times.breakfast || '—';
   $('#t-lunch').textContent = f.times.lunch || '—';
   $('#t-medicine').textContent = f.times.medicine || '—';
+  decorate(f);
   $('#h-plan').textContent = (f.plan || '—').split(' / ')[0];
   $('#h-since').textContent = fmtDate(f.since);
   $('#h-next').textContent = f.next_payment ? fmtDate(f.next_payment) : 'मुफ़्त / Free';
@@ -389,6 +482,70 @@ function render(j) {
   }
 }
 
+
+// ---- warmth: greeting by time of day, next call, glowing diya, thought, family photo ----
+const THOUGHTS = [
+  'हर दिन एक नया उपहार है। 🌼', 'मुस्कुराइए, आप अपनों के दिल में रहते हैं। ❤️', 'थोड़ी धूप, थोड़ी चाय और ढेर सारी बातें – यही तो ज़िंदगी है। ☕',
+  'आपका अनुभव हमारे लिए सबसे बड़ा ख़ज़ाना है।', 'पुराने गीत, पुरानी यादें – दिल आज भी जवान है। 🎶', 'जो प्यार बाँटता है, उसके पास प्यार लौटकर आता है।',
+  'आज किसी पुराने दोस्त को याद कीजिए – वो भी आपको याद कर रहा होगा।', 'धीरे चलिए, पर चलते रहिए। 🚶', 'आपकी दुआओं से ही घर में रौनक है। 🪔',
+  'हँसी सबसे अच्छी दवा है। 😊', 'बीता कल सीख देता है, आने वाला कल उम्मीद।', 'आप अकेले नहीं हैं – स्नेहा और आपका परिवार साथ है।',
+  'भगवान का नाम, अपनों का साथ – बस यही काफ़ी है। 🙏', 'छोटी-छोटी ख़ुशियाँ ही सबसे बड़ी होती हैं। 🌸',
+];
+const SKY = {
+  morning: '<circle cx="50" cy="56" r="22" fill="#f59e0b"/><g stroke="#f59e0b" stroke-width="5" stroke-linecap="round"><path d="M50 18v10M22 30l7 7M78 30l-7 7M12 56h10M78 56h10"/></g><path d="M8 80 h84" stroke="#ea580c" stroke-width="5" stroke-linecap="round"/>',
+  afternoon: '<circle cx="50" cy="48" r="24" fill="#facc15"/><g stroke="#f59e0b" stroke-width="5" stroke-linecap="round"><path d="M50 8v10M50 78v10M10 48h10M80 48h10M22 20l7 7M78 20l-7 7M22 76l7-7M78 76l-7-7"/></g>',
+  evening: '<path d="M30 70 h40 c0 10 -9 16 -20 16 s-20 -6 -20 -16 Z" fill="#9f1239"/><path d="M50 30 C 60 44, 60 54, 50 62 C 40 54, 40 44, 50 30 Z" fill="#facc15"/><path d="M50 40 C 55 48, 55 54, 50 58 C 45 54, 45 48, 50 40 Z" fill="#f97316"/>',
+  night: '<path d="M62 18 A 32 32 0 1 0 82 66 A 26 26 0 1 1 62 18 Z" fill="#fde68a"/><circle cx="24" cy="24" r="2.5" fill="#fef9c3"/><circle cx="34" cy="80" r="2" fill="#fef9c3"/><circle cx="86" cy="26" r="2" fill="#fef9c3"/>',
+};
+function partOfDay(h) { return h < 5 ? 'night' : h < 12 ? 'morning' : h < 16 ? 'afternoon' : h < 20 ? 'evening' : 'night'; }
+const GREET = { morning: 'सुप्रभात', afternoon: 'नमस्ते', evening: 'शुभ संध्या', night: 'शुभ रात्रि' };
+const CALL_HI = { breakfast: 'नाश्ते', lunch: 'खाने', medicine: 'दवाई' };
+function hhmm12(t) {
+  const [h, m] = String(t).split(':').map(Number); if (isNaN(h)) return t;
+  const word = h < 12 ? 'सुबह' : h < 16 ? 'दोपहर' : h < 20 ? 'शाम' : 'रात';
+  return `${word} ${((h + 11) % 12) + 1}${m ? ':' + String(m).padStart(2, '0') : ''} बजे`;
+}
+function decorate(f) {
+  const now = new Date(); const part = partOfDay(now.getHours());
+  $('#hero').className = 'hero ' + part;
+  $('#sky').innerHTML = SKY[part];
+  $('#greet').textContent = GREET[part];
+  // the next call today, in loving words
+  const mins = (t) => { const [h, m] = String(t || '').split(':').map(Number); return isNaN(h) ? null : h * 60 + (m || 0); };
+  const nowM = now.getHours() * 60 + now.getMinutes();
+  const calls = ['breakfast', 'lunch', 'medicine'].map((k) => ({ k, t: f.times[k], m: mins(f.times[k]) })).filter((c) => c.m != null);
+  const next = calls.find((c) => c.m >= nowM);
+  ['breakfast', 'lunch', 'medicine'].forEach((k) => $('#d-' + k).classList.toggle('next', !!next && next.k === k));
+  const sneha = 'स्नेहा';
+  $('#next-call').textContent = f.status !== 'Active'
+    ? 'स्नेहा जल्द ही आपसे पहली बार बात करेगी। 💛'
+    : next ? `${sneha} आज ${hhmm12(next.t)} ${CALL_HI[next.k]} के समय फ़ोन करेगी। 💛`
+           : `आज की सब बातें हो गईं। ${sneha} कल सुबह फिर फ़ोन करेगी। 🌙`;
+  const day = Math.floor((now - new Date(now.getFullYear(), 0, 0)) / 86400000);
+  $('#thought').textContent = THOUGHTS[day % THOUGHTS.length];
+  showPhoto();
+}
+function showPhoto() {
+  const ph = store.get('gs_photo');
+  const el = $('#photo');
+  if (ph) { el.style.backgroundImage = `url(${ph})`; el.textContent = ''; $('#photo-btn').textContent = 'फ़ोटो बदलें / Change photo'; $('#photo-hint').textContent = 'हर बार ऐप खोलें, अपनों को देखें।'; }
+  else { el.style.backgroundImage = ''; el.textContent = '📷'; }
+}
+const pickPhoto = () => $('#photo-in').click();
+$('#photo').addEventListener('click', pickPhoto);
+$('#photo-btn').addEventListener('click', pickPhoto);
+$('#photo-in').addEventListener('change', (e) => {
+  const file = e.target.files && e.target.files[0]; if (!file) return;
+  const img = new Image(); const url = URL.createObjectURL(file);
+  img.onload = () => {
+    // shrink to a small square so it fits in the phone's storage; it never leaves the phone
+    const size = 360, c = document.createElement('canvas'); c.width = c.height = size;
+    const k = Math.max(size / img.width, size / img.height), w = img.width * k, h = img.height * k;
+    c.getContext('2d').drawImage(img, (size - w) / 2, (size - h) / 2, w, h);
+    store.set('gs_photo', c.toDataURL('image/jpeg', 0.8)); URL.revokeObjectURL(url); showPhoto();
+  };
+  img.src = url;
+});
 
 // ---- medicines ----
 const TIME_HI = { morning: 'सुबह', afternoon: 'दोपहर', evening: 'शाम', night: 'रात' };
