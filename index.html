@@ -90,6 +90,23 @@
   .clip video { width: 100%; max-width: 360px; aspect-ratio: 1; border-radius: 18px; display: block; margin: 10px auto 0; background: #fff1e0; }
   .pick { display: flex; gap: 6px; }
   .pick select { flex: 1; min-width: 0; }
+  .talk { text-align: center; }
+  .talk-face { position: relative; width: min(100%, 360px); margin: 0 auto; border-radius: 24px; overflow: hidden; box-shadow: 0 10px 30px rgba(234,88,12,.25); animation: breathe 4s ease-in-out infinite; }
+  .talk-face canvas { width: 100%; height: auto; display: block; }
+  .talk-face video { position: absolute; right: 8px; bottom: 8px; width: 28%; border-radius: 12px; border: 2px solid #fff; transform: scaleX(-1); }
+  .talk-ai { position: absolute; left: 8px; top: 8px; background: rgba(255,255,255,.85); color: #9a3412; font-size: 12px; padding: 2px 8px; border-radius: 99px; }
+  .talk-cam { position: absolute; right: 8px; top: 8px; background: rgba(220,38,38,.9); color: #fff; font-size: 12px; padding: 2px 8px; border-radius: 99px; }
+  @keyframes breathe { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.012); } }
+  .talk-state { font-size: 20px; font-weight: 700; color: #9a3412; min-height: 1.6em; margin: 12px 0 8px; }
+  .talk-mic { width: 110px; height: 110px; border-radius: 50%; border: 0; font-size: 46px; background: linear-gradient(160deg, #f97316, #c2410c); color: #fff; box-shadow: 0 8px 24px rgba(194,65,12,.4); cursor: pointer; }
+  .talk-mic.rec { background: linear-gradient(160deg, #ef4444, #b91c1c); animation: pulse 1s ease-in-out infinite; }
+  .talk-mic:disabled { opacity: .5; }
+  @keyframes pulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(239,68,68,.5); } 50% { box-shadow: 0 0 0 18px rgba(239,68,68,0); } }
+  .talk-row { display: flex; gap: 8px; margin-top: 12px; } .talk-row .btn { flex: 1; }
+  .talk-log { text-align: left; margin-top: 12px; display: flex; flex-direction: column; gap: 8px; }
+  .talk-log .u { align-self: flex-end; background: #ffedd5; padding: 8px 12px; border-radius: 14px 14px 4px 14px; max-width: 85%; }
+  .talk-log .s { align-self: flex-start; background: #fff7ed; border: 1px solid #fed7aa; padding: 8px 12px; border-radius: 14px 14px 14px 4px; max-width: 85%; }
+  .talk-log .s.urgent { background: #fee2e2; border-color: #fca5a5; }
   .g-btn { display: flex; justify-content: center; min-height: 48px; margin: 14px 0 6px; }
   .clips { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; }
   .clips figure { margin: 0; text-align: center; font-size: 15px; color: #9a3412; }
@@ -226,6 +243,7 @@
       <p id="h-status-text" style="font-size:15px;margin-top:6px"></p>
     </div>
 
+    <div class="card" style="text-align:center"><button class="btn primary talk-open" data-go="talk" type="button">📹 <span data-en="Talk to Sneha">स्नेहा से बात करें</span></button></div>
     <div class="card clip hidden" id="today-clip"><h2 id="today-clip-title"></h2><video id="today-clip-video" poster="sneha.jpg" controls playsinline preload="none"></video></div>
 
     <div class="card today-card" id="today-card">
@@ -373,7 +391,24 @@
   </section>
 
   <!-- What Sneha does -->
+  <section id="v-talk" class="view hidden">
+    <div class="card talk">
+      <div class="talk-face"><canvas id="talk-canvas" width="512" height="512" aria-label="स्नेहा"></canvas>
+        <video id="talk-self" class="hidden" playsinline muted></video>
+        <span class="talk-ai">स्नेहा – आपकी AI सहायिका</span><span id="talk-cam-on" class="talk-cam hidden">● कैमरा चालू</span></div>
+      <p id="talk-state" class="talk-state"><span data-en="Press the button and speak">बटन दबाकर बोलिए</span></p>
+      <button class="talk-mic" id="talk-mic" type="button" aria-label="बोलें / Speak">🎤</button>
+      <div class="talk-row">
+        <button class="btn secondary" id="talk-cam" type="button">📷 <span data-en="Camera on">कैमरा चालू करें</span></button>
+        <button class="btn secondary" data-go="home" type="button" id="talk-end">✖ <span data-en="End">बंद करें</span></button>
+      </div>
+      <div id="talk-log" class="talk-log"></div>
+      <p class="muted" style="font-size:13px"><span data-en="Nothing is recorded. Your words go only to Sneha; the camera stays on this phone.">कुछ भी रिकॉर्ड नहीं होता। आपकी बात सिर्फ़ स्नेहा तक जाती है; कैमरा इसी फ़ोन पर रहता है।</span></p>
+    </div>
+  </section>
+
   <section id="v-sneha" class="view hidden">
+    <div class="card" style="text-align:center"><button class="btn primary talk-open" data-go="talk" type="button">📹 <span data-en="Talk to Sneha">स्नेहा से बात करें</span></button></div>
     <div class="card sneha-intro">
       <img src="sneha.jpg" width="96" height="96" alt="स्नेहा / Sneha">
       <div><h2><span data-en="Namaste, I am Sneha 🙏">नमस्ते, मैं स्नेहा हूँ 🙏</span></h2>
@@ -566,6 +601,10 @@ const DEMO_CODE = 'GS-DEMO';
       return reply({ ok: true, code: DEMO_CODE, status: 'New', suggested_plan: 'plus', preview: true });
     }
     if (u.includes('/app-status')) return reply({ ok: true, ...D });
+    if (u.includes('/app-talk')) {
+      const R = ['अरे वाह पापा जी, आपसे बात करके बहुत अच्छा लगा! आज आपने क्या-क्या किया?', 'बहुत बढ़िया! आप ऐसे ही मुस्कुराते रहिए, मैं हमेशा आपके साथ हूँ।', 'जी पापा जी, मैं ध्यान से सुन रही हूँ। और बताइए?'];
+      return reply({ ok: true, heard: '(डेमो) आपकी बात', reply: R[Math.floor(Math.random() * R.length)], urgent: false, audio: '' });
+    }
     if (u.includes('/app-medicines')) return reply({ ok: true, medicines: D.medicines });
     if (u.includes('/app-medicine-add')) { D.medicines.push({ id: ++nextId, simple: body.simple || body.name, name: body.name, dose: body.dose || '', times: body.times || [], food: body.food, stock: body.stock }); return reply({ ok: true }); }
     if (u.includes('/app-medicine-remove')) { D.medicines = D.medicines.filter((m) => String(m.id) !== String(body.id)); return reply({ ok: true }); }
@@ -670,6 +709,7 @@ function show(view) {
   if (view === 'home') loadStatus();
   if (view === 'meds') loadMeds();
   if (view === 'signup') applyGoogle();
+  if (view === 'talk') talkOpen(); else if (window.talkClose) talkClose();
 }
 // A short buzz and a visible press on every button, so elders know the tap worked.
 document.addEventListener('pointerdown', (e) => {
@@ -1353,6 +1393,148 @@ if (window.__PREVIEW) {
   };
   gs.onerror = () => { $('#g-msg').textContent = 'Google बटन लोड नहीं हुआ; "मेरे पास कोड है" से आगे बढ़ें / Google did not load; use "I have a code"'; };
   document.head.appendChild(gs);
+}
+
+// ---- Talk to Sneha: her live face (base picture + mouth moved by her voice), one button to speak ----
+API.talk = API_BASE + '/app-talk';
+const TALK = { face: null, ctx: null, ac: null, an: null, level: 0, blinkUntil: 0, nextBlink: 0, rec: null, chunks: [], history: [], busy: false, cam: null, mood: 'neutral', speaking: false };
+function talkLoadFace() {
+  if (TALK.face) return TALK.face;
+  const img = (src) => new Promise((ok) => { const i = new Image(); i.onload = () => ok(i); i.src = src; });
+  TALK.face = Promise.all([fetch('face/face.json').then((r) => r.json()), img('face/base.jpg'), img('face/mouth.png'), img('face/blink.png')])
+    .then(([cfg, base, mouth, blink]) => ({ cfg, base, mouth, blink }));
+  return TALK.face;
+}
+function talkDraw(F) {
+  const c = $('#talk-canvas'); if (!c || $('#v-talk').classList.contains('hidden')) return;
+  const g = c.getContext('2d'); const { cfg, base, mouth, blink } = F; const m = cfg.mouth;
+  g.drawImage(base, 0, 0, 512, 512);
+  // mouth: from the voice level while Sneha speaks
+  if (TALK.an && TALK.speaking) {
+    const a = new Uint8Array(TALK.an.fftSize); TALK.an.getByteTimeDomainData(a);
+    let sum = 0; for (const v of a) sum += (v - 128) * (v - 128);
+    const rms = Math.sqrt(sum / a.length) / 128;
+    TALK.level = TALK.level * 0.5 + Math.min(1, rms * 5) * 0.5;
+  } else TALK.level *= 0.7;
+  const k = Math.min(m.n - 1, Math.round(TALK.level * (m.n - 1)));
+  if (k > 0) g.drawImage(mouth, k * m.w, 0, m.w, m.h, m.x, m.y, m.w, m.h);
+  // a natural blink every few seconds
+  const now = performance.now();
+  if (now > TALK.nextBlink) { TALK.blinkUntil = now + 140; TALK.nextBlink = now + 2500 + Math.random() * 3500; }
+  if (now < TALK.blinkUntil) { const b = cfg.blink; g.drawImage(blink, b.x, b.y, b.w, b.h); }
+  requestAnimationFrame(() => talkDraw(F));
+}
+function talkState(hi, en) { $('#talk-state').textContent = T(hi, en); }
+function talkLog(cls, text) { const d = document.createElement('div'); d.className = cls; d.textContent = text; $('#talk-log').prepend(d); }
+async function talkOpen() {
+  const F = await talkLoadFace(); TALK.nextBlink = performance.now() + 1500; talkDraw(F);
+  talkState('बटन दबाकर बोलिए', 'Press the button and speak');
+}
+window.talkClose = () => {
+  try { if (TALK.rec && TALK.rec.state === 'recording') TALK.rec.stop(); } catch (e) {}
+  if (TALK.cam) { TALK.cam.getTracks().forEach((t) => t.stop()); TALK.cam = null; $('#talk-self').classList.add('hidden'); $('#talk-cam-on').classList.add('hidden'); }
+  if (TALK.audio) { TALK.audio.pause(); }
+};
+function talkAudioCtx() {
+  if (!TALK.ac) { const AC = window.AudioContext || window.webkitAudioContext; TALK.ac = new AC(); TALK.an = TALK.ac.createAnalyser(); TALK.an.fftSize = 512; TALK.an.connect(TALK.ac.destination); }
+  if (TALK.ac.state === 'suspended') TALK.ac.resume();
+}
+// speak a reply: her recorded voice through the analyser (lips follow it); demo/preview falls back to the phone's own voice
+function talkSpeak(b64, mime, text) {
+  return new Promise((resolve) => {
+    // never wait for ever: some phones do not report the end of speech
+    let finished = false; const done = () => { if (finished) return; finished = true; TALK.speaking = false; resolve(); };
+    setTimeout(done, 4000 + String(text || '').length * 110);
+    if (!b64) {
+      try { const u = new SpeechSynthesisUtterance(text); u.lang = 'hi-IN'; TALK.speaking = true;
+        const fake = setInterval(() => { TALK.level = 0.3 + Math.random() * 0.6; }, 90);
+        u.onend = () => { clearInterval(fake); TALK.speaking = false; done(); }; speechSynthesis.speak(u); } catch (e) { done(); }
+      return;
+    }
+    const a = new Audio('data:' + (mime || 'audio/mpeg') + ';base64,' + b64); TALK.audio = a;
+    try { const src = TALK.ac.createMediaElementSource(a); src.connect(TALK.an); } catch (e) {}
+    a.onplay = () => { TALK.speaking = true; }; a.onended = a.onerror = () => { TALK.speaking = false; done(); };
+    a.play().catch(() => { TALK.speaking = false; done(); });
+  });
+}
+function talkMime() {
+  for (const m of ['audio/webm;codecs=opus', 'audio/webm', 'audio/mp4', 'audio/ogg']) if (window.MediaRecorder && MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(m)) return m;
+  return '';
+}
+async function talkListen() {
+  if (TALK.busy) return;
+  talkAudioCtx();
+  if (TALK.rec && TALK.rec.state === 'recording') { TALK.rec.stop(); return; }   // second tap: done speaking
+  let st;
+  try { st = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true } }); store.set('gs_media', 'granted'); }
+  catch (e) { talkState('माइक की अनुमति चाहिए। फ़ोन की सेटिंग में इस साइट को माइक दीजिए।', 'Microphone permission is needed. Allow it for this site in the phone settings.'); return; }
+  const mime = talkMime(); TALK.chunks = [];
+  const rec = new MediaRecorder(st, mime ? { mimeType: mime, audioBitsPerSecond: 24000 } : undefined); TALK.rec = rec;
+  rec.ondataavailable = (e) => { if (e.data.size) TALK.chunks.push(e.data); };
+  // stop by itself after about 1.5 seconds of quiet, or 25 seconds at most
+  const src = TALK.ac.createMediaStreamSource(st); const an = TALK.ac.createAnalyser(); an.fftSize = 512; src.connect(an);
+  const buf = new Uint8Array(an.fftSize); let heard = false, quietSince = performance.now(); const started = performance.now();
+  const vad = setInterval(() => {
+    an.getByteTimeDomainData(buf); let s = 0; for (const v of buf) s += (v - 128) * (v - 128); const rms = Math.sqrt(s / buf.length);
+    if (rms > 6) { heard = true; quietSince = performance.now(); }
+    if ((heard && performance.now() - quietSince > 1500) || performance.now() - started > 25000) { if (rec.state === 'recording') rec.stop(); }
+  }, 100);
+  rec.onstop = async () => {
+    clearInterval(vad); st.getTracks().forEach((t) => t.stop()); $('#talk-mic').classList.remove('rec');
+    const blob = new Blob(TALK.chunks, { type: (rec.mimeType || mime || 'audio/webm').split(';')[0] });
+    if (!heard || blob.size < 1500) { talkState('कुछ सुनाई नहीं दिया, फिर से दबाकर बोलिए', 'I heard nothing; press and speak again'); return; }
+    talkSend(blob);
+  };
+  rec.start(250); $('#talk-mic').classList.add('rec');
+  talkState('सुन रही हूँ… बोलिए 👂', 'Listening… speak 👂');
+}
+async function talkSend(blob) {
+  TALK.busy = true; $('#talk-mic').disabled = true; talkState('स्नेहा सोच रही है…', 'Sneha is thinking…');
+  const b64 = await new Promise((ok) => { const r = new FileReader(); r.onload = () => ok(String(r.result).split(',')[1]); r.readAsDataURL(blob); });
+  try {
+    const j = await (await fetch(API.talk, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ code: store.get('gs_code'), audio: b64, mime: blob.type, history: TALK.history, mood: TALK.mood }) })).json();
+    if (!j.ok) {
+      talkState(j.why === 'limit' ? 'आज बहुत बात हो गई, थोड़ी देर बाद फिर बात करेंगे 💛' : 'माफ़ कीजिए, अभी बात नहीं हो पाई। फिर कोशिश करें।',
+        j.why === 'limit' ? 'We have talked a lot; let us talk again in a while 💛' : 'Sorry, that did not work. Please try again.');
+      return;
+    }
+    if (j.heard) { talkLog('u', j.heard); TALK.history.push({ r: 'u', t: j.heard }); }
+    talkLog('s' + (j.urgent ? ' urgent' : ''), j.reply); TALK.history.push({ r: 's', t: j.reply }); TALK.history = TALK.history.slice(-6);
+    talkState(j.urgent ? 'घर वालों को ख़बर दी जा रही है 🚨' : 'स्नेहा बोल रही है…', j.urgent ? 'The family is being told now 🚨' : 'Sneha is speaking…');
+    await talkSpeak(j.audio, j.mime, j.reply);
+    talkState('बटन दबाकर बोलिए', 'Press the button and speak');
+  } catch (e) { talkState('इंटरनेट नहीं; थोड़ी देर बाद कोशिश करें', 'No internet; try again shortly'); }
+  finally { TALK.busy = false; $('#talk-mic').disabled = false; }
+}
+$('#talk-mic').addEventListener('click', talkListen);
+// camera: shown small, read on this phone only (smile or not); the picture itself never leaves the phone
+$('#talk-cam').addEventListener('click', async () => {
+  if (TALK.cam) { window.talkClose(); TALK.mood = 'neutral'; return; }
+  try {
+    TALK.cam = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: 320, height: 240 } });
+    const v = $('#talk-self'); v.srcObject = TALK.cam; v.classList.remove('hidden'); $('#talk-cam-on').classList.remove('hidden'); await v.play();
+    store.set('gs_media', 'granted');
+    talkMoodWatch(v);
+  } catch (e) { talkState('कैमरे की अनुमति नहीं मिली', 'Camera permission was not given'); }
+});
+async function talkMoodWatch(video) {
+  try {
+    const vision = await import('https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/vision_bundle.mjs');
+    const files = await vision.FilesetResolver.forVisionTasks('https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/wasm');
+    const fl = await vision.FaceLandmarker.createFromOptions(files, { baseOptions: { modelAssetPath: 'https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task' },
+      outputFaceBlendshapes: true, runningMode: 'VIDEO', numFaces: 1 });
+    const tick = () => {
+      if (!TALK.cam) return;
+      const r = fl.detectForVideo(video, performance.now());
+      const bs = (((r.faceBlendshapes || [])[0] || {}).categories || []).reduce((o, c) => (o[c.categoryName] = c.score, o), {});
+      const smile = ((bs.mouthSmileLeft || 0) + (bs.mouthSmileRight || 0)) / 2, frown = ((bs.mouthFrownLeft || 0) + (bs.mouthFrownRight || 0)) / 2;
+      const eyes = ((bs.eyeBlinkLeft || 0) + (bs.eyeBlinkRight || 0)) / 2;
+      TALK.mood = smile > 0.45 ? 'smiling' : frown > 0.3 ? 'sad' : eyes > 0.55 ? 'tired' : 'neutral';
+      setTimeout(tick, 700);
+    };
+    tick();
+  } catch (e) { TALK.mood = 'neutral'; }   // the talk works the same without it
 }
 
 buildForm();
