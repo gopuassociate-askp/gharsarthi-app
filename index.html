@@ -499,8 +499,10 @@ const DEMO_CODE = 'GS-DEMO';
 (() => {
   const q = new URLSearchParams(location.search);
   const ls = (k, v) => { try { return v === undefined ? localStorage.getItem(k) : v === null ? localStorage.removeItem(k) : localStorage.setItem(k, v); } catch (e) { return null; } };
-  if (q.get('demo') === '1' && ls('gs_code') !== DEMO_CODE) { ls('gs_code_before_demo', ls('gs_code') || ''); ls('gs_code', DEMO_CODE); }
-  if (ls('gs_code') !== DEMO_CODE) return;
+  const PREVIEW = q.get('preview') === '1' || (() => { try { return sessionStorage.getItem('gs_preview') === '1'; } catch (e) { return false; } })();
+  if (PREVIEW) { try { sessionStorage.setItem('gs_preview', '1'); } catch (e) {} window.__PREVIEW = true; }
+  if (!PREVIEW && q.get('demo') === '1' && ls('gs_code') !== DEMO_CODE) { ls('gs_code_before_demo', ls('gs_code') || ''); ls('gs_code', DEMO_CODE); }
+  if (!PREVIEW && ls('gs_code') !== DEMO_CODE) return;
   const at = (h, m) => { const d = new Date(); d.setUTCHours(h - 5, m - 30, 0, 0); return d.toISOString(); };
   const md = (off) => { const d = new Date(Date.now() + off * 864e5); return d.toISOString().slice(5, 10); };
   const D = {
@@ -535,6 +537,12 @@ const DEMO_CODE = 'GS-DEMO';
     const u = String(url);
     if (!u.startsWith(API_BASE) || u.includes('/app-news')) return real(url, opt);
     let body = {}; try { body = JSON.parse(opt.body || '{}'); } catch (e) {}
+    if (u.includes('/app-signup')) {
+      if (body.elder_name) { D.family.elder_name = body.elder_name; D.family.address_as = body.address_as_other || body.address_as || body.elder_name;
+        D.family.city = body.city || D.family.city; D.family.state = body.state || D.family.state; D.family.language = body.language || D.family.language; D.family.plan = body.plan || D.family.plan; }
+      D.family.status = 'New'; D.messages = []; D.today = []; D.payments = []; D.occasions = []; D.medicines = [];
+      return reply({ ok: true, code: DEMO_CODE, status: 'New', suggested_plan: 'plus', preview: true });
+    }
     if (u.includes('/app-status')) return reply({ ok: true, ...D });
     if (u.includes('/app-medicines')) return reply({ ok: true, medicines: D.medicines });
     if (u.includes('/app-medicine-add')) { D.medicines.push({ id: ++nextId, simple: body.simple || body.name, name: body.name, dose: body.dose || '', times: body.times || [], food: body.food, stock: body.stock }); return reply({ ok: true }); }
@@ -551,8 +559,12 @@ const DEMO_CODE = 'GS-DEMO';
   document.addEventListener('DOMContentLoaded', () => {
     const bar = document.createElement('div');
     bar.style.cssText = 'position:sticky;top:0;z-index:50;background:#7c3aed;color:#fff;padding:8px 12px;font-size:15px;display:flex;gap:10px;align-items:center;justify-content:space-between';
-    bar.innerHTML = '<span>🧪 डेमो परिवार: सब नमूना है, कुछ भी असली नहीं भेजा जाता / Demo family: sample data, nothing real is sent</span><button style="background:#fff;color:#7c3aed;border:0;border-radius:8px;padding:6px 10px;font:inherit">Exit demo</button>';
-    bar.querySelector('button').onclick = () => { const b = ls('gs_code_before_demo'); if (b) ls('gs_code', b); else ls('gs_code', null); ls('gs_code_before_demo', null); ls('gs_last', null); location.href = location.pathname; };
+    bar.innerHTML = PREVIEW
+      ? '<span>👀 नए विज़िटर का पूर्वावलोकन: कुछ भी सेव नहीं होता / Preview as a new visitor: nothing is saved</span><button style="background:#fff;color:#0f766e;border:0;border-radius:8px;padding:6px 10px;font:inherit">Exit preview</button>'
+      : '<span>🧪 डेमो परिवार: सब नमूना है, कुछ भी असली नहीं भेजा जाता / Demo family: sample data, nothing real is sent</span><button style="background:#fff;color:#7c3aed;border:0;border-radius:8px;padding:6px 10px;font:inherit">Exit demo</button>';
+    if (PREVIEW) bar.style.background = '#0f766e';
+    bar.querySelector('button').onclick = () => {
+      if (PREVIEW) { try { sessionStorage.removeItem('gs_preview'); } catch (e) {} location.href = location.pathname; return; } const b = ls('gs_code_before_demo'); if (b) ls('gs_code', b); else ls('gs_code', null); ls('gs_code_before_demo', null); ls('gs_last', null); location.href = location.pathname; };
     document.body.prepend(bar);
   });
 })();
@@ -572,9 +584,9 @@ const STATUS = {
 };
 const $ = (s) => document.querySelector(s);
 const store = {
-  get: (k) => { try { return localStorage.getItem(k); } catch (e) { return null; } },
-  set: (k, v) => { try { localStorage.setItem(k, v); } catch (e) {} },
-  del: (k) => { try { localStorage.removeItem(k); } catch (e) {} },
+  get: (k) => { if (window.__PREVIEW) return (window.__MEM || {})[k] ?? null; try { return localStorage.getItem(k); } catch (e) { return null; } },
+  set: (k, v) => { if (window.__PREVIEW) { (window.__MEM = window.__MEM || {})[k] = v; return; } try { localStorage.setItem(k, v); } catch (e) {} },
+  del: (k) => { if (window.__PREVIEW) { delete (window.__MEM || {})[k]; return; } try { localStorage.removeItem(k); } catch (e) {} },
 };
 
 function show(view) {
