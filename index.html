@@ -87,6 +87,10 @@
   .sneha-intro { display: flex; gap: 14px; align-items: center; }
   .sneha-intro img { width: 96px; height: 96px; border-radius: 50%; object-fit: cover; flex: none; border: 3px solid #fff; box-shadow: 0 0 0 3px #f59e0b; }
   .sneha-intro h2 { margin: 0 0 4px; }
+  .clip video { width: 100%; max-width: 360px; aspect-ratio: 1; border-radius: 18px; display: block; margin: 10px auto 0; background: #fff1e0; }
+  .clips { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; }
+  .clips figure { margin: 0; text-align: center; font-size: 15px; color: #9a3412; }
+  .clips video { width: 100%; aspect-ratio: 1; border-radius: 14px; background: #fff1e0; display: block; margin-bottom: 4px; }
   .sneha-hero h2 { font-size: 26px; }
 
   ul.plain { padding-left: 22px; margin: 6px 0 0; }
@@ -169,6 +173,7 @@
   <section id="v-welcome" class="view">
     <div class="card sneha-hero">
       <figure class="sneha-face"><img src="sneha.jpg" width="170" height="170" alt="स्नेहा / Sneha"><figcaption><span data-en="Sneha – your AI companion">स्नेहा – आपकी AI सहायिका</span></figcaption></figure>
+      <div class="clip"><button class="btn secondary" id="meet-sneha">▶ <span data-en="Meet Sneha">स्नेहा से मिलिए</span></button><video id="meet-video" class="hidden" src="video/welcome.mp4" poster="sneha.jpg" controls playsinline preload="none"></video></div>
       <h2><span data-en="Namaste, I am Sneha 🙏">नमस्ते, मैं स्नेहा हूँ 🙏</span></h2>
       <p><span data-en="I call your loved ones every day to lovingly ask how they are, remind them about meals and medicines, and listen to their old stories – and if anything seems wrong, I tell you at once.">मैं रोज़ आपके अपनों को फ़ोन करके प्यार से हालचाल पूछती हूँ, खाने और दवाई की याद दिलाती हूँ, उनकी पुरानी बातें सुनती हूँ – और कुछ भी गड़बड़ लगे तो तुरंत आपको बताती हूँ।</span></p>
       <p class="muted">I call your loved ones every day, remind them about meals and medicines, listen to their stories, and tell you at once if anything seems wrong.</p>
@@ -198,6 +203,8 @@
       <span id="h-status" class="pill wait">—</span>
       <p id="h-status-text" style="font-size:15px;margin-top:6px"></p>
     </div>
+
+    <div class="card clip hidden" id="today-clip"><h2 id="today-clip-title"></h2><video id="today-clip-video" poster="sneha.jpg" controls playsinline preload="none"></video></div>
 
     <div class="card today-card" id="today-card">
       <div class="today-top"><div><b id="td-day">—</b><span id="td-date">—</span></div><span id="td-icon" class="td-icon" aria-hidden="true"></span></div>
@@ -349,6 +356,11 @@
       <img src="sneha.jpg" width="96" height="96" alt="स्नेहा / Sneha">
       <div><h2><span data-en="Namaste, I am Sneha 🙏">नमस्ते, मैं स्नेहा हूँ 🙏</span></h2>
       <p class="muted"><span data-en="Your AI companion. I talk on the phone in your family's language, with the same warm voice every day.">आपकी AI सहायिका। मैं रोज़ उसी प्यारी आवाज़ में, आपके परिवार की भाषा में फ़ोन पर बात करती हूँ।</span></p></div>
+    </div>
+    <div class="card">
+      <h2><span data-en="Hear Sneha">स्नेहा को सुनिए</span></h2>
+      <div class="clips"><figure><video src="video/welcome.mp4" poster="sneha.jpg" controls playsinline preload="none"></video><span data-en="Hello">नमस्ते</span></figure><figure><video src="video/morning.mp4" poster="sneha.jpg" controls playsinline preload="none"></video><span data-en="Good morning">सुप्रभात</span></figure><figure><video src="video/diwali.mp4" poster="sneha.jpg" controls playsinline preload="none"></video><span data-en="Diwali">दीपावली</span></figure><figure><video src="video/birthday.mp4" poster="sneha.jpg" controls playsinline preload="none"></video><span data-en="Birthday">जन्मदिन</span></figure><figure><video src="video/remember.mp4" poster="sneha.jpg" controls playsinline preload="none"></video><span data-en="I'll remember">मैं याद रखूँगी</span></figure></div>
+      <p class="muted"><span data-en="Tap to play. Sneha is an AI; her face and voice are made by computer.">दबाकर चलाइए। स्नेहा एक AI है; उसका चेहरा और आवाज़ कंप्यूटर से बने हैं।</span></p>
     </div>
     <div class="card">
       <h2>स्नेहा क्या करती है / What Sneha does</h2>
@@ -931,6 +943,19 @@ function familyStates(f) {
 }
 const istDay = (d) => new Date(d.getTime() + 330 * 60000).toISOString().slice(0, 10);
 const daysBetween = (a, b) => Math.round((Date.parse(b) - Date.parse(a)) / 86400000);
+$('#meet-sneha').addEventListener('click', () => { const v = $('#meet-video'); v.classList.remove('hidden'); $('#meet-sneha').classList.add('hidden'); v.play().catch(() => {}); });
+function showTodayClip(f, occasions, today) {
+  const md = today.slice(5);
+  const bday = f.elder_birthday === md || (occasions || []).some((o) => o.kind === 'birthday_self' && o.date === md);
+  const fest = document.body.dataset.fest;
+  const clip = bday ? ['birthday', T('स्नेहा की ओर से जन्मदिन की बधाई 🎂', 'Birthday wishes from Sneha 🎂')]
+    : fest === 'diwali' ? ['diwali', T('स्नेहा की ओर से दीपावली की शुभकामनाएँ 🪔', 'Diwali wishes from Sneha 🪔')] : null;
+  const box = $('#today-clip');
+  if (!clip) { box.classList.add('hidden'); return; }
+  $('#today-clip-title').textContent = clip[1];
+  const v = $('#today-clip-video'); if (!v.src.endsWith(`video/${clip[0]}.mp4`)) v.src = `video/${clip[0]}.mp4`;
+  box.classList.remove('hidden');
+}
 function showToday(f, occasions, calls) {
   const now = new Date(); const today = istDay(now);
   const states = familyStates(f);
@@ -964,6 +989,7 @@ function showToday(f, occasions, calls) {
   }).sort((a, b) => a.n - b.n)[0];
   if (nextO) chips.push(`${OCC_ICON[nextO.o.kind] || '📅'} ${esc(nextO.o.note || nextO.o.person)}: ${nextO.n === 0 ? T('आज', 'today') : nextO.n === 1 ? T('कल', 'tomorrow') : T(nextO.n + ' दिन', 'in ' + nextO.n + ' days')}`);
   $('#td-next').innerHTML = chips.map((c) => `<span class="td-chip">${c}</span>`).join('');
+  showTodayClip(f, occasions, today);
   // today with the elder: each check-in as it happens
   const who = f.address_as || f.elder_name || '';
   $('#td-calls-title').textContent = T(`आज ${who} के साथ`, `Today with ${who}`);
