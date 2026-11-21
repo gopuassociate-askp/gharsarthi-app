@@ -601,10 +601,7 @@ const DEMO_CODE = 'GS-DEMO';
       return reply({ ok: true, code: DEMO_CODE, status: 'New', suggested_plan: 'plus', preview: true });
     }
     if (u.includes('/app-status')) return reply({ ok: true, ...D });
-    if (u.includes('/app-talk')) {
-      const R = ['अरे वाह पापा जी, आपसे बात करके बहुत अच्छा लगा! आज आपने क्या-क्या किया?', 'बहुत बढ़िया! आप ऐसे ही मुस्कुराते रहिए, मैं हमेशा आपके साथ हूँ।', 'जी पापा जी, मैं ध्यान से सुन रही हूँ। और बताइए?'];
-      return reply({ ok: true, heard: '(डेमो) आपकी बात', reply: R[Math.floor(Math.random() * R.length)], urgent: false, audio: '' });
-    }
+    if (u.includes('/app-talk')) return real(url, opt);   // demo talks to the real Sneha (sample elder, no family alerts)
     if (u.includes('/app-medicines')) return reply({ ok: true, medicines: D.medicines });
     if (u.includes('/app-medicine-add')) { D.medicines.push({ id: ++nextId, simple: body.simple || body.name, name: body.name, dose: body.dose || '', times: body.times || [], food: body.food, stock: body.stock }); return reply({ ok: true }); }
     if (u.includes('/app-medicine-remove')) { D.medicines = D.medicines.filter((m) => String(m.id) !== String(body.id)); return reply({ ok: true }); }
