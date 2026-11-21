@@ -226,6 +226,29 @@
       <button class="btn primary" id="up-send" type="button">परिवार को भेजें / Send to family</button>
       <div id="up-err" class="err"></div>
     </div>
+
+    <div class="card" id="occ-card">
+      <h2>🎉 ख़ास दिन / Special days</h2>
+      <p class="muted">जन्मदिन, शादी की सालगिरह, बच्चों-पोतों के जन्मदिन, पुण्यतिथि। स्नेहा उस दिन प्यार से बधाई देगी (पुण्यतिथि पर बस याद करेगी), और एक दिन पहले आपको याद दिलाया जाएगा।<br>Sneha greets on the day; you get a reminder the day before.</p>
+      <div id="occ-list"></div>
+      <label for="occ-kind">क्या है? / What</label>
+      <select id="occ-kind">
+        <option value="birthday_self">उनका अपना जन्मदिन / Their birthday</option>
+        <option value="wedding">शादी की सालगिरह / Wedding anniversary</option>
+        <option value="birthday">परिवार में किसी का जन्मदिन / A family member's birthday</option>
+        <option value="remembrance">पुण्यतिथि / Day of remembrance</option>
+      </select>
+      <div id="occ-who" class="hidden">
+        <label for="occ-person">किसका? नाम / Whose? Name</label>
+        <input id="occ-person" placeholder="जैसे: काव्या">
+        <label for="occ-relation">उनसे रिश्ता / Relation to them</label>
+        <input id="occ-relation" placeholder="जैसे: पोती, बेटा, पत्नी">
+      </div>
+      <label for="occ-date">तारीख़ / Date</label>
+      <input id="occ-date" type="date">
+      <button class="btn primary" id="occ-add" type="button">जोड़ें / Add</button>
+      <div id="occ-err" class="err"></div>
+    </div>
     <div class="card">
       <h2>आज स्नेहा कब फ़ोन करेगी? 🪔</h2>
       <div class="diyas">
@@ -388,7 +411,8 @@ const FIELDS = [{"key":"family_name","label":"आपका नाम / Your name
 // The page is hosted on a normal web host; n8n runs only these two services.
 const API_BASE = 'https://gharsarthi.app.n8n.cloud/webhook';
 const API = { signup: API_BASE + '/app-signup', status: API_BASE + '/app-status', meds: API_BASE + '/app-medicines', message: API_BASE + '/app-message',
-  medAdd: API_BASE + '/app-medicine-add', medRemove: API_BASE + '/app-medicine-remove', seen: API_BASE + '/app-seen' };
+  medAdd: API_BASE + '/app-medicine-add', medRemove: API_BASE + '/app-medicine-remove', seen: API_BASE + '/app-seen',
+  occAdd: API_BASE + '/app-occasion-add', occRemove: API_BASE + '/app-occasion-remove' };
 // What happens to a message from the elder, by level (config/needs.json).
 const LEVEL = {
   urgent:    ['bad',  '🚨 तुरंत', 'भेज दिया ✓ स्नेहा अभी घर वालों को फ़ोन कर रही है, जब तक कोई सुन न ले।'],
@@ -541,6 +565,7 @@ function render(j) {
   $('#t-medicine').textContent = f.times.medicine || '—';
   decorate(f);
   renderMessages(j.messages, f.address_as || f.elder_name);
+  renderOccasions(j.occasions || []);
   if (!$('#up-from').value) $('#up-from').value = store.get('gs_elder_from') || f.address_as || '';
   $('#h-plan').textContent = (f.plan || '—').split(' / ')[0];
   $('#h-since').textContent = fmtDate(f.since);
@@ -765,6 +790,39 @@ $('#login-go').addEventListener('click', () => {
   store.set('gs_code', c); $('#login-err').textContent = ''; show('home');
 });
 $('#logout').addEventListener('click', () => { store.del('gs_code'); store.del('gs_last'); show('welcome'); });
+
+// ---- special days ----
+const OCC_ICON = { birthday_self: '🎂', wedding: '💐', birthday: '🎈', remembrance: '🪔', other: '📅' };
+const MONTH_HI = ['जनवरी', 'फ़रवरी', 'मार्च', 'अप्रैल', 'मई', 'जून', 'जुलाई', 'अगस्त', 'सितंबर', 'अक्टूबर', 'नवंबर', 'दिसंबर'];
+function renderOccasions(list) {
+  const box = $('#occ-list'); box.innerHTML = '';
+  if (!list.length) { box.innerHTML = '<p class="muted">अभी कोई ख़ास दिन नहीं जोड़ा गया। / None yet.</p>'; return; }
+  for (const o of list) {
+    const [m, d] = String(o.date || '').split('-').map(Number);
+    const when = m ? `${d} ${MONTH_HI[m - 1]}` : 'तारीख़ पक्की करें';
+    box.insertAdjacentHTML('beforeend', `<div class="row"><span>${OCC_ICON[o.kind] || '📅'} ${esc(o.note || o.person)}${o.source === 'call' ? ' <span class="muted">(स्नेहा ने सुना)</span>' : ''}</span><span><b>${when}</b> <button class="btn secondary" style="width:auto;padding:4px 10px;margin:0 0 0 6px" data-occ="${o.id}" type="button">✕</button></span></div>`);
+  }
+}
+$('#occ-kind').addEventListener('change', () => $('#occ-who').classList.toggle('hidden', !['birthday', 'remembrance'].includes($('#occ-kind').value)));
+$('#occ-add').addEventListener('click', async () => {
+  const body = { code: store.get('gs_code'), kind: $('#occ-kind').value, person: $('#occ-person').value.trim(), relation: $('#occ-relation').value.trim(), date: $('#occ-date').value };
+  if (!body.date) { $('#occ-err').textContent = 'तारीख़ चुनिए / Choose the date'; return; }
+  if (['birthday', 'remembrance'].includes(body.kind) && !body.person) { $('#occ-err').textContent = 'नाम लिखिए / Add the name'; return; }
+  busy($('#occ-add'), true, 'जोड़ रहे हैं… / Adding…');
+  try {
+    const j = await (await fetch(API.occAdd, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(body) })).json();
+    if (!j.ok) throw new Error(j.problems);
+    $('#occ-person').value = ''; $('#occ-relation').value = ''; $('#occ-date').value = '';
+    $('#occ-err').textContent = 'जोड़ दिया ✓ स्नेहा उस दिन याद रखेगी।'; loadStatus();
+  } catch (e) { $('#occ-err').textContent = 'जोड़ नहीं पाए, फिर कोशिश करें / Could not add, try again'; }
+  finally { busy($('#occ-add'), false); }
+});
+$('#occ-list').addEventListener('click', async (e) => {
+  const b = e.target.closest('[data-occ]'); if (!b) return;
+  busy(b, true, '…');
+  try { await fetch(API.occRemove, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ code: store.get('gs_code'), id: b.dataset.occ }) }); loadStatus(); }
+  catch (err) { busy(b, false); }
+});
 
 // ---- install ----
 let installEvt = null;
