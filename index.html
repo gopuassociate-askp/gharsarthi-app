@@ -137,6 +137,8 @@
   .td-fest { margin-top: 12px; padding: 12px 14px; border-radius: 16px; background: linear-gradient(120deg, #fff1d6, #ffe4e6); font-size: 19px; font-weight: 700; color: #9f1239; }
   .td-weather { margin-top: 10px; font-size: 17px; color: #4a2410; }
   .td-weather small { display: block; color: #9a3412; font-size: 15px; margin-top: 2px; }
+  .bhakti-line { font-size: 20px; line-height: 1.6; color: #7c2d12; margin: 6px 0 10px; }
+  .news-item { display: block; padding: 9px 0; border-bottom: 1px dashed #fde3c3; color: var(--ink); text-decoration: none; font-size: 16px; line-height: 1.5; }
   .td-next { margin-top: 10px; display: flex; flex-wrap: wrap; gap: 8px; }
   .td-chip { background: #fff7ed; border: 1px solid #fed7aa; border-radius: 999px; padding: 4px 12px; font-size: 15px; color: #7c2d12; }
   .td-h { margin: 14px 0 6px; font-size: 17px; color: #9f1239; }
@@ -257,6 +259,27 @@
       <p class="note"><span data-en="Sneha understands on her own: 🛒 milk, vegetables = a message; 💊 medicine, doctor, gas = a message, and one call if nobody replies; 🚨 feeling unwell = calls at once.">स्नेहा ख़ुद समझ लेती है: 🛒 दूध-सब्ज़ी जैसी चीज़ें = संदेश; 💊 दवाई, डॉक्टर, गैस = संदेश, जवाब न आए तो एक फ़ोन; 🚨 तबीयत ख़राब = तुरंत फ़ोन।</span></p>
       <button class="btn primary" id="up-send" type="button">परिवार को भेजें / Send to family</button>
       <div id="up-err" class="err"></div>
+    </div>
+
+    <div class="card hidden" id="bhakti-card">
+      <h2>🙏 <span data-en="Thought of devotion">आज का भक्ति विचार</span></h2>
+      <p id="bhakti-line" class="bhakti-line"></p>
+      <a id="bhakti-site" class="hidden" target="_blank" rel="noopener"></a>
+    </div>
+
+    <div class="card hidden" id="news-card">
+      <h2>📰 <span data-en="Today's news">आज की ख़बरें</span></h2>
+      <div id="news-list"></div>
+      <p class="muted" id="news-src"></p>
+    </div>
+
+    <div class="card" id="likes-card">
+      <h2>💛 <span data-en="What do you like?">मेरी पसंद</span></h2>
+      <p class="muted"><span data-en="Choose what you would like to see in the app every day.">ऐप में रोज़ क्या देखना पसंद करेंगे? चुनिए।</span></p>
+      <label class="check"><input type="checkbox" id="like-bhakti"> <span>🙏 <span data-en="Devotion: a thought for the day">भक्ति: रोज़ एक विचार</span></span></label>
+      <select id="like-faith" class="hidden"></select>
+      <label class="check"><input type="checkbox" id="like-news"> <span>📰 <span data-en="News: government updates (PIB)">ख़बरें: सरकार की ताज़ा ख़बरें (PIB)</span></span></label>
+      <p class="muted"><span data-en="Weather is always shown. Cricket scores are coming soon.">मौसम हमेशा दिखता है। क्रिकेट स्कोर जल्द आएगा।</span></p>
     </div>
 
     <div class="card" id="invite-card">
@@ -963,6 +986,39 @@ $('#invite-copy').addEventListener('click', async () => {
   try { await navigator.clipboard.writeText(inviteLink()); $('#invite-msg').textContent = T('लिंक कॉपी हो गया ✓', 'Link copied ✓'); }
   catch (e) { $('#invite-msg').textContent = inviteLink(); }
 });
+
+// ---- my likes: devotion and news (chosen on this phone) ----
+const BHAKTI = [{"key":"ram","hi":"श्री राम","en":"Shri Ram","site":null,"lines":[["राम नाम में ही सुख है, राम नाम में ही शांति।","In Ram's name there is joy, in Ram's name there is peace."],["जैसे राम जी ने हर रिश्ता निभाया, वैसे ही आपने परिवार को सँजोया है।","As Ram honoured every bond, you have cherished your family."],["धीरज और सच्चाई, यही राम जी की राह है।","Patience and truth: that is Ram's path."],["आज का दिन राम जी के नाम, मन में शांति, घर में आराम।","Today in Ram's name: peace in the heart, comfort at home."],["सियावर रामचंद्र की जय! आपका दिन मंगलमय हो।","Glory to Siyavar Ramchandra! May your day be blessed."],["राम जी की कृपा से हर काम बन जाता है।","With Ram's grace every task is fulfilled."],["राम भजन से दिन की शुरुआत, मन रहे हल्का साथ-साथ।","Begin the day with Ram's bhajan; the mind stays light."]]},{"key":"krishna","hi":"श्री कृष्ण","en":"Shri Krishna","site":null,"lines":[["कर्म करते चलिए, फल की चिंता कान्हा पर छोड़ दीजिए।","Keep doing your work; leave the fruit to Kanha."],["राधे-राधे! आज का दिन प्रेम और मुस्कान से भरा हो।","Radhe Radhe! May today be full of love and smiles."],["मुरली की धुन की तरह आपका मन आज मधुर रहे।","May your mind be as sweet as the flute's tune today."],["जो होता है, अच्छे के लिए होता है।","Whatever happens, happens for good."],["कान्हा सबके साथ हैं, आप भी अकेले नहीं हैं।","Kanha is with everyone; you are never alone."],["माखन जैसा मीठा दिन हो आपका।","May your day be as sweet as butter."],["हरे कृष्ण! मन शांत, दिल प्रसन्न।","Hare Krishna! A calm mind, a happy heart."]]},{"key":"shiv","hi":"शिव जी","en":"Lord Shiva","site":"https://shrikashivishwanath.org","lines":[["हर हर महादेव! भोलेनाथ सबका भला करें।","Har Har Mahadev! May Bholenath bless all."],["ॐ नमः शिवाय, मन में शांति, जीवन में संतोष।","Om Namah Shivaya: peace in the mind, contentment in life."],["भोले बाबा की तरह सरल रहिए, सब सरल हो जाएगा।","Be simple like Bhole Baba, and everything becomes simple."],["शिव जी का आशीर्वाद आपके घर पर बना रहे।","May Shiva's blessing stay on your home."],["जहाँ श्रद्धा है, वहाँ महादेव हैं।","Where there is faith, there is Mahadev."],["आज एक लोटा जल और ढेर सारा विश्वास।","Today, a little water for Shiva and a lot of faith."],["बम बम भोले! दिन मंगलमय हो।","Bam Bam Bhole! May your day be blessed."]]},{"key":"hanuman","hi":"हनुमान जी","en":"Hanuman ji","site":null,"lines":[["जय बजरंगबली! संकट दूर, मन भरपूर।","Jai Bajrangbali! Troubles away, a full heart."],["हनुमान जी की तरह हिम्मत रखिए, सब हो जाएगा।","Keep courage like Hanuman ji, and all will be well."],["संकट मोचन नाम तिहारो, आज भी साथ हैं हमारे।","The remover of troubles is with us today too."],["सेवा और भक्ति, यही हनुमान जी की शक्ति।","Service and devotion are Hanuman ji's strength."],["राम काज करिबे को आतुर, हम भी अच्छे काम में आतुर।","Like Hanuman, eager to do good work."],["मंगलवार हो या कोई दिन, बजरंगबली सदा साथ।","Tuesday or any day, Bajrangbali is always with you."],["जय हनुमान ज्ञान गुन सागर, आपका दिन रहे उजागर।","Glory to Hanuman, ocean of wisdom; may your day shine."]]},{"key":"durga","hi":"माँ दुर्गा","en":"Maa Durga","site":"https://www.maavaishnodevi.org","lines":[["जय माता दी! माँ सबकी रक्षा करें।","Jai Mata Di! May Maa protect all."],["माँ की कृपा से घर में सुख-शांति रहे।","By Maa's grace may there be peace at home."],["शक्ति भी माँ, ममता भी माँ।","Maa is strength, Maa is love."],["माँ का नाम लीजिए, मन हल्का हो जाएगा।","Take Maa's name and the heart grows light."],["जहाँ माँ का आशीर्वाद, वहाँ हर दिन त्योहार।","Where Maa blesses, every day is a festival."],["या देवी सर्वभूतेषु, आपका दिन शुभ हो।","To the Devi in all beings: may your day be auspicious."],["माँ शेरावाली सबका भला करें।","May Sherawali Maa do good to all."]]},{"key":"ganesh","hi":"गणेश जी","en":"Lord Ganesha","site":"https://www.siddhivinayak.org","lines":[["गणपति बप्पा मोरया! हर काम शुभ हो।","Ganpati Bappa Morya! May every task be auspicious."],["विघ्नहर्ता सब बाधाएँ दूर करें।","May the remover of obstacles clear every hurdle."],["श्री गणेशाय नमः, नए दिन की शुभ शुरुआत।","Shri Ganeshaya Namah: an auspicious start to the day."],["मोदक जैसी मीठी हो आज की हर बात।","May every word today be as sweet as a modak."],["बप्पा की कृपा से घर में खुशियाँ भरी रहें।","By Bappa's grace may the home stay full of joy."],["बुद्धि और धैर्य, यही गणेश जी का आशीर्वाद।","Wisdom and patience: Ganesha's blessing."],["जय गणेश देवा! दिन मंगलमय हो।","Jai Ganesh Deva! May your day be blessed."]]},{"key":"sai","hi":"साईं बाबा","en":"Sai Baba","site":"https://www.sai.org.in","lines":[["श्रद्धा और सबुरी, यही साईं का संदेश।","Faith and patience: Sai's message."],["सबका मालिक एक।","One Master for all."],["ॐ साईं राम! आज का दिन शांति से भरा हो।","Om Sai Ram! May today be full of peace."],["साईं की कृपा हर घर में बरसे।","May Sai's grace rain on every home."],["जो माँगो प्रेम से, साईं देते हैं प्रेम से।","Ask with love, and Sai gives with love."],["सबुरी रखिए, सब अच्छा होगा।","Keep patience; all will be well."],["साईं नाम से मन को आराम।","Sai's name brings rest to the heart."]]},{"key":"guru","hi":"गुरु नानक देव जी / वाहेगुरु","en":"Guru Nanak Dev ji / Waheguru","site":"https://sgpc.net","lines":[["वाहेगुरु जी का खालसा, वाहेगुरु जी की फ़तह।","Waheguru ji ka Khalsa, Waheguru ji ki Fateh."],["नाम जपो, किरत करो, वंड छको।","Remember God, work honestly, share with others."],["सरबत दा भला।","Well-being for all."],["वाहेगुरु की मेहर से दिन चढ़दी कला में रहे।","By Waheguru's grace may the day be in high spirits."],["सेवा में ही सुख है।","In seva there is joy."],["एक ओंकार, सबमें एक ही ज्योत।","Ik Onkar: one light in all."],["गुरु की बानी, मन की शांति।","The Guru's word, the heart's peace."]]},{"key":"islam","hi":"अल्लाह / इस्लाम","en":"Allah / Islam","site":null,"lines":[["अल्लाह की रहमत आप पर बनी रहे।","May Allah's mercy be upon you."],["सब्र और शुक्र, यही ज़िंदगी की दौलत।","Patience and gratitude are life's wealth."],["आपकी दुआएँ घर की रौनक हैं।","Your prayers are the light of the home."],["अल्लाह सबको सेहत और सुकून दे।","May Allah give everyone health and peace."],["नेकी कर, दरिया में डाल।","Do good and let it go."],["हर दिन एक नेमत है।","Every day is a blessing."],["दिल साफ़, नीयत नेक, अल्लाह सब देख रहा है।","A clean heart, good intentions: Allah sees all."]]},{"key":"christian","hi":"प्रभु यीशु","en":"Lord Jesus","site":null,"lines":[["प्रभु यीशु का प्रेम आपके साथ रहे।","May the love of Jesus be with you."],["प्रेम धीरजवंत है, प्रेम कृपालु है।","Love is patient, love is kind."],["आज का दिन आशीषों से भरा हो।","May today be full of blessings."],["प्रभु हर दिन आपकी चरवाही करें।","May the Lord shepherd you every day."],["क्षमा और प्रेम, यही प्रभु की राह।","Forgiveness and love: the Lord's way."],["आप अकेले नहीं, प्रभु साथ हैं।","You are not alone; the Lord is with you."],["शांति आपके घर में बनी रहे।","May peace stay in your home."]]},{"key":"jain","hi":"भगवान महावीर / जैन","en":"Bhagwan Mahavir / Jain","site":null,"lines":[["जियो और जीने दो।","Live and let live."],["अहिंसा परमो धर्मः।","Non-violence is the highest duty."],["जय जिनेंद्र! आपका दिन शांत और मंगलमय हो।","Jai Jinendra! May your day be calm and blessed."],["क्षमा वीरस्य भूषणम्, क्षमा में ही बड़ाई है।","Forgiveness is the ornament of the brave."],["सादा जीवन, शांत मन।","A simple life, a calm mind."],["संयम में ही सुख है।","In self-restraint there is joy."],["सबके प्रति करुणा, यही महावीर का संदेश।","Compassion for all: Mahavir's message."]]},{"key":"buddha","hi":"भगवान बुद्ध","en":"Lord Buddha","site":null,"lines":[["मन शांत हो तो सब शांत है।","When the mind is calm, all is calm."],["बुद्धं शरणं गच्छामि।","I go to the Buddha for refuge."],["करुणा और मैत्री से दिन की शुरुआत।","Begin the day with compassion and kindness."],["आज का पल ही सबसे अनमोल है।","This moment is the most precious."],["क्रोध छोड़िए, शांति अपनाइए।","Let go of anger; embrace peace."],["सबका मंगल हो।","May all be well."],["धीरे-धीरे, सजगता से, यही राह है।","Slowly and mindfully: that is the way."]]}];
+const likes = (() => { try { return JSON.parse(store.get('gs_likes') || '{}'); } catch (e) { return {}; } })();
+const saveLikes = () => store.set('gs_likes', JSON.stringify(likes));
+const fs = $('#like-faith');
+fs.innerHTML = BHAKTI.map((f) => `<option value="${f.key}">${esc(T(f.hi, f.en))}</option>`).join('');
+function showLikes() {
+  $('#like-bhakti').checked = !!likes.bhakti; $('#like-news').checked = !!likes.news;
+  fs.classList.toggle('hidden', !likes.bhakti); if (likes.faith) fs.value = likes.faith;
+  // devotion: one line a day for their faith
+  const faith = BHAKTI.find((f) => f.key === (likes.faith || fs.value)) || BHAKTI[0];
+  $('#bhakti-card').classList.toggle('hidden', !likes.bhakti || !faith);
+  if (likes.bhakti && faith) {
+    const n = Math.floor((Date.now() + 330 * 60000) / 86400000) % faith.lines.length;
+    $('#bhakti-line').textContent = T(faith.lines[n][0], faith.lines[n][1]);
+    const a = $('#bhakti-site'); a.classList.toggle('hidden', !faith.site);
+    if (faith.site) { a.href = faith.site; a.textContent = T('🛕 दर्शन की जानकारी (आधिकारिक वेबसाइट)', '🛕 Darshan details (official website)'); }
+  }
+  $('#news-card').classList.toggle('hidden', !likes.news);
+  if (likes.news) loadNews();
+}
+async function loadNews() {
+  let j = null;
+  try { const c = JSON.parse(store.get('gs_news') || 'null'); if (c && Date.now() - c.t < 2 * 3600000) j = c.j; } catch (e) {}
+  if (!j) { try { j = await (await fetch(API_BASE + '/app-news')).json(); store.set('gs_news', JSON.stringify({ t: Date.now(), j })); } catch (e) { return; } }
+  $('#news-list').innerHTML = (j.items || []).map((x) => `<a class="news-item" href="${esc(x.link)}" target="_blank" rel="noopener">• ${esc(x.title)}</a>`).join('') || `<p class="muted">${T('अभी कोई ख़बर नहीं।', 'No news right now.')}</p>`;
+  $('#news-src').textContent = T('स्रोत: पत्र सूचना कार्यालय (PIB), भारत सरकार', 'Source: Press Information Bureau (PIB), Government of India');
+}
+$('#like-bhakti').addEventListener('change', (e) => { likes.bhakti = e.target.checked; if (!likes.faith) likes.faith = fs.value; saveLikes(); showLikes(); });
+$('#like-news').addEventListener('change', (e) => { likes.news = e.target.checked; saveLikes(); showLikes(); });
+fs.addEventListener('change', () => { likes.faith = fs.value; saveLikes(); showLikes(); });
+showLikes();
 
 // ---- special days ----
 const OCC_ICON = { birthday_self: '🎂', wedding: '💐', birthday: '🎈', remembrance: '🪔', other: '📅' };
