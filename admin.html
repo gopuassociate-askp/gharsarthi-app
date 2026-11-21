@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>SadaSneha Admin</title>
+<style>
+  :root { --bg: #fff8ee; --card: #fff; --ink: #3b1d0e; --muted: #8a5a3c; --line: #f1dcc4; --brand: #ea580c; --red: #b91c1c; --green: #15803d; }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 16px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif; background: var(--bg); color: var(--ink); }
+  header { background: linear-gradient(90deg, #c2410c, #f59e0b); color: #fff; padding: 12px 16px; display: flex; align-items: center; gap: 12px; position: sticky; top: 0; z-index: 2; }
+  header h1 { font-size: 19px; margin: 0; flex: 1; }
+  header button { background: rgba(255,255,255,.2); color: #fff; border: 1px solid rgba(255,255,255,.5); border-radius: 10px; padding: 6px 12px; font: inherit; cursor: pointer; }
+  main { max-width: 1100px; margin: 0 auto; padding: 16px; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 16px; margin-bottom: 16px; }
+  h2 { font-size: 18px; margin: 0 0 10px; }
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; }
+  .stat { background: #fff7ed; border-radius: 12px; padding: 10px 12px; }
+  .stat b { display: block; font-size: 26px; }
+  .stat span { color: var(--muted); font-size: 14px; }
+  .stat.alert { background: #fee2e2; color: var(--red); }
+  input, select { font: inherit; padding: 9px 10px; border: 1px solid #e5c9a8; border-radius: 10px; background: #fff; }
+  .btn { background: var(--brand); color: #fff; border: 0; border-radius: 10px; padding: 9px 14px; font: inherit; cursor: pointer; }
+  .btn.small { padding: 6px 10px; font-size: 14px; }
+  .muted { color: var(--muted); }
+  .err { color: var(--red); min-height: 1.4em; }
+  .tools { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 10px; }
+  .tools input { flex: 1; min-width: 180px; }
+  .fam { border: 1px solid var(--line); border-radius: 14px; padding: 12px; margin-bottom: 10px; }
+  .fam.urgent { border-color: var(--red); box-shadow: 0 0 0 2px #fecaca; }
+  .fam-top { display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; }
+  .fam-top b { font-size: 17px; }
+  .pill { font-size: 13px; padding: 2px 9px; border-radius: 99px; background: #fef3c7; }
+  .pill.Active { background: #dcfce7; color: var(--green); } .pill.New, .pill.Needs { background: #e0f2fe; }
+  .pill.Declined, .pill.Paused { background: #f3f4f6; } .pill.Test { background: #ede9fe; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 4px 16px; margin: 8px 0; font-size: 15px; }
+  .row-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  a { color: #c2410c; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { color: var(--muted); font-weight: 600; }
+  .tbl { overflow-x: auto; }
+  .no { color: var(--red); } .yes { color: var(--green); }
+  .hidden { display: none !important; }
+  .login { max-width: 420px; margin: 40px auto; }
+  .login input { width: 100%; margin: 8px 0; }
+</style>
+</head>
+<body>
+<header><h1>SadaSneha · Admin</h1><span id="when" class="muted" style="color:#fff7"></span><button id="refresh" class="hidden">Refresh</button><button id="logout" class="hidden">Log out</button></header>
+<main>
+  <section id="v-login" class="card login">
+    <h2>Founder login</h2>
+    <p class="muted">Enter the admin key you set in n8n (workflow "SadaSneha - admin", node "Admin key"). It is kept only in this browser tab and is forgotten when you close it.</p>
+    <input id="key" type="password" autocomplete="current-password" placeholder="Admin key">
+    <div id="login-err" class="err"></div>
+    <button class="btn" id="login-go">Open admin</button>
+  </section>
+
+  <section id="v-main" class="hidden">
+    <div class="card">
+      <div class="stats" id="stats"></div>
+    </div>
+    <div class="card">
+      <h2>Families</h2>
+      <div class="tools">
+        <input id="q" placeholder="Search name, code, phone, city…">
+        <select id="f-status"><option value="">All statuses</option></select>
+      </div>
+      <div id="fams"></div>
+    </div>
+    <div class="card">
+      <h2>Recent calls</h2>
+      <div class="tbl"><table><thead><tr><th>When (IST)</th><th>Elder</th><th>Call</th><th>Answered</th><th>Level</th><th>Said</th></tr></thead><tbody id="calls"></tbody></table></div>
+    </div>
+    <div class="card">
+      <h2>Recent messages and needs</h2>
+      <div class="tbl"><table><thead><tr><th>When (IST)</th><th>Elder</th><th>Direction</th><th>Level</th><th>Text</th><th>Seen by</th></tr></thead><tbody id="msgs"></tbody></table></div>
+    </div>
+    <div class="card">
+      <h2>Tools</h2>
+      <p><a href="https://gharsarthi.app.n8n.cloud" target="_blank" rel="noopener">n8n (workflows, data tables, executions)</a> ·
+        <a href="https://gharsarthi.app.n8n.cloud/webhook/health" target="_blank" rel="noopener">System health</a> ·
+        <a href="https://gharsarthi.app.n8n.cloud/form/ghar-sarthi-start-welcome" target="_blank" rel="noopener">Start a welcome call</a> ·
+        <a href="https://platform.bolna.ai" target="_blank" rel="noopener">Bolna (call logs)</a></p>
+    </div>
+  </section>
+</main>
+<script>
+const API = 'https://gharsarthi.app.n8n.cloud/webhook/';
+const STATUSES = ['New', 'Needs check', 'Verified', 'Active', 'Paused', 'Declined', 'Test'];
+const $ = (s) => document.querySelector(s);
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const ist = (iso) => iso ? new Date(iso).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }) : '—';
+const tel = (p) => p ? `<a href="tel:${esc(p)}">${esc(p)}</a>` : '—';
+let KEY = ''; let DATA = null;
+try { KEY = sessionStorage.getItem('adminKey') || ''; } catch (e) {}
+
+async function api(path, opts = {}) {
+  const r = await fetch(API + path, { ...opts, headers: { ...(opts.headers || {}), 'x-admin-key': KEY } });
+  const j = await r.json().catch(() => ({ ok: false, why: 'bad reply' }));
+  if (r.status === 401) throw Object.assign(new Error(j.why), { auth: true });
+  return j;
+}
+const WHY = { wrong: 'Wrong key.', locked: 'Too many wrong tries. Locked for an hour.', not_set: 'The admin key has not been set in n8n yet.' };
+
+async function load() {
+  try {
+    DATA = await api('admin-data');
+    $('#v-login').classList.add('hidden'); $('#v-main').classList.remove('hidden');
+    $('#refresh').classList.remove('hidden'); $('#logout').classList.remove('hidden');
+    $('#when').textContent = 'Updated ' + ist(DATA.at);
+    render();
+  } catch (e) {
+    if (e.auth) { logout(); $('#login-err').textContent = WHY[e.message] || 'Not allowed.'; }
+    else $('#when').textContent = 'Could not refresh (network).';
+  }
+}
+function logout() {
+  KEY = ''; try { sessionStorage.removeItem('adminKey'); } catch (e) {}
+  $('#v-main').classList.add('hidden'); $('#v-login').classList.remove('hidden');
+  $('#refresh').classList.add('hidden'); $('#logout').classList.add('hidden');
+}
+function render() {
+  const d = DATA;
+  const st = [['Families', d.total], ['Active', d.counts.Active], ['New', d.counts.New], ['Needs check', d.counts['Needs check']], ['Calls today', d.calls_today]];
+  $('#stats').innerHTML = st.map(([k, v]) => `<div class="stat"><b>${v ?? 0}</b><span>${k}</span></div>`).join('') +
+    `<div class="stat ${d.urgent_open ? 'alert' : ''}"><b>${d.urgent_open}</b><span>Urgent needs open</span></div>`;
+  const q = $('#q').value.trim().toLowerCase(); const fs = $('#f-status').value;
+  const list = d.families.filter((f) => (!fs || f.status === fs) && (!q || JSON.stringify(f).toLowerCase().includes(q)));
+  $('#fams').innerHTML = list.map((f) => `
+    <div class="fam ${f.urgent_open ? 'urgent' : ''}">
+      <div class="fam-top"><b>${esc(f.address_as || f.elder)}</b><span class="muted">${esc(f.elder)}${f.age ? ', ' + esc(f.age) : ''}</span>
+        <span class="pill ${esc(f.status.split(' ')[0])}">${esc(f.status)}</span><span class="muted">${esc(f.access_code)}</span>
+        ${f.urgent_open ? `<span class="pill" style="background:#fee2e2;color:#b91c1c">🚨 ${f.urgent_open} urgent open</span>` : ''}</div>
+      <div class="grid">
+        <div>📍 ${esc(f.city)}${f.state ? ', ' + esc(String(f.state).split(' / ').pop()) : ''}</div>
+        <div>🗣️ ${esc(String(f.language).split(' / ').pop())}</div>
+        <div>📞 Elder: ${tel(f.elder_phone)}</div>
+        <div>👤 ${esc(f.family_name)} (${esc(String(f.relation).split(' / ').pop())}): ${tel(f.family_phone)}</div>
+        <div>✉️ ${f.family_email ? `<a href="mailto:${esc(f.family_email)}">${esc(f.family_email)}</a>` : '—'}</div>
+        <div>📋 ${esc(String(f.plan).split(' / ').pop())}</div>
+        <div>🕑 Signed up ${ist(f.submitted_at)}</div>
+        <div>☎️ Last call: ${f.last_call ? `${ist(f.last_call.at)} · ${esc(f.last_call.checkin)} · ${f.last_call.answered ? '<span class="yes">answered</span>' : '<span class="no">missed</span>'}` : '—'}</div>
+        <div>Today: ${f.calls_today} calls${f.missed_today ? `, <span class="no">${f.missed_today} missed</span>` : ''} · open needs ${f.open_needs}</div>
+        ${f.care_hint ? `<div>⚠️ ${esc(f.care_hint)}</div>` : ''}${f.check_notes ? `<div>📝 ${esc(f.check_notes)}</div>` : ''}
+      </div>
+      <div class="row-actions">
+        <select data-code="${esc(f.access_code)}">${STATUSES.map((s) => `<option${s === f.status ? ' selected' : ''}>${s}</option>`).join('')}</select>
+        <button class="btn small" data-save="${esc(f.access_code)}">Save status</button>
+        <a href="./?code=${encodeURIComponent(f.access_code)}" target="_blank" rel="noopener">View as family ↗</a>
+        <span class="muted" id="msg-${esc(f.access_code)}"></span>
+      </div>
+    </div>`).join('') || '<p class="muted">No families match.</p>';
+  $('#calls').innerHTML = d.recent_calls.map((c) => `<tr><td>${ist(c.at)}</td><td>${esc(c.elder)}</td><td>${esc(c.checkin)}</td><td class="${c.answered ? 'yes' : 'no'}">${c.answered ? 'yes' : 'no'}</td><td>${esc(c.level)}</td><td>${esc(c.reply)}</td></tr>`).join('') || '<tr><td colspan="6" class="muted">No calls yet.</td></tr>';
+  $('#msgs').innerHTML = d.recent_messages.map((m) => `<tr><td>${ist(m.at)}</td><td>${esc(m.elder)}</td><td>${m.direction === 'to_family' ? 'elder → family' : 'family → elder'}</td><td>${esc(m.level)}</td><td>${esc(m.text)}</td><td>${esc(m.seen_by) || (m.direction === 'to_family' ? '<span class="no">not yet</span>' : '')}</td></tr>`).join('') || '<tr><td colspan="6" class="muted">No messages yet.</td></tr>';
+}
+$('#f-status').innerHTML += STATUSES.map((s) => `<option>${s}</option>`).join('');
+$('#q').addEventListener('input', () => DATA && render());
+$('#f-status').addEventListener('change', () => DATA && render());
+$('#fams').addEventListener('click', async (e) => {
+  const code = e.target.dataset.save; if (!code) return;
+  const status = document.querySelector(`select[data-code="${code}"]`).value;
+  const out = document.getElementById('msg-' + code); out.textContent = 'Saving…';
+  try {
+    const r = await api('admin-status', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ access_code: code, status }) });
+    out.textContent = r.ok ? 'Saved ✓' : 'Not saved: ' + r.why;
+    if (r.ok) load();
+  } catch (err) { out.textContent = err.auth ? 'Logged out.' : 'Network error.'; if (err.auth) logout(); }
+});
+$('#login-go').addEventListener('click', () => {
+  KEY = $('#key').value.trim(); $('#login-err').textContent = '';
+  if (!KEY) return;
+  try { sessionStorage.setItem('adminKey', KEY); } catch (e) {}
+  $('#key').value = ''; load();
+});
+$('#key').addEventListener('keydown', (e) => { if (e.key === 'Enter') $('#login-go').click(); });
+$('#logout').addEventListener('click', logout);
+$('#refresh').addEventListener('click', load);
+setInterval(() => { if (KEY && !document.hidden) load(); }, 60000);
+if (KEY) load();
+</script>
+</body>
+</html>
