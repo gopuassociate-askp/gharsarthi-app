@@ -259,6 +259,14 @@
       <div id="up-err" class="err"></div>
     </div>
 
+    <div class="card" id="invite-card">
+      <h2>👨‍👩‍👧 <span data-en="Add your family">परिवार को जोड़ें</span></h2>
+      <p class="muted"><span data-en="Send this app to brothers, sisters and grandchildren. One tap opens it, already logged in. Share it only with family.">भाई-बहनों और बच्चों को यह ऐप भेजिए। एक बार दबाते ही खुल जाएगा, कोड डालने की ज़रूरत नहीं। सिर्फ़ परिवार के साथ साझा करें।</span></p>
+      <button class="btn primary" id="invite-wa" type="button">💬 <span data-en="Send on WhatsApp">WhatsApp पर भेजें</span></button>
+      <button class="btn secondary" id="invite-copy" type="button">🔗 <span data-en="Copy link">लिंक कॉपी करें</span></button>
+      <div id="invite-msg" class="err"></div>
+    </div>
+
     <div class="card" id="occ-card">
       <h2>🎉 ख़ास दिन / Special days</h2>
       <p class="muted"><span data-en="Birthdays, wedding anniversary, children's and grandchildren's birthdays, days of remembrance. Sneha greets lovingly on the day (on a remembrance day she only remembers), and you get a reminder the day before.">जन्मदिन, शादी की सालगिरह, बच्चों-पोतों के जन्मदिन, पुण्यतिथि। स्नेहा उस दिन प्यार से बधाई देगी (पुण्यतिथि पर बस याद करेगी), और एक दिन पहले आपको याद दिलाया जाएगा।</span><br>Sneha greets on the day; you get a reminder the day before.</p>
@@ -944,6 +952,18 @@ function showToday(f, occasions, calls) {
   $('#td-calls').innerHTML = rows.length ? rows.join('') : `<p class="muted">${f.status === 'Active' ? T('आज अभी कोई कॉल नहीं हुई।', 'No calls yet today.') : T('स्नेहा की रोज़ की कॉल शुरू होने पर यहाँ दिखेंगी।', 'Daily calls will show here once they start.')}</p>`;
 }
 
+// ---- invite family: a one-tap link with the family's code ----
+function inviteLink() { return location.origin + location.pathname + '?code=' + encodeURIComponent(store.get('gs_code') || ''); }
+$('#invite-wa').addEventListener('click', () => {
+  const who = ($('#h-elder').textContent || '').trim();
+  const text = T(`${who} की सेवा "घर सारथी" ऐप में देखिए – स्नेहा रोज़ उनका हालचाल पूछती है। बस यह लिंक खोलिए: `, `See ${who}'s care in the Ghar Sarthi app – Sneha checks on them every day. Just open this link: `) + inviteLink();
+  window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank');
+});
+$('#invite-copy').addEventListener('click', async () => {
+  try { await navigator.clipboard.writeText(inviteLink()); $('#invite-msg').textContent = T('लिंक कॉपी हो गया ✓', 'Link copied ✓'); }
+  catch (e) { $('#invite-msg').textContent = inviteLink(); }
+});
+
 // ---- special days ----
 const OCC_ICON = { birthday_self: '🎂', wedding: '💐', birthday: '🎈', remembrance: '🪔', other: '📅' };
 const MONTH_HI = LANG === 'en' ? ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'] : ['जनवरी', 'फ़रवरी', 'मार्च', 'अप्रैल', 'मई', 'जून', 'जुलाई', 'अगस्त', 'सितंबर', 'अक्टूबर', 'नवंबर', 'दिसंबर'];
@@ -1006,7 +1026,7 @@ $('#lang-btn').addEventListener('click', () => { try { localStorage.setItem('gs_
 
 buildForm();
 const params = new URLSearchParams(location.search);
-if (params.get('code')) store.set('gs_code', params.get('code').toUpperCase());
+if (params.get('code')) { store.set('gs_code', params.get('code').toUpperCase()); try { history.replaceState(null, '', location.pathname); } catch (e) {} }
 show(params.get('ack') ? 'seen' : store.get('gs_code') ? 'home' : (params.get('view') === 'signup' ? 'signup' : 'welcome'));
 </script>
 </body>
