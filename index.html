@@ -90,6 +90,7 @@
   .clip video { width: 100%; max-width: 360px; aspect-ratio: 1; border-radius: 18px; display: block; margin: 10px auto 0; background: #fff1e0; }
   .pick { display: flex; gap: 6px; }
   .pick select { flex: 1; min-width: 0; }
+  .g-btn { display: flex; justify-content: center; min-height: 48px; margin: 14px 0 6px; }
   .clips { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; }
   .clips figure { margin: 0; text-align: center; font-size: 15px; color: #9a3412; }
   .clips video { width: 100%; aspect-ratio: 1; border-radius: 14px; background: #fff1e0; display: block; margin-bottom: 4px; }
@@ -179,12 +180,31 @@
       <h2><span data-en="Namaste, I am Sneha 🙏">नमस्ते, मैं स्नेहा हूँ 🙏</span></h2>
       <p><span data-en="I call your loved ones every day to lovingly ask how they are, remind them about meals and medicines, and listen to their old stories – and if anything seems wrong, I tell you at once.">मैं रोज़ आपके अपनों को फ़ोन करके प्यार से हालचाल पूछती हूँ, खाने और दवाई की याद दिलाती हूँ, उनकी पुरानी बातें सुनती हूँ – और कुछ भी गड़बड़ लगे तो तुरंत आपको बताती हूँ।</span></p>
       <p class="muted">I call your loved ones every day, remind them about meals and medicines, listen to their stories, and tell you at once if anything seems wrong.</p>
-      <button class="btn primary" data-go="signup">स्नेहा से जुड़ें / Sign up</button>
+      <div id="g-btn" class="g-btn"></div>
+      <button class="btn primary hidden" id="g-preview" type="button">G&nbsp; Google से आगे बढ़ें / Continue with Google</button>
+      <p id="g-msg" class="err"></p>
+      <p class="muted" style="font-size:15px"><span data-en="One tap with your Google account. No password, no typing.">अपने Google खाते से एक टैप। न पासवर्ड, न टाइपिंग।</span></p>
       <button class="btn secondary" data-go="login">मेरे पास कोड है / I have a code</button>
     </div>
   </section>
 
   <!-- Enter code -->
+  <section id="v-perm" class="view hidden">
+    <div class="card sneha-hero">
+      <figure class="sneha-face"><img src="sneha.jpg" width="120" height="120" alt="स्नेहा / Sneha" style="width:120px;height:120px"></figure>
+      <h2>📹 <span data-en="To talk to Sneha on video">स्नेहा से वीडियो पर बात करने के लिए</span></h2>
+      <p><span data-en="Sneha needs your camera and microphone so she can see and hear you when you talk to her.">स्नेहा को आपका कैमरा और माइक चाहिए, ताकि बात करते समय वह आपको देख-सुन सके।</span></p>
+      <ul class="plain" style="text-align:left">
+        <li>🔒 <span data-en="Video is never recorded or stored.">वीडियो कभी रिकॉर्ड या सेव नहीं होगा।</span></li>
+        <li>👆 <span data-en="The camera turns on only when you press the 📹 button.">कैमरा सिर्फ़ तभी चालू होगा जब आप 📹 बटन दबाएँगे।</span></li>
+        <li>✋ <span data-en="You can switch it off any time.">आप इसे कभी भी बंद कर सकते हैं।</span></li>
+      </ul>
+      <button class="btn primary" id="perm-yes" type="button">अभी अनुमति दें / Allow now</button>
+      <button class="btn secondary" id="perm-later" type="button">बाद में / Later</button>
+      <p id="perm-msg" class="muted"></p>
+    </div>
+  </section>
+
   <section id="v-login" class="view hidden">
     <div class="card">
       <h2>अपना कोड डालें / Enter your code</h2>
@@ -649,6 +669,7 @@ function show(view) {
   window.scrollTo(0, 0);
   if (view === 'home') loadStatus();
   if (view === 'meds') loadMeds();
+  if (view === 'signup') applyGoogle();
 }
 // A short buzz and a visible press on every button, so elders know the tap worked.
 document.addEventListener('pointerdown', (e) => {
@@ -1282,6 +1303,57 @@ $('#seen-btn').addEventListener('click', async () => {
 if (LANG === 'en') { document.documentElement.lang = 'en'; document.querySelectorAll('[data-en]').forEach((el) => { el.textContent = el.dataset.en; }); }
 $('#lang-btn').textContent = LANG === 'en' ? 'हिंदी' : 'English';
 $('#lang-btn').addEventListener('click', () => { try { localStorage.setItem('gs_lang', LANG === 'en' ? 'hi' : 'en'); } catch (e) {} location.reload(); });
+
+// ---- Continue with Google ----
+const GOOGLE_CLIENT_ID = '752490424522-aqvg18ctdnkmlgg6o831181d2vlshq2h.apps.googleusercontent.com';
+API.google = API_BASE + '/app-google';
+// fill and lock the Gmail on the sign-up form when they came through Google
+function applyGoogle() {
+  const em = store.get('gs_g_email'); const nm = store.get('gs_g_name');
+  const e = $('#f-family_email'), n = $('#f-family_name');
+  if (e && em) { e.value = em; e.readOnly = true; e.style.background = '#f3f4f6'; e.title = 'Google'; }
+  if (n && nm && !n.value) n.value = nm;
+}
+// after login: ask once for camera and microphone (Allow now / Later), then go on
+let afterPerm = 'home';
+function askPermsThen(next) {
+  afterPerm = next;
+  if (store.get('gs_media')) return show(next);
+  show('perm');
+}
+$('#perm-yes').addEventListener('click', async () => {
+  try {
+    const st = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+    st.getTracks().forEach((t) => t.stop());   // only asking; nothing is kept on
+    store.set('gs_media', 'granted');
+  } catch (e) { store.set('gs_media', 'later'); }
+  show(afterPerm);
+});
+$('#perm-later').addEventListener('click', () => { store.set('gs_media', 'later'); show(afterPerm); });
+async function onGoogle(credential) {
+  $('#g-msg').textContent = 'रुकिए… / Please wait…';
+  try {
+    const j = await (await fetch(API.google, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ credential }) })).json();
+    if (!j.ok) { $('#g-msg').textContent = 'Google से लॉगिन नहीं हो पाया, फिर कोशिश करें / Google login failed, please try again'; return; }
+    $('#g-msg').textContent = '';
+    store.set('gs_g_email', j.email || ''); store.set('gs_g_name', j.name || '');
+    if (j.code) { store.set('gs_code', j.code); return askPermsThen('home'); }
+    askPermsThen('signup');
+  } catch (e) { $('#g-msg').textContent = 'इंटरनेट नहीं / Offline'; }
+}
+if (window.__PREVIEW) {
+  // preview: a pretend Google account, so the founder sees the whole journey
+  $('#g-preview').classList.remove('hidden');
+  $('#g-preview').addEventListener('click', () => { store.set('gs_g_email', 'preview.family@gmail.com'); store.set('gs_g_name', 'Preview Family'); askPermsThen('signup'); });
+} else {
+  const gs = document.createElement('script'); gs.src = 'https://accounts.google.com/gsi/client'; gs.async = true;
+  gs.onload = () => {
+    google.accounts.id.initialize({ client_id: GOOGLE_CLIENT_ID, callback: (r) => onGoogle(r.credential), ux_mode: 'popup' });
+    google.accounts.id.renderButton($('#g-btn'), { theme: 'filled_blue', size: 'large', shape: 'pill', text: 'continue_with', width: 300, locale: LANG === 'en' ? 'en' : 'hi' });
+  };
+  gs.onerror = () => { $('#g-msg').textContent = 'Google बटन लोड नहीं हुआ; "मेरे पास कोड है" से आगे बढ़ें / Google did not load; use "I have a code"'; };
+  document.head.appendChild(gs);
+}
 
 buildForm();
 const params = new URLSearchParams(location.search);
