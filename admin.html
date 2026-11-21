@@ -45,6 +45,13 @@
   .hidden { display: none !important; }
   .login { max-width: 420px; margin: 40px auto; }
   .login input { width: 100%; margin: 8px 0; }
+  .tabs { display: flex; gap: 8px; margin-top: 12px; }
+  .tabs button { font: inherit; padding: 8px 14px; border-radius: 10px; border: 1px solid #e5c9a8; background: #fff; cursor: pointer; }
+  .tabs button.on { background: var(--brand); color: #fff; border-color: var(--brand); }
+  .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; margin-bottom: 12px; }
+  .form-grid label { display: flex; flex-direction: column; gap: 4px; font-size: 14px; color: var(--muted); }
+  .form-grid .wide { grid-column: 1 / -1; }
+  .money { text-align: right; white-space: nowrap; }
 </style>
 </head>
 <body>
@@ -62,7 +69,41 @@
     <div class="card">
       <div class="stats" id="stats"></div>
       <p style="margin:12px 0 0"><a class="btn" style="display:inline-block;text-decoration:none" href="./?demo=1" target="_blank" rel="noopener">🧪 Open demo family</a></p>
+      <div class="tabs"><button data-tab="ops" class="on">Families &amp; calls</button><button data-tab="acc">Accounts</button></div>
     </div>
+    <div id="t-acc" class="hidden">
+      <div class="card"><h2>This financial year <span class="muted" id="acc-fy"></span></h2><div class="stats" id="acc-stats"></div><p class="muted" id="acc-gst"></p></div>
+      <div class="card"><h2>Payments due</h2><div class="tbl"><table><thead><tr><th>Elder</th><th>Family</th><th>Plan</th><th>Due</th><th>State</th></tr></thead><tbody id="acc-dues"></tbody></table></div></div>
+      <div class="card"><h2>Record a payment</h2>
+        <div class="form-grid">
+          <label>Family<select id="p-code"></select></label>
+          <label>Plan<select id="p-plan"></select></label>
+          <label>Cycle<select id="p-cycle"></select></label>
+          <label>Amount (₹, GST included)<input id="p-amount" type="number" min="1" step="1"></label>
+          <label>Paid on<input id="p-date" type="date"></label>
+          <label>Method<select id="p-method"><option>UPI</option><option>Bank transfer</option><option>Cash</option><option>Card</option><option>Cheque</option></select></label>
+          <label class="wide">Note<input id="p-note" placeholder="UPI ref, receipt no…"></label>
+        </div>
+        <button class="btn" id="p-save">Save payment</button> <span id="p-msg" class="muted"></span></div>
+      <div class="card"><h2>Record an expense</h2>
+        <div class="form-grid">
+          <label>Category<select id="e-cat"></select></label>
+          <label>Amount (₹, total paid)<input id="e-amount" type="number" min="1" step="0.01"></label>
+          <label>GST in it (₹, from invoice)<input id="e-gst" type="number" min="0" step="0.01" value="0"></label>
+          <label>Date<input id="e-date" type="date"></label>
+          <label>Vendor<input id="e-vendor" placeholder="Bolna, Hostinger, staff name…"></label>
+          <label>For one family (optional)<select id="e-code"><option value="">— all / overhead —</option></select></label>
+          <label class="wide">Note<input id="e-note"></label>
+        </div>
+        <button class="btn" id="e-save">Save expense</button> <span id="e-msg" class="muted"></span></div>
+      <div class="card"><h2>Profit and loss by month</h2><div class="tbl"><table><thead><tr><th>Month</th><th>Received</th><th>GST collected</th><th>Income</th><th>Expenses</th><th>GST paid (credit)</th><th>GST payable</th><th>Profit</th></tr></thead><tbody id="acc-months"></tbody></table></div>
+        <p class="muted">Income = received − GST collected. Profit = income − expenses (without their GST). Income tax is on profit; GST payable = GST collected − GST credit.</p></div>
+      <div class="card"><h2>Price list (GST included)</h2><div class="tbl"><table><thead><tr><th>Plan</th><th>Monthly</th><th>2 months</th><th>Quarterly</th><th>Half-yearly</th><th>Yearly</th></tr></thead><tbody id="acc-prices"></tbody></table></div>
+        <p class="muted">Members by plan: <span id="acc-members"></span></p></div>
+      <div class="card"><h2>Recent payments</h2><div class="tbl"><table><thead><tr><th>Paid on</th><th>Elder</th><th>Amount</th><th>Plan</th><th>Cycle</th><th>Covers</th><th>Method</th><th>Note</th></tr></thead><tbody id="acc-pays"></tbody></table></div></div>
+      <div class="card"><h2>Recent expenses</h2><div class="tbl"><table><thead><tr><th>Date</th><th>Category</th><th>Vendor</th><th>Amount</th><th>GST</th><th>Family</th><th>Note</th></tr></thead><tbody id="acc-exps"></tbody></table></div></div>
+    </div>
+    <div id="t-ops">
     <div class="card">
       <h2>Families</h2>
       <div class="tools">
@@ -78,6 +119,7 @@
     <div class="card">
       <h2>Recent messages and needs</h2>
       <div class="tbl"><table><thead><tr><th>When (IST)</th><th>Elder</th><th>Direction</th><th>Level</th><th>Text</th><th>Seen by</th></tr></thead><tbody id="msgs"></tbody></table></div>
+    </div>
     </div>
     <div class="card">
       <h2>Tools</h2>
@@ -159,6 +201,70 @@ function render() {
   $('#calls').innerHTML = d.recent_calls.map((c) => `<tr><td>${ist(c.at)}</td><td>${esc(c.elder)}</td><td>${esc(c.checkin)}</td><td class="${c.answered ? 'yes' : 'no'}">${c.answered ? 'yes' : 'no'}</td><td>${esc(c.level)}</td><td>${esc(c.reply)}</td></tr>`).join('') || '<tr><td colspan="6" class="muted">No calls yet.</td></tr>';
   $('#msgs').innerHTML = d.recent_messages.map((m) => `<tr><td>${ist(m.at)}</td><td>${esc(m.elder)}</td><td>${m.direction === 'to_family' ? 'elder → family' : 'family → elder'}</td><td>${esc(m.level)}</td><td>${esc(m.text)}</td><td>${esc(m.seen_by) || (m.direction === 'to_family' ? '<span class="no">not yet</span>' : '')}</td></tr>`).join('') || '<tr><td colspan="6" class="muted">No messages yet.</td></tr>';
 }
+
+// ---- accounts ----
+let ACC = null;
+const rs = (x) => '₹' + Number(x || 0).toLocaleString('en-IN', { maximumFractionDigits: 2 });
+const istToday = () => new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Kolkata' }).format(new Date());
+document.querySelectorAll('.tabs button').forEach((b) => b.addEventListener('click', () => {
+  document.querySelectorAll('.tabs button').forEach((x) => x.classList.toggle('on', x === b));
+  $('#t-ops').classList.toggle('hidden', b.dataset.tab !== 'ops'); $('#t-acc').classList.toggle('hidden', b.dataset.tab !== 'acc');
+  if (b.dataset.tab === 'acc') loadAccounts();
+}));
+async function loadAccounts() {
+  try { ACC = await api('admin-accounts'); renderAccounts(); }
+  catch (e) { if (e.auth) logout(); }
+}
+function fillForms() {
+  if (!ACC || $('#p-plan').options.length) return;
+  $('#p-plan').innerHTML = ACC.plans.map((p) => `<option value="${p.key}">${esc(p.en)} (${rs(p.per_month)}/month)</option>`).join('');
+  $('#p-cycle').innerHTML = ACC.cycles.map((c) => `<option value="${c.key}">${esc(c.en)}${c.discount ? ' (−' + Math.round(c.discount * 100) + '%)' : ''}</option>`).join('');
+  $('#e-cat').innerHTML = ACC.categories.map((c) => `<option>${esc(c)}</option>`).join('');
+  $('#p-date').value = $('#e-date').value = istToday();
+  const suggest = () => { const row = ACC.price_list.find((x) => x.plan === (ACC.plans.find((p) => p.key === $('#p-plan').value) || {}).en);
+    const pr = row && row.prices.find((x) => x.cycle === $('#p-cycle').value); if (pr) $('#p-amount').value = pr.total; };
+  $('#p-plan').addEventListener('change', suggest); $('#p-cycle').addEventListener('change', suggest); suggest();
+}
+function renderAccounts() {
+  const a = ACC; fillForms();
+  const fams = (DATA ? DATA.families : []).filter((f) => f.status !== 'Test');
+  const opts = fams.map((f) => `<option value="${esc(f.access_code)}">${esc(f.address_as || f.elder)} · ${esc(f.family_name)} · ${esc(f.access_code)}</option>`).join('');
+  $('#p-code').innerHTML = opts; $('#e-code').innerHTML = '<option value="">— all / overhead —</option>' + opts;
+  $('#acc-fy').textContent = `(from ${a.ytd.from})`;
+  const y = a.ytd;
+  $('#acc-stats').innerHTML = [['Received', y.income], ['Income', y.net_income], ['Expenses', y.expenses], ['Profit', y.profit]]
+    .map(([k, v]) => `<div class="stat ${k === 'Profit' && v < 0 ? 'alert' : ''}"><b>${rs(v)}</b><span>${k}</span></div>`).join('') +
+    (a.gst_registered ? `<div class="stat"><b>${rs(y.gst_payable)}</b><span>GST payable</span></div>` : '');
+  $('#acc-gst').textContent = (a.gst_registered ? `GST registered: ${Math.round(a.gst_rate * 100)}% is taken out of every fee.` : 'Not GST-registered: the full fee is income.') + (a.gst_threshold_note ? ' ⚠️ ' + a.gst_threshold_note : '');
+  $('#acc-dues').innerHTML = a.dues.map((d) => `<tr><td>${esc(d.elder)}</td><td>${esc(d.family)} ${d.phone ? `<a href="tel:${esc(d.phone)}">📞</a>` : ''}</td><td>${esc(d.plan)}</td><td>${esc(d.due || '—')}</td><td class="${d.state === 'overdue' ? 'no' : ''}">${esc(d.state)}</td></tr>`).join('') || '<tr><td colspan="5" class="muted">Nothing due in the next 7 days.</td></tr>';
+  $('#acc-months').innerHTML = a.months.map((m) => `<tr><td>${m.month}</td><td class="money">${rs(m.income)}</td><td class="money">${rs(m.gst_collected)}</td><td class="money">${rs(m.net_income)}</td><td class="money">${rs(m.expenses)}</td><td class="money">${rs(m.gst_paid)}</td><td class="money">${rs(m.gst_payable)}</td><td class="money ${m.profit < 0 ? 'no' : 'yes'}">${rs(m.profit)}</td></tr>`).join('') || '<tr><td colspan="8" class="muted">No payments or expenses yet.</td></tr>';
+  $('#acc-prices').innerHTML = a.price_list.map((r) => `<tr><td>${esc(r.plan)}</td>${r.prices.map((p) => `<td class="money">${rs(p.total)}</td>`).join('')}</tr>`).join('');
+  $('#acc-members').textContent = Object.entries(a.members_by_plan).map(([k, v]) => `${k}: ${v}`).join(' · ') || 'none yet';
+  $('#acc-pays').innerHTML = a.recent_payments.map((p) => `<tr><td>${esc(p.paid_on)}</td><td>${esc(p.elder)}</td><td class="money">${rs(p.amount)}</td><td>${esc(p.plan || '')}</td><td>${esc(p.cycle || '')}</td><td>${esc(p.period_from || '')}${p.period_to ? ' → ' + esc(p.period_to) : ''}</td><td>${esc(p.method || '')}</td><td>${esc(p.note || '')}</td></tr>`).join('') || '<tr><td colspan="8" class="muted">No payments yet.</td></tr>';
+  $('#acc-exps').innerHTML = a.recent_expenses.map((e) => `<tr><td>${esc(e.spent_on)}</td><td>${esc(e.category)}</td><td>${esc(e.vendor || '')}</td><td class="money">${rs(e.amount)}</td><td class="money">${rs(e.gst_paid)}</td><td>${esc(e.access_code || '')}</td><td>${esc(e.note || '')}</td></tr>`).join('') || '<tr><td colspan="7" class="muted">No expenses yet.</td></tr>';
+}
+const WHY_ACC = { code: 'Choose a family.', amount: 'Check the amount.', cycle: 'Choose a cycle.', category: 'Choose a category.' };
+$('#p-save').addEventListener('click', async () => {
+  $('#p-msg').textContent = 'Saving…';
+  try {
+    const r = await api('admin-payment', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({
+      access_code: $('#p-code').value, plan: $('#p-plan').value, cycle: $('#p-cycle').value, amount: Number($('#p-amount').value),
+      paid_on: $('#p-date').value, method: $('#p-method').value, note: $('#p-note').value }) });
+    $('#p-msg').textContent = r.ok ? `Saved ✓ Next payment due ${r.next_payment}` : 'Not saved: ' + (WHY_ACC[r.why] || r.why);
+    if (r.ok) { $('#p-note').value = ''; loadAccounts(); load(); }
+  } catch (e) { $('#p-msg').textContent = e.auth ? 'Logged out.' : 'Network error.'; if (e.auth) logout(); }
+});
+$('#e-save').addEventListener('click', async () => {
+  $('#e-msg').textContent = 'Saving…';
+  try {
+    const r = await api('admin-expense', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({
+      category: $('#e-cat').value, amount: Number($('#e-amount').value), gst_paid: Number($('#e-gst').value), spent_on: $('#e-date').value,
+      vendor: $('#e-vendor').value, access_code: $('#e-code').value, note: $('#e-note').value }) });
+    $('#e-msg').textContent = r.ok ? 'Saved ✓' : 'Not saved: ' + (WHY_ACC[r.why] || r.why);
+    if (r.ok) { $('#e-amount').value = ''; $('#e-gst').value = '0'; $('#e-note').value = ''; $('#e-vendor').value = ''; loadAccounts(); }
+  } catch (e) { $('#e-msg').textContent = e.auth ? 'Logged out.' : 'Network error.'; if (e.auth) logout(); }
+});
+
 $('#f-status').innerHTML += STATUSES.map((s) => `<option>${s}</option>`).join('');
 $('#q').addEventListener('input', () => DATA && render());
 $('#f-status').addEventListener('change', () => DATA && render());
