@@ -273,11 +273,21 @@
       <p class="muted" id="news-src"></p>
     </div>
 
+    <div class="card hidden" id="radio-card">
+      <h2>📻 <span data-en="Radio">रेडियो</span></h2>
+      <p class="muted"><span data-en="All India Radio's 240+ stations live, including Vividh Bharati and your state's own station, on Prasar Bharati's official NewsOnAir website and app.">आकाशवाणी के 240 से ज़्यादा स्टेशन लाइव: विविध भारती, समाचार और आपके राज्य का अपना स्टेशन, प्रसार भारती की आधिकारिक NewsOnAir वेबसाइट और ऐप पर।</span></p>
+      <a class="btn primary" href="https://www.newsonair.gov.in/" target="_blank" rel="noopener">📻 <span data-en="Listen to All India Radio (website)">आकाशवाणी सुनें (वेबसाइट)</span></a>
+      <a class="btn secondary" id="radio-app" href="https://play.google.com/store/search?q=NewsOnAir&c=apps" target="_blank" rel="noopener">📲 <span data-en="Get the NewsOnAir app">NewsOnAir ऐप लें</span></a>
+      <a class="btn secondary" href="https://www.radiomirchi.com/" target="_blank" rel="noopener">🎶 <span data-en="Radio Mirchi (FM)">रेडियो मिर्ची (FM)</span></a>
+      <p class="muted"><span data-en="Tip: in the NewsOnAir app, tap Live Radio and choose Vividh Bharati for old songs.">सुझाव: NewsOnAir ऐप में "Live Radio" दबाइए और पुराने गानों के लिए "विविध भारती" चुनिए।</span></p>
+    </div>
+
     <div class="card" id="likes-card">
       <h2>💛 <span data-en="What do you like?">मेरी पसंद</span></h2>
       <p class="muted"><span data-en="Choose what you would like to see in the app every day.">ऐप में रोज़ क्या देखना पसंद करेंगे? चुनिए।</span></p>
       <label class="check"><input type="checkbox" id="like-bhakti"> <span>🙏 <span data-en="Devotion: a thought for the day">भक्ति: रोज़ एक विचार</span></span></label>
       <select id="like-faith" class="hidden"></select>
+      <label class="check"><input type="checkbox" id="like-radio"> <span>📻 <span data-en="Radio: All India Radio, Vividh Bharati, FM">रेडियो: आकाशवाणी, विविध भारती, FM</span></span></label>
       <label class="check"><input type="checkbox" id="like-news"> <span>📰 <span data-en="News: government updates (PIB)">ख़बरें: सरकार की ताज़ा ख़बरें (PIB)</span></span></label>
       <p class="muted"><span data-en="Weather is always shown. Cricket scores are coming soon.">मौसम हमेशा दिखता है। क्रिकेट स्कोर जल्द आएगा।</span></p>
     </div>
@@ -1006,6 +1016,7 @@ function showLikes() {
     if (faith.site) { a.href = faith.site; a.textContent = T('🛕 दर्शन की जानकारी (आधिकारिक वेबसाइट)', '🛕 Darshan details (official website)'); }
   }
   $('#news-card').classList.toggle('hidden', !likes.news);
+  $('#like-radio').checked = !!likes.radio; $('#radio-card').classList.toggle('hidden', !likes.radio);
   if (likes.news) loadNews();
 }
 async function loadNews() {
@@ -1017,6 +1028,9 @@ async function loadNews() {
 }
 $('#like-bhakti').addEventListener('change', (e) => { likes.bhakti = e.target.checked; if (!likes.faith) likes.faith = fs.value; saveLikes(); showLikes(); });
 $('#like-news').addEventListener('change', (e) => { likes.news = e.target.checked; saveLikes(); showLikes(); });
+$('#like-radio').addEventListener('change', (e) => { likes.radio = e.target.checked; saveLikes(); showLikes(); });
+// iPhone: the App Store page of the NewsOnAir app
+if (/iPhone|iPad|iPod/.test(navigator.userAgent)) $('#radio-app').href = 'https://apps.apple.com/in/app/newsonair/id1450030867';
 fs.addEventListener('change', () => { likes.faith = fs.value; saveLikes(); showLikes(); });
 showLikes();
 
