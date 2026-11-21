@@ -88,6 +88,8 @@
   .sneha-intro img { width: 96px; height: 96px; border-radius: 50%; object-fit: cover; flex: none; border: 3px solid #fff; box-shadow: 0 0 0 3px #f59e0b; }
   .sneha-intro h2 { margin: 0 0 4px; }
   .clip video { width: 100%; max-width: 360px; aspect-ratio: 1; border-radius: 18px; display: block; margin: 10px auto 0; background: #fff1e0; }
+  .pick { display: flex; gap: 6px; }
+  .pick select { flex: 1; min-width: 0; }
   .clips { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; }
   .clips figure { margin: 0; text-align: center; font-size: 15px; color: #9a3412; }
   .clips video { width: 100%; aspect-ratio: 1; border-radius: 14px; background: #fff1e0; display: block; margin-bottom: 4px; }
@@ -568,6 +570,55 @@ const DEMO_CODE = 'GS-DEMO';
     document.body.prepend(bar);
   });
 })();
+// ---- dropdowns for dates and times (no typing of / . : AM PM) ----
+const PICK_MONTHS = ['जनवरी / Jan', 'फ़रवरी / Feb', 'मार्च / Mar', 'अप्रैल / Apr', 'मई / May', 'जून / Jun', 'जुलाई / Jul', 'अगस्त / Aug', 'सितंबर / Sep', 'अक्टूबर / Oct', 'नवंबर / Nov', 'दिसंबर / Dec'];
+const opt = (v, t, sel) => `<option value="${v}"${sel ? ' selected' : ''}>${t}</option>`;
+const pad2 = (n) => String(n).padStart(2, '0');
+// A time: hour, minute, AM/PM -> "9:30 AM" in the hidden input
+function timePick(hidden) {
+  const box = document.createElement('div'); box.className = 'pick';
+  box.innerHTML = `<select aria-label="घंटा / Hour">${opt('', 'घंटा / Hour')}${[...Array(12)].map((_, i) => opt(i + 1, i + 1)).join('')}</select>` +
+    `<select aria-label="मिनट / Minute">${['00', '15', '30', '45'].map((m) => opt(m, m)).join('')}</select>` +
+    `<select aria-label="AM / PM">${opt('AM', 'AM')}${opt('PM', 'PM')}</select>`;
+  const [h, m, ap] = box.querySelectorAll('select');
+  const sync = () => { hidden.value = h.value ? `${h.value}:${m.value} ${ap.value}` : ''; };
+  box.addEventListener('change', sync);
+  const ph = /(\d{1,2}):(\d{2})\s*(AM|PM)/i.exec(hidden.getAttribute('placeholder') || '');
+  if (ph) { ap.value = ph[3].toUpperCase(); }
+  return box;
+}
+// A range of time: "2:30 PM to 4:00 PM"
+function rangePick(hidden) {
+  const wrap = document.createElement('div');
+  const a = document.createElement('input'), b = document.createElement('input');
+  const pa = timePick(a), pb = timePick(b);
+  wrap.append(Object.assign(document.createElement('span'), { className: 'muted', textContent: 'से / From' }), pa,
+    Object.assign(document.createElement('span'), { className: 'muted', textContent: 'तक / To' }), pb);
+  wrap.addEventListener('change', () => { hidden.value = a.value && b.value ? `${a.value} to ${b.value}` : ''; });
+  return wrap;
+}
+// A date: day, month and (optionally) year. format 'dm' -> "15-08"; 'ymd' -> "2026-08-15" (year "0000" when not known)
+function datePick(hidden, format, years) {
+  const box = document.createElement('div'); box.className = 'pick';
+  box.innerHTML = `<select aria-label="दिन / Day">${opt('', 'दिन / Day')}${[...Array(31)].map((_, i) => opt(pad2(i + 1), i + 1)).join('')}</select>` +
+    `<select aria-label="महीना / Month">${opt('', 'महीना / Month')}${PICK_MONTHS.map((n, i) => opt(pad2(i + 1), n)).join('')}</select>` +
+    (format === 'ymd' ? `<select aria-label="साल / Year">${years.map(([v, t]) => opt(v, t)).join('')}</select>` : '');
+  const [d, mo, y] = box.querySelectorAll('select');
+  const sync = () => { hidden.value = d.value && mo.value ? (format === 'dm' ? `${d.value}-${mo.value}` : `${y.value}-${mo.value}-${d.value}`) : ''; };
+  box.addEventListener('change', sync);
+  box.reset = () => { d.value = ''; mo.value = ''; if (y) y.selectedIndex = 0; sync(); };
+  return box;
+}
+// swap an <input> for dropdowns, keeping a hidden input with the same id and name
+function swapForPick(input, make) {
+  const hidden = document.createElement('input'); hidden.type = 'hidden'; hidden.id = input.id; hidden.name = input.name;
+  hidden.setAttribute('placeholder', input.getAttribute('placeholder') || '');
+  const box = make(hidden); input.replaceWith(hidden); hidden.after(box); hidden.pick = box; return hidden;
+}
+const THIS_YEAR = new Date().getFullYear();
+const pastYears = [['0000', 'साल पता नहीं / Year not known'], ...[...Array(100)].map((_, i) => [String(THIS_YEAR - i), String(THIS_YEAR - i)])];
+const nextYears = [...Array(4)].map((_, i) => [String(THIS_YEAR + i), String(THIS_YEAR + i)]);
+
 // What happens to a message from the elder, by level (config/needs.json).
 const LEVEL = {
   urgent:    ['bad',  T('🚨 तुरंत', '🚨 Urgent'), T('भेज दिया ✓ स्नेहा अभी घर वालों को फ़ोन कर रही है, जब तक कोई सुन न ले।', 'Sent ✓ Sneha is phoning the family now, until someone hears.')],
@@ -655,6 +706,9 @@ function buildForm() {
   }
   html += '<button class="btn primary" type="submit">जमा करें / Submit</button>';
   f.innerHTML = html;
+  for (const k of ['wake_time', 'breakfast_time', 'lunch_time', 'medicine_time']) { const el = $('#f-' + k); if (el) swapForPick(el, timePick); }
+  const nc = $('#f-no_call_hours'); if (nc) swapForPick(nc, rangePick);
+  const bd = $('#f-elder_birthday'); if (bd) swapForPick(bd, (h) => datePick(h, 'dm'));
   // what Sneha calls them: only the forms that fit a man or a woman
   const g = $('#f-elder_gender'), aa = $('#f-address_as'), by = (byKey.address_as || {}).by_gender;
   if (g && aa && by) {
@@ -667,6 +721,7 @@ function buildForm() {
   }
   f.addEventListener('submit', submitForm);
 }
+
 
 async function submitForm(e) {
   e.preventDefault();
@@ -1151,6 +1206,8 @@ function renderOccasions(list) {
     box.insertAdjacentHTML('beforeend', `<div class="row"><span>${OCC_ICON[o.kind] || '📅'} ${esc(o.note || o.person)}${o.source === 'call' ? ' <span class="muted">(स्नेहा ने सुना)</span>' : ''}</span><span><b>${when}</b> <button class="btn secondary" style="width:auto;padding:4px 10px;margin:0 0 0 6px" data-occ="${o.id}" type="button">✕</button></span></div>`);
   }
 }
+const occPick = swapForPick($('#occ-date'), (h) => datePick(h, 'ymd', pastYears)).pick;
+swapForPick($('#m-end'), (h) => datePick(h, 'ymd', nextYears));
 $('#occ-kind').addEventListener('change', () => $('#occ-who').classList.toggle('hidden', !['birthday', 'remembrance'].includes($('#occ-kind').value)));
 $('#occ-add').addEventListener('click', async () => {
   const body = { code: store.get('gs_code'), kind: $('#occ-kind').value, person: $('#occ-person').value.trim(), relation: $('#occ-relation').value.trim(), date: $('#occ-date').value };
@@ -1160,7 +1217,7 @@ $('#occ-add').addEventListener('click', async () => {
   try {
     const j = await (await fetch(API.occAdd, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(body) })).json();
     if (!j.ok) throw new Error(j.problems);
-    $('#occ-person').value = ''; $('#occ-relation').value = ''; $('#occ-date').value = '';
+    $('#occ-person').value = ''; $('#occ-relation').value = ''; occPick.reset();
     $('#occ-err').textContent = 'जोड़ दिया ✓ स्नेहा उस दिन याद रखेगी।'; loadStatus();
   } catch (e) { $('#occ-err').textContent = 'जोड़ नहीं पाए, फिर कोशिश करें / Could not add, try again'; }
   finally { busy($('#occ-add'), false); }
