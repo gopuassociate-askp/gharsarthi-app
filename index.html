@@ -125,12 +125,14 @@
   .row { display: flex; justify-content: space-between; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--line); }
   .row:last-child { border-bottom: 0; }
   .row span:first-child { color: var(--muted); }
+.lang-btn{margin-left:auto;background:rgba(255,255,255,.18);color:#fff;border:1px solid rgba(255,255,255,.5);border-radius:999px;padding:6px 14px;font:inherit;font-weight:700;cursor:pointer}
 </style>
 </head>
 <body>
 <header>
   <svg viewBox="0 0 512 512" aria-hidden="true"><rect width="512" height="512" fill="#fff8ee"/><path d="M256 96 L416 226 L384 226 L384 396 L128 396 L128 226 L96 226 Z" fill="#ea580c"/><path d="M256 356 C 214 324, 176 296, 176 260 C 176 236, 194 218, 216 218 C 234 218, 248 228, 256 242 C 264 228, 278 218, 296 218 C 318 218, 336 236, 336 260 C 336 296, 298 324, 256 356 Z" fill="#fff8ee"/><circle cx="256" cy="150" r="22" fill="#facc15"/></svg>
-  <div><h1>घर सारथी</h1><p>स्नेहा – आपकी अपनी, रोज़ आपके साथ</p></div>
+  <div><h1><span data-en="Ghar Sarthi">घर सारथी</span></h1><p><span data-en="Sneha – your own, with you every day">स्नेहा – आपकी अपनी, रोज़ आपके साथ</span></p></div>
+  <button id="lang-btn" type="button" class="lang-btn" aria-label="Language">English</button>
 </header>
 <div class="toran" aria-hidden="true"></div>
 
@@ -157,8 +159,8 @@
         </g>
         <circle cx="100" cy="100" r="96" fill="none" stroke="#f59e0b" stroke-width="6" stroke-dasharray="2 10" stroke-linecap="round"/>
       </svg>
-      <h2>नमस्ते, मैं स्नेहा हूँ 🙏</h2>
-      <p>मैं रोज़ आपके अपनों को फ़ोन करके प्यार से हालचाल पूछती हूँ, खाने और दवाई की याद दिलाती हूँ, उनकी पुरानी बातें सुनती हूँ – और कुछ भी गड़बड़ लगे तो तुरंत आपको बताती हूँ।</p>
+      <h2><span data-en="Namaste, I am Sneha 🙏">नमस्ते, मैं स्नेहा हूँ 🙏</span></h2>
+      <p><span data-en="I call your loved ones every day to lovingly ask how they are, remind them about meals and medicines, and listen to their old stories – and if anything seems wrong, I tell you at once.">मैं रोज़ आपके अपनों को फ़ोन करके प्यार से हालचाल पूछती हूँ, खाने और दवाई की याद दिलाती हूँ, उनकी पुरानी बातें सुनती हूँ – और कुछ भी गड़बड़ लगे तो तुरंत आपको बताती हूँ।</span></p>
       <p class="muted">I call your loved ones every day, remind them about meals and medicines, listen to their stories, and tell you at once if anything seems wrong.</p>
       <button class="btn primary" data-go="signup">स्नेहा से जुड़ें / Sign up</button>
       <button class="btn secondary" data-go="login">मेरे पास कोड है / I have a code</button>
@@ -169,7 +171,7 @@
   <section id="v-login" class="view hidden">
     <div class="card">
       <h2>अपना कोड डालें / Enter your code</h2>
-      <p class="muted">पंजीकरण के बाद मिला कोड, जैसे GS-4K7P9QX2</p>
+      <p class="muted"><span data-en="The code you got after signing up, e.g. GS-4K7P9QX2">पंजीकरण के बाद मिला कोड, जैसे GS-4K7P9QX2</span></p>
       <input id="code-in" autocomplete="off" autocapitalize="characters" placeholder="GS-XXXXXXXX">
       <div id="login-err" class="err"></div>
       <button class="btn primary" id="login-go">आगे बढ़ें / Continue</button>
@@ -181,7 +183,7 @@
   <section id="v-home" class="view hidden">
     <div id="hero" class="hero">
       <svg id="sky" class="sky" viewBox="0 0 100 100" aria-hidden="true"></svg>
-      <h2><span id="greet">नमस्ते</span>,<span id="h-elder" class="who">—</span></h2>
+      <h2><span id="greet"><span data-en="Namaste">नमस्ते</span></span>,<span id="h-elder" class="who">—</span></h2>
       <p id="next-call">—</p>
       <span id="h-status" class="pill wait">—</span>
       <p id="h-status-text" style="font-size:15px;margin-top:6px"></p>
@@ -191,8 +193,8 @@
       <div class="photo-wrap">
         <div id="photo" class="photo" role="button" tabindex="0" aria-label="परिवार की फ़ोटो लगाएँ">📷</div>
         <div class="photo-text">
-          <b>आपका परिवार आपके साथ है ❤️</b>
-          <span class="muted" id="photo-hint">अपने परिवार की एक प्यारी-सी फ़ोटो यहाँ लगाइए। यह सिर्फ़ इसी फ़ोन में रहती है।</span><br>
+          <b><span data-en="Your family is with you ❤️">आपका परिवार आपके साथ है ❤️</span></b>
+          <span class="muted" id="photo-hint"><span data-en="Add a lovely family photo here. It stays only on this phone.">अपने परिवार की एक प्यारी-सी फ़ोटो यहाँ लगाइए। यह सिर्फ़ इसी फ़ोन में रहती है।</span></span><br>
           <button class="link" id="photo-btn" type="button">फ़ोटो लगाएँ / Add photo</button>
         </div>
       </div>
@@ -201,8 +203,8 @@
 
 
     <div class="card" id="msg-card">
-      <h2>💌 <span id="msg-title">अपनों का संदेश</span></h2>
-      <p class="muted">यहाँ बोलकर या लिखकर संदेश भेजिए। स्नेहा अगली कॉल में इसे प्यार से पढ़कर सुनाएगी।<br>Speak or type a message; Sneha reads it out in her next call.</p>
+      <h2>💌 <span id="msg-title"><span data-en="Message for your loved one">अपनों का संदेश</span></span></h2>
+      <p class="muted"><span data-en="Speak or type a message here. Sneha will read it out lovingly in her next call.">यहाँ बोलकर या लिखकर संदेश भेजिए। स्नेहा अगली कॉल में इसे प्यार से पढ़कर सुनाएगी।</span><br>Speak or type a message; Sneha reads it out in her next call.</p>
       <label for="msg-from">आपका नाम / Your name</label>
       <input id="msg-from" placeholder="जैसे: सत्येंद्र" autocomplete="name">
       <label for="msg-text">संदेश / Message</label>
@@ -215,21 +217,21 @@
 
     <div class="card" id="up-card">
       <h2>📮 परिवार को संदेश / Message to family</h2>
-      <p class="muted">कुछ कहना है? बोलकर या लिखकर भेजिए – बच्चों को तुरंत मिल जाएगा।<br>Speak or type; your family gets it at once.</p>
+      <p class="muted"><span data-en="Something to say? Speak or type it – your children get it at once.">कुछ कहना है? बोलकर या लिखकर भेजिए – बच्चों को तुरंत मिल जाएगा।</span><br>Speak or type; your family gets it at once.</p>
       <label for="up-from">आपका नाम / Your name</label>
       <input id="up-from" placeholder="जैसे: पापा जी">
       <label for="up-text">संदेश / Message</label>
       <textarea id="up-text" maxlength="300" placeholder="बेटा, मेरी दवाई ख़त्म होने वाली है।"></textarea>
       <button class="btn warm hidden" id="up-mic" type="button">🎤 बोलकर लिखें / Speak</button>
-      <label class="check"><input type="checkbox" id="up-urgent"> <span><b>तुरंत चाहिए – अभी फ़ोन करवाएँ</b><br>Urgent: phone my family now</span></label>
-      <p class="note">स्नेहा ख़ुद समझ लेती है: 🛒 दूध-सब्ज़ी जैसी चीज़ें = संदेश; 💊 दवाई, डॉक्टर, गैस = संदेश, जवाब न आए तो एक फ़ोन; 🚨 तबीयत ख़राब = तुरंत फ़ोन।</p>
+      <label class="check"><input type="checkbox" id="up-urgent"> <span><b><span data-en="Needed now – phone my family">तुरंत चाहिए – अभी फ़ोन करवाएँ</span></b><br>Urgent: phone my family now</span></label>
+      <p class="note"><span data-en="Sneha understands on her own: 🛒 milk, vegetables = a message; 💊 medicine, doctor, gas = a message, and one call if nobody replies; 🚨 feeling unwell = calls at once.">स्नेहा ख़ुद समझ लेती है: 🛒 दूध-सब्ज़ी जैसी चीज़ें = संदेश; 💊 दवाई, डॉक्टर, गैस = संदेश, जवाब न आए तो एक फ़ोन; 🚨 तबीयत ख़राब = तुरंत फ़ोन।</span></p>
       <button class="btn primary" id="up-send" type="button">परिवार को भेजें / Send to family</button>
       <div id="up-err" class="err"></div>
     </div>
 
     <div class="card" id="occ-card">
       <h2>🎉 ख़ास दिन / Special days</h2>
-      <p class="muted">जन्मदिन, शादी की सालगिरह, बच्चों-पोतों के जन्मदिन, पुण्यतिथि। स्नेहा उस दिन प्यार से बधाई देगी (पुण्यतिथि पर बस याद करेगी), और एक दिन पहले आपको याद दिलाया जाएगा।<br>Sneha greets on the day; you get a reminder the day before.</p>
+      <p class="muted"><span data-en="Birthdays, wedding anniversary, children's and grandchildren's birthdays, days of remembrance. Sneha greets lovingly on the day (on a remembrance day she only remembers), and you get a reminder the day before.">जन्मदिन, शादी की सालगिरह, बच्चों-पोतों के जन्मदिन, पुण्यतिथि। स्नेहा उस दिन प्यार से बधाई देगी (पुण्यतिथि पर बस याद करेगी), और एक दिन पहले आपको याद दिलाया जाएगा।</span><br>Sneha greets on the day; you get a reminder the day before.</p>
       <div id="occ-list"></div>
       <label for="occ-kind">क्या है? / What</label>
       <select id="occ-kind">
@@ -250,16 +252,16 @@
       <div id="occ-err" class="err"></div>
     </div>
     <div class="card">
-      <h2>आज स्नेहा कब फ़ोन करेगी? 🪔</h2>
+      <h2><span data-en="When will Sneha call today? 🪔">आज स्नेहा कब फ़ोन करेगी? 🪔</span></h2>
       <div class="diyas">
-        <div class="diya" id="d-breakfast"><svg viewBox="0 0 48 48" aria-hidden="true"><path class="flame" d="M24 6 C 30 14, 30 20, 24 24 C 18 20, 18 14, 24 6 Z"/><path d="M6 28 h36 c0 9 -8 14 -18 14 S6 37 6 28 Z" fill="#c2410c"/><path d="M10 30 h28" stroke="#facc15" stroke-width="2"/></svg><b id="t-breakfast">—</b><span>नाश्ता</span></div>
-        <div class="diya" id="d-lunch"><svg viewBox="0 0 48 48" aria-hidden="true"><path class="flame" d="M24 6 C 30 14, 30 20, 24 24 C 18 20, 18 14, 24 6 Z"/><path d="M6 28 h36 c0 9 -8 14 -18 14 S6 37 6 28 Z" fill="#c2410c"/><path d="M10 30 h28" stroke="#facc15" stroke-width="2"/></svg><b id="t-lunch">—</b><span>खाना</span></div>
-        <div class="diya" id="d-medicine"><svg viewBox="0 0 48 48" aria-hidden="true"><path class="flame" d="M24 6 C 30 14, 30 20, 24 24 C 18 20, 18 14, 24 6 Z"/><path d="M6 28 h36 c0 9 -8 14 -18 14 S6 37 6 28 Z" fill="#c2410c"/><path d="M10 30 h28" stroke="#facc15" stroke-width="2"/></svg><b id="t-medicine">—</b><span>दवाई</span></div>
+        <div class="diya" id="d-breakfast"><svg viewBox="0 0 48 48" aria-hidden="true"><path class="flame" d="M24 6 C 30 14, 30 20, 24 24 C 18 20, 18 14, 24 6 Z"/><path d="M6 28 h36 c0 9 -8 14 -18 14 S6 37 6 28 Z" fill="#c2410c"/><path d="M10 30 h28" stroke="#facc15" stroke-width="2"/></svg><b id="t-breakfast">—</b><span><span data-en="Breakfast">नाश्ता</span></span></div>
+        <div class="diya" id="d-lunch"><svg viewBox="0 0 48 48" aria-hidden="true"><path class="flame" d="M24 6 C 30 14, 30 20, 24 24 C 18 20, 18 14, 24 6 Z"/><path d="M6 28 h36 c0 9 -8 14 -18 14 S6 37 6 28 Z" fill="#c2410c"/><path d="M10 30 h28" stroke="#facc15" stroke-width="2"/></svg><b id="t-lunch">—</b><span><span data-en="Lunch">खाना</span></span></div>
+        <div class="diya" id="d-medicine"><svg viewBox="0 0 48 48" aria-hidden="true"><path class="flame" d="M24 6 C 30 14, 30 20, 24 24 C 18 20, 18 14, 24 6 Z"/><path d="M6 28 h36 c0 9 -8 14 -18 14 S6 37 6 28 Z" fill="#c2410c"/><path d="M10 30 h28" stroke="#facc15" stroke-width="2"/></svg><b id="t-medicine">—</b><span><span data-en="Medicine">दवाई</span></span></div>
       </div>
     </div>
 
     <div class="card thought">
-      <span class="muted">आज का सुविचार 🌼</span>
+      <span class="muted"><span data-en="Thought for today 🌼">आज का सुविचार 🌼</span></span>
       <p class="q" id="thought">—</p>
     </div>
 
@@ -278,7 +280,7 @@
   <section id="v-pay" class="view hidden">
     <div class="card">
       <h2>भुगतान / Payments</h2>
-      <div id="pay-empty" class="note">अभी कोई भुगतान नहीं। फ़ाउंडिंग फ़ैमिली के लिए सेवा मुफ़्त है।<br><span class="muted">No payments yet. The service is free for founding families.</span></div>
+      <div id="pay-empty" class="note"><span data-en="No payments yet. The service is free for founding families.">अभी कोई भुगतान नहीं। फ़ाउंडिंग फ़ैमिली के लिए सेवा मुफ़्त है।</span><br><span class="muted">No payments yet. The service is free for founding families.</span></div>
       <table id="pay-table" class="hidden"><thead><tr><th>तारीख / Date</th><th>राशि / Amount</th><th>स्थिति / Status</th></tr></thead><tbody></tbody></table>
     </div>
   </section>
@@ -288,19 +290,19 @@
     <div class="card">
       <h2>स्नेहा क्या करती है / What Sneha does</h2>
       <ul class="plain">
-        <li>दिन में 3 बार कॉल: नाश्ता, दोपहर का खाना, रात की दवाई</li>
-        <li>प्यार से बात करती है, पुराने गाने और यादें सुनती है</li>
-        <li>दर्द, चक्कर, गिरना, साँस की तकलीफ़ सुनते ही परिवार को तुरंत फ़ोन</li>
-        <li>कॉल न उठे या दवाई न ली हो, तो दोबारा कॉल, फिर परिवार को ख़बर</li>
-        <li>हर ज़रूरी बात का ईमेल परिवार को</li>
+        <li><span data-en="3 calls a day: breakfast, lunch, night medicine">दिन में 3 बार कॉल: नाश्ता, दोपहर का खाना, रात की दवाई</span></li>
+        <li><span data-en="Talks lovingly, listens to old songs and memories">प्यार से बात करती है, पुराने गाने और यादें सुनती है</span></li>
+        <li><span data-en="Calls the family at once on hearing of pain, dizziness, a fall or breathing trouble">दर्द, चक्कर, गिरना, साँस की तकलीफ़ सुनते ही परिवार को तुरंत फ़ोन</span></li>
+        <li><span data-en="If a call is missed or a medicine not taken: another call, then the family is told">कॉल न उठे या दवाई न ली हो, तो दोबारा कॉल, फिर परिवार को ख़बर</span></li>
+        <li><span data-en="An email to the family about everything important">हर ज़रूरी बात का ईमेल परिवार को</span></li>
       </ul>
       <p class="muted">3 calls a day, a warm chat, an immediate call to family on emergency words, a second call when a call is missed or medicine is not taken, and an email for anything worth knowing.</p>
     </div>
     <div class="card">
       <h2>स्नेहा क्या नहीं करती / What Sneha does not do</h2>
       <ul class="plain">
-        <li>वह एम्बुलेंस या डॉक्टर नहीं है। आपात स्थिति में पहले 108 / 112 पर कॉल करें।</li>
-        <li>दवाई या इलाज की सलाह नहीं देती।</li>
+        <li><span data-en="She is not an ambulance or a doctor. In an emergency, call 108 / 112 first.">वह एम्बुलेंस या डॉक्टर नहीं है। आपात स्थिति में पहले 108 / 112 पर कॉल करें।</span></li>
+        <li><span data-en="She does not give medicine or treatment advice.">दवाई या इलाज की सलाह नहीं देती।</span></li>
         <li>कभी बैंक, OTP या पैसों की बात नहीं पूछती।</li>
       </ul>
     </div>
@@ -311,14 +313,14 @@
   <section id="v-meds" class="view hidden">
     <div class="card">
       <h2>दवाइयाँ / Medicines</h2>
-      <p class="muted">स्नेहा अपनी रोज़ की कॉल में इन्हें नाम लेकर याद दिलाएगी। वह कभी दवाई बदलने या छोड़ने को नहीं कहेगी।<br>Sneha reminds by name in her daily calls; she never changes or skips a dose.</p>
+      <p class="muted"><span data-en="Sneha will remind them by name in her daily calls. She will never ask them to change or skip a medicine.">स्नेहा अपनी रोज़ की कॉल में इन्हें नाम लेकर याद दिलाएगी। वह कभी दवाई बदलने या छोड़ने को नहीं कहेगी।</span><br>Sneha reminds by name in her daily calls; she never changes or skips a dose.</p>
       <div id="meds-list"></div>
       <p id="meds-empty" class="note hidden">अभी कोई दवाई नहीं जोड़ी गई। / No medicines added yet.</p>
     </div>
     <div class="card">
       <h2>दवाई जोड़ें / Add a medicine</h2>
       <form id="med-form" novalidate>
-        <label for="m-name">दवाई का नाम (पत्ते पर जैसा लिखा है) <span class="req">*</span></label>
+        <label for="m-name"><span data-en="Medicine name (as written on the strip)">दवाई का नाम (पत्ते पर जैसा लिखा है)</span> <span class="req">*</span></label>
         <input id="m-name" name="name" placeholder="Amlodipine 5">
         <label for="m-simple">स्नेहा इसे कैसे बोले? / How should Sneha call it?</label>
         <input id="m-simple" name="simple" placeholder="बीपी वाली गोली, शुगर की गोली">
@@ -346,9 +348,9 @@
   <section id="v-help" class="view hidden">
     <div class="card">
       <h2>आपात स्थिति / Emergency</h2>
-      <a class="btn danger" href="tel:108">📞 108 एम्बुलेंस</a>
-      <a class="btn danger" href="tel:112">📞 112 आपात सहायता</a>
-      <a class="btn secondary" href="tel:14567">📞 14567 एल्डरलाइन (बुज़ुर्ग हेल्पलाइन)</a>
+      <a class="btn danger" href="tel:108"><span data-en="📞 108 Ambulance">📞 108 एम्बुलेंस</span></a>
+      <a class="btn danger" href="tel:112"><span data-en="📞 112 Emergency help">📞 112 आपात सहायता</span></a>
+      <a class="btn secondary" href="tel:14567"><span data-en="📞 14567 Elderline (senior citizens' helpline)">📞 14567 एल्डरलाइन (बुज़ुर्ग हेल्पलाइन)</span></a>
     </div>
     <div class="card">
       <h2>होम स्क्रीन पर लगाएँ / Add to home screen</h2>
@@ -365,7 +367,7 @@
   <section id="v-signup" class="view hidden">
     <div class="card">
       <h2>पंजीकरण / Sign up</h2>
-      <p class="muted">लगभग 5 मिनट। * वाले सवाल ज़रूरी हैं।</p>
+      <p class="muted"><span data-en="About 5 minutes. Questions marked * are required.">लगभग 5 मिनट। * वाले सवाल ज़रूरी हैं।</span></p>
       <form id="signup-form" novalidate></form>
       <div id="signup-err" class="err"></div>
     </div>
@@ -375,9 +377,9 @@
   <section id="v-seen" class="view hidden">
     <div class="card">
       <h2>✅ संदेश देख लिया / Seen</h2>
-      <p id="seen-text">घर के बुज़ुर्ग ने आपको संदेश भेजा था। नीचे दबाकर बताइए कि आप इसका ध्यान रखेंगे – स्नेहा उन्हें बता देगी, और आपको इसके लिए फ़ोन नहीं आएगा।</p>
+      <p id="seen-text"><span data-en="Your elder sent you a message. Tap below to say you'll take care of it – Sneha will let them know, and nobody will phone you about it.">घर के बुज़ुर्ग ने आपको संदेश भेजा था। नीचे दबाकर बताइए कि आप इसका ध्यान रखेंगे – स्नेहा उन्हें बता देगी, और आपको इसके लिए फ़ोन नहीं आएगा।</span></p>
       <p class="muted">Tap to tell them you will take care of it. Sneha will let them know, and nobody will be phoned about it.</p>
-      <button class="btn primary" id="seen-btn" type="button">✅ हाँ, मैं ध्यान रखूँगा / रखूँगी</button>
+      <button class="btn primary" id="seen-btn" type="button"><span data-en="✅ Yes, I'll take care of it">✅ हाँ, मैं ध्यान रखूँगा / रखूँगी</span></button>
       <div id="seen-err" class="err"></div>
       <button class="btn secondary hidden" id="seen-home" type="button" data-go="welcome">ऐप खोलें / Open the app</button>
     </div>
@@ -387,26 +389,29 @@
   <section id="v-done" class="view hidden">
     <div class="card">
       <h2>धन्यवाद! / Thank you!</h2>
-      <p>आपका पंजीकरण मिल गया। हम 1–2 दिन में आपको फ़ोन करके जानकारी पक्की करेंगे। उसके बाद स्नेहा पहले एक स्वागत कॉल करेगी।</p>
+      <p><span data-en="We have your sign-up. We'll call you within 1–2 days to confirm the details. Then Sneha will make a welcome call.">आपका पंजीकरण मिल गया। हम 1–2 दिन में आपको फ़ोन करके जानकारी पक्की करेंगे। उसके बाद स्नेहा पहले एक स्वागत कॉल करेगी।</span></p>
       <p>आपका कोड / Your code:</p>
       <div class="code" id="done-code">—</div>
-      <p class="note">इस कोड को सँभाल कर रखें। इसी से आप ऐप में अपनी सेवा देख सकते हैं।<br><span class="muted">Keep this code safe; it opens your service in this app.</span></p>
+      <p class="note"><span data-en="Keep this code safe. It opens your service in this app.">इस कोड को सँभाल कर रखें। इसी से आप ऐप में अपनी सेवा देख सकते हैं।</span><br><span class="muted">Keep this code safe; it opens your service in this app.</span></p>
       <div id="done-notes" class="err"></div>
-      <div id="done-plan-box" class="note hidden"><b>आपके जवाबों से सुझाव / Suggested from your answers:</b><br><span id="done-plan"></span><br><span class="muted">यह सिर्फ़ सुझाव है; आप और बुज़ुर्ग तय करेंगे। स्नेहा बातचीत से समझती रहेगी और ज़रूरत बदलने पर बताएगी।</span></div>
+      <div id="done-plan-box" class="note hidden"><b>आपके जवाबों से सुझाव / Suggested from your answers:</b><br><span id="done-plan"></span><br><span class="muted"><span data-en="This is only a suggestion; you and the elder decide. Sneha keeps learning from conversations and will tell you if needs change.">यह सिर्फ़ सुझाव है; आप और बुज़ुर्ग तय करेंगे। स्नेहा बातचीत से समझती रहेगी और ज़रूरत बदलने पर बताएगी।</span></span></div>
       <button class="btn primary" data-go="home">मेरी सेवा देखें / See my service</button>
     </div>
   </section>
 </main>
 
 <nav id="tabs" class="hidden">
-  <button data-go="home" class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11 12 4l9 7v9H3z"/></svg>सेवा</button>
-  <button data-go="pay"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="M3 10h18"/></svg>भुगतान</button>
-  <button data-go="meds"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="9" width="18" height="7" rx="3.5"/><path d="M12 9v7"/></svg>दवाई</button>
-  <button data-go="sneha"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2"/></svg>स्नेहा</button>
-  <button data-go="help"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v6M12 16v.5"/></svg>मदद</button>
+  <button data-go="home" class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11 12 4l9 7v9H3z"/></svg><span data-en="Home">सेवा</span></button>
+  <button data-go="pay"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="M3 10h18"/></svg><span data-en="Payments">भुगतान</span></button>
+  <button data-go="meds"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="9" width="18" height="7" rx="3.5"/><path d="M12 9v7"/></svg><span data-en="Medicines">दवाई</span></button>
+  <button data-go="sneha"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2"/></svg><span data-en="Sneha">स्नेहा</span></button>
+  <button data-go="help"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v6M12 16v.5"/></svg><span data-en="Help">मदद</span></button>
 </nav>
 
 <script>
+// हिंदी / English: each family chooses; remembered on this phone. Switching reloads the page.
+const LANG = (() => { try { return localStorage.getItem('gs_lang') || 'hi'; } catch (e) { return 'hi'; } })();
+const T = (hi, en) => (LANG === 'en' ? en : hi);
 const FIELDS = [{"key":"family_name","label":"आपका नाम / Your name","type":"text","required":true},{"key":"relation","label":"बुज़ुर्ग से आपका रिश्ता / Your relation to the elder","type":"dropdown","options":["मैं स्वयं (बुज़ुर्ग) / Myself (the elder)","बेटा / Son","बेटी / Daughter","बहू / Daughter-in-law","दामाद / Son-in-law","पोता-पोती / Grandchild","अन्य / Other"],"required":true},{"key":"family_phone","label":"आपका मोबाइल नंबर / Your mobile","type":"text","placeholder":"98XXXXXXXX","required":true},{"key":"family_email","label":"आपका ईमेल / Your email","type":"email","required":true},{"key":"city","label":"शहर / City","type":"text","required":true},{"key":"elder_name","label":"बुज़ुर्ग का नाम / Elder's name","type":"text","required":true},{"key":"elder_gender","label":"बुज़ुर्ग हैं / The elder is","type":"dropdown","options":["पुरुष / Male","महिला / Female"],"required":true},{"key":"address_as","label":"स्नेहा उन्हें प्यार से क्या कहकर बुलाए? / What would they love Sneha to call them?","type":"dropdown","options":["पापा जी","पिता जी","बाबू जी","बाउजी","दादा जी","नाना जी","अंकल जी","ताऊ जी","चाचा जी","मामा जी","भाई साहब","मम्मी जी","माता जी","अम्मा जी","माँ जी","बीजी","दादी जी","नानी जी","आंटी जी","ताई जी","चाची जी","मामी जी","बहन जी","अन्य (नीचे लिखें) / Other (write below)"],"required":true},{"key":"address_as_other","label":"अन्य हो तो यहाँ लिखें / If other, write it here","type":"text","placeholder":"जैसे: शर्मा जी, बड़े पापा","required":false},{"key":"sneha_intro","label":"स्नेहा अपना परिचय कैसे दे? / How should Sneha introduce herself?","type":"dropdown","options":["आपकी बेटी स्नेहा","आपकी पोती स्नेहा","आपकी नातिन स्नेहा","आपकी बहू स्नेहा","घर सारथी से स्नेहा"],"required":true},{"key":"elder_age","label":"उम्र / Age","type":"number","required":true},{"key":"elder_birthday","label":"जन्मदिन (वैकल्पिक) / Birthday, optional","type":"text","placeholder":"15 अगस्त / 15-08","required":false},{"key":"elder_phone","label":"बुज़ुर्ग का मोबाइल नंबर / Elder's mobile","type":"text","placeholder":"98XXXXXXXX","required":true},{"key":"phone_type","label":"उनका फ़ोन / Their phone","type":"dropdown","options":["कीपैड / Keypad","एंड्रॉयड / Android","आईफ़ोन / iPhone"],"required":true},{"key":"language","label":"स्नेहा किस भाषा में बात करे? / Sneha's language","type":"dropdown","options":["हिंदी / Hindi","मराठी / Marathi","ગુજરાતી / Gujarati","ਪੰਜਾਬੀ / Punjabi","ଓଡ଼ିଆ / Odia","বাংলা / Bengali","తెలుగు / Telugu","தமிழ் / Tamil","ಕನ್ನಡ / Kannada","മലയാളം / Malayalam"],"required":true},{"key":"wake_time","label":"सुबह उठने का समय / Wake-up time","type":"text","placeholder":"6:30 AM","required":false},{"key":"breakfast_time","label":"नाश्ते का समय / Breakfast time","type":"text","placeholder":"9:30 AM","required":true},{"key":"lunch_time","label":"दोपहर के खाने का समय / Lunch time","type":"text","placeholder":"1:30 PM","required":true},{"key":"medicine_time","label":"रात की दवाई का समय / Night medicine time","type":"text","placeholder":"8:30 PM","required":true},{"key":"no_call_hours","label":"किस समय कॉल न करें? / When should Sneha not call?","type":"text","placeholder":"2:30 PM to 4 PM (आराम / rest)","required":false},{"key":"health_notes","label":"स्वास्थ्य (वैकल्पिक) / Health, optional","type":"textarea","placeholder":"BP, शुगर, कम सुनाई देता है","required":false},{"key":"contact2_name","label":"देखभाल करने वाले 1: नाम / Caretaker 1: name (needed if you are the elder)","type":"text","required":false},{"key":"contact2_relation","label":"देखभाल करने वाले 1: रिश्ता / relation","type":"text","placeholder":"भतीजा, पड़ोसी, बेटा","required":false},{"key":"contact2_phone","label":"देखभाल करने वाले 1: मोबाइल / mobile","type":"text","required":false},{"key":"contact2_role","label":"देखभाल करने वाले 1: किस काम के लिए? / for what?","type":"dropdown","options":["आपात स्थिति और रोज़ की ख़बर / Emergencies and daily updates","सिर्फ़ आपात स्थिति / Emergencies only","सिर्फ़ रोज़ की ख़बर / Daily updates only"],"required":false},{"key":"contact3_name","label":"देखभाल करने वाले 2: नाम / Caretaker 2: name","type":"text","required":false},{"key":"contact3_relation","label":"देखभाल करने वाले 2: रिश्ता / relation","type":"text","required":false},{"key":"contact3_phone","label":"देखभाल करने वाले 2: मोबाइल / mobile","type":"text","required":false},{"key":"contact3_role","label":"देखभाल करने वाले 2: किस काम के लिए? / for what?","type":"dropdown","options":["आपात स्थिति और रोज़ की ख़बर / Emergencies and daily updates","सिर्फ़ आपात स्थिति / Emergencies only","सिर्फ़ रोज़ की ख़बर / Daily updates only"],"required":false},{"key":"ab_goes_out","label":"क्या वे अकेले बाहर जाते हैं (बाज़ार, सैर)? / Do they go out alone (market, walk)?","type":"dropdown","options":["हाँ / Yes","कभी-कभी / Sometimes","चल सकते हैं, पर सुरक्षा के लिए हम बाहर नहीं जाने देते / Can, but we keep them in for safety","नहीं / No"],"required":true},{"key":"ab_strength","label":"चलने-फिरने में कमज़ोरी या धीमापन? / Weakness or slowness when walking?","type":"dropdown","options":["नहीं / No","थोड़े धीमे हैं / A little slow","हाँ, कमज़ोर हैं या सहारा चाहिए / Yes, weak or need support"],"required":true},{"key":"ab_own_medicines","label":"क्या वे अपनी दवाई ख़ुद, बिना याद दिलाए लेते हैं? / Do they take their medicines themselves, without reminders?","type":"dropdown","options":["हाँ / Yes","कोई दवाई नहीं / No medicines","कभी भूल जाते हैं / Sometimes forget","नहीं, याद दिलाना पड़ता है / No, they need reminding"],"required":true},{"key":"ab_med_count","label":"रोज़ कितनी दवाइयाँ? / How many medicines a day?","type":"dropdown","options":["0–2","3 या ज़्यादा / 3 or more"],"required":true},{"key":"ab_fall","label":"पिछले एक साल में कभी गिरे? / Any fall in the last year?","type":"dropdown","options":["नहीं / No","हाँ / Yes"],"required":true},{"key":"ab_hospital","label":"पिछले एक साल में अस्पताल में भर्ती हुए? / In hospital in the last year?","type":"dropdown","options":["नहीं / No","हाँ / Yes"],"required":true},{"key":"ab_memory","label":"क्या वे बातें अक्सर भूल जाते हैं या उलझ जाते हैं? / Do they often forget things or get confused?","type":"dropdown","options":["नहीं / No","थोड़ा / A little","हाँ / Yes"],"required":true},{"key":"ab_hearing","label":"फ़ोन पर सुनने या देखने में दिक्कत? / Difficulty hearing on the phone, or seeing?","type":"dropdown","options":["नहीं / No","हाँ / Yes"],"required":true},{"key":"ab_alone","label":"क्या वे अकेले रहते हैं, या दिन में अकेले रहते हैं? / Do they live alone, or are they alone during the day?","type":"dropdown","options":["नहीं / No","हाँ / Yes"],"required":true},{"key":"ab_serious","label":"कोई गंभीर बीमारी (दिल, लकवा, किडनी, पार्किंसन…)? / Any serious illness (heart, stroke, kidney, Parkinson's…)?","type":"dropdown","options":["नहीं / No","सिर्फ़ बीपी या शुगर / Only BP or sugar","हाँ / Yes"],"required":true},{"key":"cautions","label":"परिवार की सावधानियाँ: स्नेहा प्यार से इनका ध्यान रखवाए (वैकल्पिक) / Family precautions Sneha should gently keep, optional","type":"checkbox","required":false,"options":["बाहर अकेले न जाएँ / Not to go out alone","सीढ़ियाँ न चढ़ें / Not to climb stairs","भारी सामान न उठाएँ / Not to lift heavy things","गैस-चूल्हा अकेले न जलाएँ / Not to use the gas stove alone","गाड़ी या स्कूटर न चलाएँ / Not to drive","रात में उठें तो लाइट जलाकर, धीरे चलें / At night, light on and walk slowly"]},{"key":"plan","label":"प्लान / Plan","type":"dropdown","options":["फ़ाउंडिंग फ़ैमिली (मुफ़्त) / Founding family (free)"],"required":true},{"key":"consent","label":"सहमति / Consent","type":"checkbox","required":true,"options":["बुज़ुर्ग को इसकी जानकारी है और वे सहमत हैं / The elder knows and agrees","घर सारथी एम्बुलेंस या डॉक्टर नहीं है; आपात स्थिति में पहले 108/112 पर कॉल करें / Ghar Sarthi is not an ambulance or doctor; in an emergency call 108/112 first","सुरक्षा के लिए कॉल रिकॉर्ड हो सकती हैं; जानकारी निजी रहेगी और माँगने पर मिटा दी जाएगी / Calls may be recorded for safety; data stays private and is deleted on request"]},{"key":"health_consent","label":"स्वास्थ्य जानकारी (वैकल्पिक) / Health details, optional","type":"checkbox","required":false,"options":["दवाइयों और बीपी/शुगर की जानकारी रखने और याद दिलाने की अनुमति / Allow keeping medicine and BP/sugar details for reminders"]}];
 // The page is hosted on a normal web host; n8n runs only these two services.
 const API_BASE = 'https://gharsarthi.app.n8n.cloud/webhook';
@@ -415,17 +420,17 @@ const API = { signup: API_BASE + '/app-signup', status: API_BASE + '/app-status'
   occAdd: API_BASE + '/app-occasion-add', occRemove: API_BASE + '/app-occasion-remove' };
 // What happens to a message from the elder, by level (config/needs.json).
 const LEVEL = {
-  urgent:    ['bad',  '🚨 तुरंत', 'भेज दिया ✓ स्नेहा अभी घर वालों को फ़ोन कर रही है, जब तक कोई सुन न ले।'],
-  important: ['wait', '💊 ज़रूरी', 'भेज दिया ✓ घर वालों को संदेश गया। एक घंटे में किसी ने नहीं देखा तो स्नेहा एक बार फ़ोन करेगी।'],
-  general:   ['ok',   '🛒 सामान्य', 'भेज दिया ✓ घर वालों को संदेश मिल गया।'],
+  urgent:    ['bad',  T('🚨 तुरंत', '🚨 Urgent'), T('भेज दिया ✓ स्नेहा अभी घर वालों को फ़ोन कर रही है, जब तक कोई सुन न ले।', 'Sent ✓ Sneha is phoning the family now, until someone hears.')],
+  important: ['wait', T('💊 ज़रूरी', '💊 Important'), T('भेज दिया ✓ घर वालों को संदेश गया। एक घंटे में किसी ने नहीं देखा तो स्नेहा एक बार फ़ोन करेगी।', 'Sent ✓ The family has the message. If nobody sees it within an hour, Sneha phones once.')],
+  general:   ['ok',   T('🛒 सामान्य', '🛒 General'), T('भेज दिया ✓ घर वालों को संदेश मिल गया।', 'Sent ✓ The family has the message.')],
 };
 const STATUS = {
-  'New':         ['wait', 'पंजीकरण मिला', 'हम जल्द आपको फ़ोन करेंगे। / Received; we will call you soon.'],
-  'Needs check': ['wait', 'जाँच बाकी', 'कुछ जानकारी पक्की करनी है; हम फ़ोन करेंगे। / We need to check a few details.'],
-  'Verified':    ['wait', 'सत्यापित', 'स्नेहा जल्द स्वागत कॉल करेगी। / Sneha will make a welcome call soon.'],
-  'Active':      ['ok',   'सक्रिय ✓', 'स्नेहा रोज़ कॉल कर रही है। / Sneha is calling every day.'],
-  'Paused':      ['bad',  'रुकी हुई', 'सेवा अभी रुकी है। / The service is paused.'],
-  'Declined':    ['bad',  'बंद', 'सेवा शुरू नहीं हुई। / The service did not start.'],
+  'New':         ['wait', T('पंजीकरण मिला', 'Received'), 'हम जल्द आपको फ़ोन करेंगे। / Received; we will call you soon.'],
+  'Needs check': ['wait', T('जाँच बाकी', 'To be checked'), 'कुछ जानकारी पक्की करनी है; हम फ़ोन करेंगे। / We need to check a few details.'],
+  'Verified':    ['wait', T('सत्यापित', 'Verified'), 'स्नेहा जल्द स्वागत कॉल करेगी। / Sneha will make a welcome call soon.'],
+  'Active':      ['ok',   T('सक्रिय ✓', 'Active ✓'), 'स्नेहा रोज़ कॉल कर रही है। / Sneha is calling every day.'],
+  'Paused':      ['bad',  T('रुकी हुई', 'Paused'), 'सेवा अभी रुकी है। / The service is paused.'],
+  'Declined':    ['bad',  T('बंद', 'Stopped'), 'सेवा शुरू नहीं हुई। / The service did not start.'],
 };
 const $ = (s) => document.querySelector(s);
 const store = {
@@ -583,13 +588,14 @@ function render(j) {
 
 
 // ---- warmth: greeting by time of day, next call, glowing diya, thought, family photo ----
-const THOUGHTS = [
+const THOUGHTS_HI = [
   'हर दिन एक नया उपहार है। 🌼', 'मुस्कुराइए, आप अपनों के दिल में रहते हैं। ❤️', 'थोड़ी धूप, थोड़ी चाय और ढेर सारी बातें – यही तो ज़िंदगी है। ☕',
   'आपका अनुभव हमारे लिए सबसे बड़ा ख़ज़ाना है।', 'पुराने गीत, पुरानी यादें – दिल आज भी जवान है। 🎶', 'जो प्यार बाँटता है, उसके पास प्यार लौटकर आता है।',
   'आज किसी पुराने दोस्त को याद कीजिए – वो भी आपको याद कर रहा होगा।', 'धीरे चलिए, पर चलते रहिए। 🚶', 'आपकी दुआओं से ही घर में रौनक है। 🪔',
   'हँसी सबसे अच्छी दवा है। 😊', 'बीता कल सीख देता है, आने वाला कल उम्मीद।', 'आप अकेले नहीं हैं – स्नेहा और आपका परिवार साथ है।',
   'भगवान का नाम, अपनों का साथ – बस यही काफ़ी है। 🙏', 'छोटी-छोटी ख़ुशियाँ ही सबसे बड़ी होती हैं। 🌸',
 ];
+const THOUGHTS = LANG === 'en' ? ["Every day is a new gift. 🌼", "Smile – you live in the hearts of your loved ones. ❤️", "A little sunshine, a little tea and lots of talk – that is life. ☕", "Your experience is our greatest treasure.", "Old songs, old memories – the heart is still young. 🎶", "Love you share comes back to you.", "Remember an old friend today – they may be remembering you too.", "Walk slowly, but keep walking. 🚶", "Your blessings light up the home. 🪔", "Laughter is the best medicine. 😊", "Yesterday teaches, tomorrow brings hope.", "You are not alone – Sneha and your family are with you.", "God's name and your loved ones' company – that is enough. 🙏", "Small joys are the biggest ones. 🌸"] : THOUGHTS_HI;
 const SKY = {
   morning: '<circle cx="50" cy="56" r="22" fill="#f59e0b"/><g stroke="#f59e0b" stroke-width="5" stroke-linecap="round"><path d="M50 18v10M22 30l7 7M78 30l-7 7M12 56h10M78 56h10"/></g><path d="M8 80 h84" stroke="#ea580c" stroke-width="5" stroke-linecap="round"/>',
   afternoon: '<circle cx="50" cy="48" r="24" fill="#facc15"/><g stroke="#f59e0b" stroke-width="5" stroke-linecap="round"><path d="M50 8v10M50 78v10M10 48h10M80 48h10M22 20l7 7M78 20l-7 7M22 76l7-7M78 76l-7-7"/></g>',
@@ -597,10 +603,11 @@ const SKY = {
   night: '<path d="M62 18 A 32 32 0 1 0 82 66 A 26 26 0 1 1 62 18 Z" fill="#fde68a"/><circle cx="24" cy="24" r="2.5" fill="#fef9c3"/><circle cx="34" cy="80" r="2" fill="#fef9c3"/><circle cx="86" cy="26" r="2" fill="#fef9c3"/>',
 };
 function partOfDay(h) { return h < 5 ? 'night' : h < 12 ? 'morning' : h < 16 ? 'afternoon' : h < 20 ? 'evening' : 'night'; }
-const GREET = { morning: 'सुप्रभात', afternoon: 'नमस्ते', evening: 'शुभ संध्या', night: 'शुभ रात्रि' };
-const CALL_HI = { breakfast: 'नाश्ते', lunch: 'खाने', medicine: 'दवाई' };
+const GREET = { morning: T('सुप्रभात', 'Good morning'), afternoon: T('नमस्ते', 'Namaste'), evening: T('शुभ संध्या', 'Good evening'), night: T('शुभ रात्रि', 'Good night') };
+const CALL_HI = { breakfast: T('नाश्ते', 'breakfast'), lunch: T('खाने', 'lunch'), medicine: T('दवाई', 'medicine') };
 function hhmm12(t) {
   const [h, m] = String(t).split(':').map(Number); if (isNaN(h)) return t;
+  if (LANG === 'en') return `${((h + 11) % 12) + 1}${m ? ':' + String(m).padStart(2, '0') : ''} ${h < 12 ? 'am' : 'pm'}`;
   const word = h < 12 ? 'सुबह' : h < 16 ? 'दोपहर' : h < 20 ? 'शाम' : 'रात';
   return `${word} ${((h + 11) % 12) + 1}${m ? ':' + String(m).padStart(2, '0') : ''} बजे`;
 }
@@ -617,9 +624,9 @@ function decorate(f) {
   ['breakfast', 'lunch', 'medicine'].forEach((k) => $('#d-' + k).classList.toggle('next', !!next && next.k === k));
   const sneha = 'स्नेहा';
   $('#next-call').textContent = f.status !== 'Active'
-    ? 'स्नेहा जल्द ही आपसे पहली बार बात करेगी। 💛'
-    : next ? `${sneha} आज ${hhmm12(next.t)} ${CALL_HI[next.k]} के समय फ़ोन करेगी। 💛`
-           : `आज की सब बातें हो गईं। ${sneha} कल सुबह फिर फ़ोन करेगी। 🌙`;
+    ? T('स्नेहा जल्द ही आपसे पहली बार बात करेगी। 💛', 'Sneha will talk to you for the first time soon. 💛')
+    : next ? T(`${sneha} आज ${hhmm12(next.t)} ${CALL_HI[next.k]} के समय फ़ोन करेगी। 💛`, `Sneha will call today at ${hhmm12(next.t)}, at ${CALL_HI[next.k]} time. 💛`)
+           : T(`आज की सब बातें हो गईं। ${sneha} कल सुबह फिर फ़ोन करेगी। 🌙`, 'All of today\'s calls are done. Sneha will call again tomorrow morning. 🌙');
   const day = Math.floor((now - new Date(now.getFullYear(), 0, 0)) / 86400000);
   $('#thought').textContent = THOUGHTS[day % THOUGHTS.length];
   showPhoto();
@@ -627,7 +634,7 @@ function decorate(f) {
 function showPhoto() {
   const ph = store.get('gs_photo');
   const el = $('#photo');
-  if (ph) { el.style.backgroundImage = `url(${ph})`; el.textContent = ''; $('#photo-btn').textContent = 'फ़ोटो बदलें / Change photo'; $('#photo-hint').textContent = 'हर बार ऐप खोलें, अपनों को देखें।'; }
+  if (ph) { el.style.backgroundImage = `url(${ph})`; el.textContent = ''; $('#photo-btn').textContent = 'फ़ोटो बदलें / Change photo'; $('#photo-hint').textContent = T('हर बार ऐप खोलें, अपनों को देखें।', 'See your loved ones every time you open the app.'); }
   else { el.style.backgroundImage = ''; el.textContent = '📷'; }
 }
 const pickPhoto = () => $('#photo-in').click();
@@ -648,7 +655,7 @@ $('#photo-in').addEventListener('change', (e) => {
 
 // ---- messages from family: spoken or typed text, read out by Sneha ----
 function renderMessages(list, who) {
-  $('#msg-title').textContent = `${who || 'अपनों'} के लिए संदेश`;
+  $('#msg-title').textContent = T(`${who || 'अपनों'} के लिए संदेश`, `Message for ${who || 'your loved one'}`);
   const box = $('#msg-list'); box.innerHTML = '';
   for (const m of list || []) {
     const up = m.direction === 'to_family';
@@ -744,8 +751,8 @@ $('#up-send').addEventListener('click', async () => {
 });
 
 // ---- medicines ----
-const TIME_HI = { morning: 'सुबह', afternoon: 'दोपहर', evening: 'शाम', night: 'रात' };
-const FOOD_HI = { after: 'खाने के बाद', before: 'खाने से पहले', any: '' };
+const TIME_HI = { morning: T('सुबह', 'morning'), afternoon: T('दोपहर', 'afternoon'), evening: T('शाम', 'evening'), night: T('रात', 'night') };
+const FOOD_HI = { after: T('खाने के बाद', 'after food'), before: T('खाने से पहले', 'before food'), any: '' };
 const esc = (t) => String(t == null ? '' : t).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 async function loadMeds() {
   const code = store.get('gs_code'); if (!code) return show('welcome');
@@ -756,7 +763,7 @@ async function loadMeds() {
     $('#meds-empty').classList.toggle('hidden', j.medicines.length > 0);
     for (const m of j.medicines) {
       const when = m.times.map((t) => TIME_HI[t] || t).join(', ');
-      list.insertAdjacentHTML('beforeend', `<div class="row"><span><b style="color:var(--ink)">${esc(m.simple)}</b><br>${esc(m.name)} · ${esc(m.dose)}<br>${esc(when)}${FOOD_HI[m.food] ? ' · ' + FOOD_HI[m.food] : ''}${m.stock != null ? ' · ' + esc(m.stock) + ' बची' : ''}</span>
+      list.insertAdjacentHTML('beforeend', `<div class="row"><span><b style="color:var(--ink)">${esc(m.simple)}</b><br>${esc(m.name)} · ${esc(m.dose)}<br>${esc(when)}${FOOD_HI[m.food] ? ' · ' + FOOD_HI[m.food] : ''}${m.stock != null ? ' · ' + esc(m.stock) + T(' बची', ' left') : ''}</span>
         <button class="btn secondary" style="width:auto;margin:0;padding:8px 12px;font-size:14px" data-remove="${esc(m.id)}">हटाएँ</button></div>`);
     }
   } catch (e) { $('#meds-empty').textContent = 'इंटरनेट नहीं / Offline'; $('#meds-empty').classList.remove('hidden'); }
@@ -793,13 +800,13 @@ $('#logout').addEventListener('click', () => { store.del('gs_code'); store.del('
 
 // ---- special days ----
 const OCC_ICON = { birthday_self: '🎂', wedding: '💐', birthday: '🎈', remembrance: '🪔', other: '📅' };
-const MONTH_HI = ['जनवरी', 'फ़रवरी', 'मार्च', 'अप्रैल', 'मई', 'जून', 'जुलाई', 'अगस्त', 'सितंबर', 'अक्टूबर', 'नवंबर', 'दिसंबर'];
+const MONTH_HI = LANG === 'en' ? ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'] : ['जनवरी', 'फ़रवरी', 'मार्च', 'अप्रैल', 'मई', 'जून', 'जुलाई', 'अगस्त', 'सितंबर', 'अक्टूबर', 'नवंबर', 'दिसंबर'];
 function renderOccasions(list) {
   const box = $('#occ-list'); box.innerHTML = '';
   if (!list.length) { box.innerHTML = '<p class="muted">अभी कोई ख़ास दिन नहीं जोड़ा गया। / None yet.</p>'; return; }
   for (const o of list) {
     const [m, d] = String(o.date || '').split('-').map(Number);
-    const when = m ? `${d} ${MONTH_HI[m - 1]}` : 'तारीख़ पक्की करें';
+    const when = m ? `${d} ${MONTH_HI[m - 1]}` : T('तारीख़ पक्की करें', 'date to confirm');
     box.insertAdjacentHTML('beforeend', `<div class="row"><span>${OCC_ICON[o.kind] || '📅'} ${esc(o.note || o.person)}${o.source === 'call' ? ' <span class="muted">(स्नेहा ने सुना)</span>' : ''}</span><span><b>${when}</b> <button class="btn secondary" style="width:auto;padding:4px 10px;margin:0 0 0 6px" data-occ="${o.id}" type="button">✕</button></span></div>`);
   }
 }
@@ -845,6 +852,11 @@ $('#seen-btn').addEventListener('click', async () => {
   } catch (e) { $('#seen-err').textContent = 'भेज नहीं पाए, इंटरनेट देखकर फिर दबाइए / Could not send, try again'; }
   finally { busy($('#seen-btn'), false); }
 });
+
+// English: swap every marked text; the button switches and reloads.
+if (LANG === 'en') { document.documentElement.lang = 'en'; document.querySelectorAll('[data-en]').forEach((el) => { el.textContent = el.dataset.en; }); }
+$('#lang-btn').textContent = LANG === 'en' ? 'हिंदी' : 'English';
+$('#lang-btn').addEventListener('click', () => { try { localStorage.setItem('gs_lang', LANG === 'en' ? 'hi' : 'en'); } catch (e) {} location.reload(); });
 
 buildForm();
 const params = new URLSearchParams(location.search);
