@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# One-time setup of a fresh Ubuntu 22.04/24.04 server for Ghar Sarthi.
+# One-time setup of a fresh Ubuntu 22.04/24.04 server for SadaSneha.
 # Run as root:  bash setup-server.sh
 set -euo pipefail
 apt-get update -y

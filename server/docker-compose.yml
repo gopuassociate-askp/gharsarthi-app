@@ -1,4 +1,4 @@
-# Ghar Sarthi platform: self-hosted n8n + Postgres + Caddy (automatic HTTPS).
+# SadaSneha platform: self-hosted n8n + Postgres + Caddy (automatic HTTPS).
 # Runs on any Ubuntu server (2–4 GB RAM), ideally in an Indian region.
 #   cp .env.example .env   # fill in the domain and passwords
 #   docker compose up -d
