@@ -1,7 +1,7 @@
 // SadaSneha service worker: lets the app open from the home screen, even on
 // a weak network. The family's last status is kept by the page itself.
-const CACHE = 'ghar-sarthi-v19';
-const SHELL = ['./', './index.html', './manifest.json', './icon-192.png', './icon-512.png'];
+const CACHE = 'ghar-sarthi-v20';
+const SHELL = ['./', './index.html', './manifest.json', './sneha.jpg', './icon-192.png', './icon-512.png'];
 self.addEventListener('install', (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(SHELL)).then(() => self.skipWaiting()));
 });

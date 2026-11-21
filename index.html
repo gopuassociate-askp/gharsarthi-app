@@ -81,7 +81,12 @@
 
   /* Sneha on the welcome screen */
   .sneha-hero { text-align: center; }
-  .sneha-hero svg { width: 170px; height: 170px; display: block; margin: 0 auto 4px; }
+  .sneha-face { margin: 0 auto 6px; }
+  .sneha-face img { width: 170px; height: 170px; border-radius: 50%; object-fit: cover; display: block; margin: 0 auto; border: 5px solid #fff; box-shadow: 0 0 0 4px #f59e0b, 0 8px 24px rgba(234,88,12,.25); }
+  .sneha-face figcaption { font-size: 14px; color: #9a3412; margin-top: 8px; }
+  .sneha-intro { display: flex; gap: 14px; align-items: center; }
+  .sneha-intro img { width: 96px; height: 96px; border-radius: 50%; object-fit: cover; flex: none; border: 3px solid #fff; box-shadow: 0 0 0 3px #f59e0b; }
+  .sneha-intro h2 { margin: 0 0 4px; }
   .sneha-hero h2 { font-size: 26px; }
 
   ul.plain { padding-left: 22px; margin: 6px 0 0; }
@@ -163,25 +168,7 @@
   <!-- Welcome: no code saved yet -->
   <section id="v-welcome" class="view">
     <div class="card sneha-hero">
-      <svg viewBox="0 0 200 200" role="img" aria-label="स्नेहा">
-        <defs><clipPath id="sneha-c"><circle cx="100" cy="100" r="93"/></clipPath></defs>
-        <circle cx="100" cy="100" r="96" fill="#fff1e0"/>
-        <g clip-path="url(#sneha-c)">
-        <circle cx="100" cy="100" r="96" fill="none" stroke="#f59e0b" stroke-width="6" stroke-dasharray="2 10" stroke-linecap="round"/>
-        <path d="M44 196 C 48 150, 70 132, 100 132 C 130 132, 152 150, 156 196 Z" fill="#ea580c"/>
-        <path d="M58 196 C 66 160, 84 146, 100 146 C 116 146, 136 158, 142 196" fill="none" stroke="#facc15" stroke-width="5"/>
-        <rect x="90" y="112" width="20" height="24" rx="8" fill="#c68a5e"/>
-        <path d="M56 92 C 54 52, 80 34, 102 34 C 126 34, 148 52, 146 92 C 146 116, 140 132, 132 140 L 70 140 C 60 130, 56 112, 56 92 Z" fill="#2b1a12"/>
-        <ellipse cx="100" cy="88" rx="34" ry="38" fill="#d79b6c"/>
-        <path d="M66 74 C 74 50, 128 46, 136 76 C 122 62, 86 60, 66 74 Z" fill="#2b1a12"/>
-        <circle cx="100" cy="66" r="3.5" fill="#be123c"/>
-        <path d="M84 86 q4 -4 8 0 M108 86 q4 -4 8 0" stroke="#2b1a12" stroke-width="3" fill="none" stroke-linecap="round"/>
-        <path d="M88 104 q12 10 24 0" stroke="#9f1239" stroke-width="3.5" fill="none" stroke-linecap="round"/>
-        <circle cx="80" cy="98" r="5" fill="#f9a8a8" opacity=".6"/><circle cx="120" cy="98" r="5" fill="#f9a8a8" opacity=".6"/>
-        <circle cx="66" cy="96" r="3" fill="#facc15"/><circle cx="134" cy="96" r="3" fill="#facc15"/>
-        </g>
-        <circle cx="100" cy="100" r="96" fill="none" stroke="#f59e0b" stroke-width="6" stroke-dasharray="2 10" stroke-linecap="round"/>
-      </svg>
+      <figure class="sneha-face"><img src="sneha.jpg" width="170" height="170" alt="स्नेहा / Sneha"><figcaption><span data-en="Sneha – your AI companion">स्नेहा – आपकी AI सहायिका</span></figcaption></figure>
       <h2><span data-en="Namaste, I am Sneha 🙏">नमस्ते, मैं स्नेहा हूँ 🙏</span></h2>
       <p><span data-en="I call your loved ones every day to lovingly ask how they are, remind them about meals and medicines, and listen to their old stories – and if anything seems wrong, I tell you at once.">मैं रोज़ आपके अपनों को फ़ोन करके प्यार से हालचाल पूछती हूँ, खाने और दवाई की याद दिलाती हूँ, उनकी पुरानी बातें सुनती हूँ – और कुछ भी गड़बड़ लगे तो तुरंत आपको बताती हूँ।</span></p>
       <p class="muted">I call your loved ones every day, remind them about meals and medicines, listen to their stories, and tell you at once if anything seems wrong.</p>
@@ -358,6 +345,11 @@
 
   <!-- What Sneha does -->
   <section id="v-sneha" class="view hidden">
+    <div class="card sneha-intro">
+      <img src="sneha.jpg" width="96" height="96" alt="स्नेहा / Sneha">
+      <div><h2><span data-en="Namaste, I am Sneha 🙏">नमस्ते, मैं स्नेहा हूँ 🙏</span></h2>
+      <p class="muted"><span data-en="Your AI companion. I talk on the phone in your family's language, with the same warm voice every day.">आपकी AI सहायिका। मैं रोज़ उसी प्यारी आवाज़ में, आपके परिवार की भाषा में फ़ोन पर बात करती हूँ।</span></p></div>
+    </div>
     <div class="card">
       <h2>स्नेहा क्या करती है / What Sneha does</h2>
       <ul class="plain">
