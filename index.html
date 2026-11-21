@@ -135,6 +135,8 @@
   .cal i { font-style: normal; background: #ea580c; color: #fff; font-weight: 700; padding: 2px 0; }
   .cal b { font-size: 26px; color: #7c2d12; padding: 2px 0 4px; }
   .td-fest { margin-top: 12px; padding: 12px 14px; border-radius: 16px; background: linear-gradient(120deg, #fff1d6, #ffe4e6); font-size: 19px; font-weight: 700; color: #9f1239; }
+  .td-weather { margin-top: 10px; font-size: 17px; color: #4a2410; }
+  .td-weather small { display: block; color: #9a3412; font-size: 15px; margin-top: 2px; }
   .td-next { margin-top: 10px; display: flex; flex-wrap: wrap; gap: 8px; }
   .td-chip { background: #fff7ed; border: 1px solid #fed7aa; border-radius: 999px; padding: 4px 12px; font-size: 15px; color: #7c2d12; }
   .td-h { margin: 14px 0 6px; font-size: 17px; color: #9f1239; }
@@ -210,6 +212,7 @@
 
     <div class="card today-card" id="today-card">
       <div class="today-top"><div><b id="td-day">—</b><span id="td-date">—</span></div><span id="td-icon" class="td-icon" aria-hidden="true"></span></div>
+      <div id="td-weather" class="td-weather hidden"></div>
       <div id="td-fest" class="td-fest hidden"></div>
       <div id="td-next" class="td-next"></div>
       <h3 id="td-calls-title" class="td-h"></h3>
@@ -599,6 +602,7 @@ function render(j) {
   renderMessages(j.messages, f.address_as || f.elder_name);
   renderOccasions(j.occasions || []);
   showToday(f, j.occasions || [], j.today || []);
+  showWeather(f.city);
   if (!$('#up-from').value) $('#up-from').value = store.get('gs_elder_from') || f.address_as || '';
   $('#h-plan').textContent = (f.plan || '—').split(' / ')[0];
   $('#h-since').textContent = fmtDate(f.since);
@@ -825,6 +829,57 @@ $('#login-go').addEventListener('click', () => {
   store.set('gs_code', c); $('#login-err').textContent = ''; show('home');
 });
 $('#logout').addEventListener('click', () => { store.del('gs_code'); store.del('gs_last'); show('welcome'); });
+
+// ---- weather for the family's city (Open-Meteo, free, no key; kept 30 minutes on this phone) ----
+// Weather in plain words for Sneha and the app (Open-Meteo daily forecast).
+// weatherWords({ max, min, rain, code }) -> { hi, en, note } where note is
+// 'rain' | 'heat' | 'cold' | 'storm' | null (worth a gentle word in the call).
+// Kept free of npm packages: pasted into n8n Code nodes and the app.
+const WX = [
+  [[0], '☀️', 'साफ़ धूप', 'clear sky'], [[1, 2], '🌤️', 'हल्के बादल', 'partly cloudy'], [[3], '☁️', 'बादल', 'cloudy'],
+  [[45, 48], '🌫️', 'कोहरा', 'fog'], [[51, 53, 55, 56, 57], '🌦️', 'हल्की बूँदाबाँदी', 'drizzle'],
+  [[61, 63, 65, 66, 67, 80, 81, 82], '🌧️', 'बारिश', 'rain'], [[71, 73, 75, 77, 85, 86], '❄️', 'बर्फ़', 'snow'],
+  [[95, 96, 99], '⛈️', 'आँधी-तूफ़ान', 'thunderstorm'],
+];
+function wxOf(code) { return WX.find(([codes]) => codes.includes(Number(code))) || [[], '🌡️', 'मौसम', 'weather']; }
+function weatherWords(w) {
+  if (!w || w.max == null) return null;
+  const [, icon, hiSky, enSky] = wxOf(w.code);
+  const max = Math.round(w.max); const min = Math.round(w.min); const rain = Math.round(w.rain || 0);
+  let note = null;
+  if ([95, 96, 99].includes(Number(w.code))) note = 'storm';
+  else if (rain >= 60) note = 'rain';
+  else if (max >= 40) note = 'heat';
+  else if (min <= 8) note = 'cold';
+  const hi = `${icon} आज ${hiSky}, दिन में ${max}° तक, रात में ${min}°${rain >= 30 ? `, बारिश की संभावना ${rain}%` : ''}`;
+  const en = `${icon} Today ${enSky}, up to ${max}° by day, ${min}° at night${rain >= 30 ? `, ${rain}% chance of rain` : ''}`;
+  return { icon, hi, en, note, max, min, rain };
+}
+
+const WX_TIP = { rain: ['☔ बाहर जाएँ तो छाता साथ रखें।', '☔ Take an umbrella if going out.'], heat: ['💧 पानी पीते रहें, दोपहर की धूप से बचें।', '💧 Keep drinking water; avoid the afternoon sun.'],
+  cold: ['🧣 गरम कपड़े पहनें।', '🧣 Wear warm clothes.'], storm: ['🏠 आँधी-तूफ़ान में घर के अंदर रहें।', '🏠 Stay indoors during the storm.'] };
+async function showWeather(city) {
+  const box = $('#td-weather');
+  if (!city) { box.classList.add('hidden'); return; }
+  const key = 'gs_wx_' + city.toLowerCase();
+  let w = null;
+  try { const c = JSON.parse(store.get(key) || 'null'); if (c && Date.now() - c.t < 30 * 60000) w = c.w; } catch (e) {}
+  if (!w) {
+    try {
+      const g = await (await fetch('https://geocoding-api.open-meteo.com/v1/search?count=1&language=en&format=json&countryCode=IN&name=' + encodeURIComponent(city))).json();
+      const p = (g.results || [])[0]; if (!p) return;
+      const f = await (await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${p.latitude}&longitude=${p.longitude}&current=temperature_2m&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max,weather_code&timezone=Asia%2FKolkata&forecast_days=1`)).json();
+      const d = f.daily || {};
+      w = { ...weatherWords({ max: d.temperature_2m_max[0], min: d.temperature_2m_min[0], rain: (d.precipitation_probability_max || [0])[0], code: (d.weather_code || [0])[0] }),
+        now: f.current ? Math.round(f.current.temperature_2m) : null, place: p.name };
+      store.set(key, JSON.stringify({ t: Date.now(), w }));
+    } catch (e) { return; }
+  }
+  if (!w) return;
+  const tip = w.note ? WX_TIP[w.note][LANG === 'en' ? 1 : 0] : '';
+  box.innerHTML = `${esc(w.place)}${w.now != null ? ` · ${T('अभी', 'now')} ${w.now}°` : ''}<br>${esc(T(w.hi, w.en))}${tip ? `<small>${tip}</small>` : ''}`;
+  box.classList.remove('hidden');
+}
 
 // ---- today: date, festival, countdowns and today's calls ----
 const FESTIVALS = [{"date":"2026-12-25","hi":"क्रिसमस","en":"Christmas","regions":"all","greet":"inclusive","theme":"christmas","verify":false},{"date":"2027-01-01","hi":"नया साल","en":"New Year","regions":"all","greet":"all","theme":"newyear","verify":false},{"date":"2027-01-13","hi":"लोहड़ी","en":"Lohri","regions":["PB","HR","DL","HP","JK","CH"],"greet":"region","theme":"lohri","verify":true},{"date":"2027-01-15","hi":"मकर संक्रांति / पोंगल","en":"Makar Sankranti / Pongal","regions":"all","greet":"region","theme":"sankranti","verify":true},{"date":"2027-01-26","hi":"गणतंत्र दिवस","en":"Republic Day","regions":"all","greet":"all","theme":"national","verify":false},{"date":"2027-03-10","hi":"ईद-उल-फ़ित्र","en":"Id-ul-Fitr","regions":"all","greet":"inclusive","theme":"eid","verify":true},{"date":"2027-03-22","hi":"होलिका दहन","en":"Holika Dahan","regions":["UP","BR","MP","RJ","DL","HR","UK","HP","JH","CG","CH","JK","GJ","MH","WB","OD"],"greet":"region","theme":"holi","verify":false},{"date":"2027-03-23","hi":"होली","en":"Holi","regions":"all","greet":"region","theme":"holi","verify":false},{"date":"2027-04-07","hi":"गुड़ी पड़वा / उगादि / चैत्र नवरात्रि","en":"Gudi Padwa / Ugadi / Chaitra Navratri","regions":["MH","GA","KA","AP","TG","UP","BR","MP","RJ","DL","HR","UK","HP","JH","CG","CH","JK"],"greet":"region","theme":"newyear_regional","verify":false},{"date":"2027-04-14","hi":"बैसाखी / बिहू / पुथांडु / विशु","en":"Baisakhi / Bihu / Puthandu / Vishu","regions":["PB","HR","AS","TN","KL","WB","OD"],"greet":"region","theme":"harvest","verify":true},{"date":"2027-04-15","hi":"राम नवमी","en":"Ram Navami","regions":"all","greet":"region","theme":"ramnavami","verify":false},{"date":"2027-04-19","hi":"महावीर जयंती","en":"Mahavir Jayanti","regions":"all","greet":"inclusive","theme":"jain","verify":false},{"date":"2027-05-17","hi":"ईद-उल-ज़ुहा (बकरीद)","en":"Id-ul-Zuha (Bakrid)","regions":"all","greet":"inclusive","theme":"eid","verify":true},{"date":"2027-05-20","hi":"बुद्ध पूर्णिमा","en":"Buddha Purnima","regions":"all","greet":"inclusive","theme":"buddha","verify":false},{"date":"2027-06-16","hi":"मुहर्रम","en":"Muharram","regions":"all","greet":"none","theme":"muharram","verify":true},{"date":"2027-08-04","hi":"हरियाली तीज","en":"Hariyali Teej","regions":["RJ","UP","BR","MP","HR","DL","UK","JH","CG"],"greet":"region","theme":"teej","verify":false},{"date":"2027-08-15","hi":"स्वतंत्रता दिवस","en":"Independence Day","regions":"all","greet":"all","theme":"national","verify":false},{"date":"2027-08-17","hi":"रक्षा बंधन","en":"Raksha Bandhan","regions":"all","greet":"region","theme":"rakhi","verify":false},{"date":"2027-08-25","hi":"जन्माष्टमी","en":"Janmashtami","regions":"all","greet":"region","theme":"janmashtami","verify":false},{"date":"2027-09-04","hi":"गणेश चतुर्थी","en":"Ganesh Chaturthi","regions":["MH","GA","KA","AP","TG","GJ","TN"],"greet":"region","theme":"ganesh","verify":true},{"date":"2027-09-12","hi":"ओणम","en":"Onam","regions":["KL"],"greet":"region","theme":"onam","verify":true},{"date":"2027-09-30","hi":"नवरात्रि आरंभ","en":"Navratri begins","regions":"all","greet":"region","theme":"navratri","verify":false},{"date":"2027-10-02","hi":"गांधी जयंती","en":"Gandhi Jayanti","regions":"all","greet":"all","theme":"national","verify":false},{"date":"2027-10-07","hi":"दुर्गा पूजा (अष्टमी)","en":"Durga Puja (Ashtami)","regions":["WB","OD","AS","TR","BR","JH"],"greet":"region","theme":"durga","verify":true},{"date":"2027-10-09","hi":"दशहरा","en":"Dussehra","regions":"all","greet":"region","theme":"dussehra","verify":false},{"date":"2027-10-18","hi":"करवा चौथ","en":"Karva Chauth","regions":["UP","BR","MP","RJ","DL","HR","UK","HP","JH","CG","CH","JK","PB","GJ"],"greet":"region","theme":"karvachauth","verify":false},{"date":"2027-10-29","hi":"दीपावली","en":"Diwali","regions":"all","greet":"region","theme":"diwali","verify":false},{"date":"2027-11-04","hi":"छठ पूजा","en":"Chhath Puja","regions":["BR","JH","UP","DL"],"greet":"region","theme":"chhath","verify":false},{"date":"2027-11-14","hi":"गुरु नानक जयंती","en":"Guru Nanak Jayanti","regions":"all","greet":"inclusive","theme":"gurpurab","verify":false},{"date":"2027-12-25","hi":"क्रिसमस","en":"Christmas","regions":"all","greet":"inclusive","theme":"christmas","verify":false}];
