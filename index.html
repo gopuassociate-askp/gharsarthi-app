@@ -99,6 +99,16 @@
   #talk-cam.pulse { animation: campulse 1.2s ease-in-out 6; border-color: #ea580c; }
   @keyframes campulse { 50% { transform: scale(1.08); box-shadow: 0 0 0 6px rgba(234,88,12,.25); } }
   .linkbtn { background: none; border: 0; padding: 0; color: #c2410c; text-decoration: underline; font: inherit; cursor: pointer; }
+  .tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .tile { border: 0; border-radius: 22px; padding: 20px 10px; font: inherit; font-weight: 800; font-size: 20px; color: #7c2d12; background: #ffedd5; box-shadow: 0 4px 14px rgba(234,88,12,.15); min-height: 120px; cursor: pointer; }
+  .tile .ic { display: block; font-size: 42px; margin-bottom: 6px; }
+  .tile.sos { background: #dc2626; color: #fff; grid-column: 1 / -1; min-height: 90px; }
+  .door { display: block; width: 100%; border: 0; border-radius: 24px; padding: 22px 16px; margin: 12px 0; font: inherit; font-size: 21px; font-weight: 800; text-align: left; cursor: pointer; }
+  .door small { display: block; font-size: 15px; font-weight: 500; margin-top: 4px; opacity: .85; }
+  .door.elder { background: #ea580c; color: #fff; } .door.family { background: #ffedd5; color: #7c2d12; }
+  .rowline { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 8px 0; border-bottom: 1px solid #fde3cf; }
+  .alert-item { border-left: 5px solid #dc2626; background: #fef2f2; border-radius: 12px; padding: 10px 12px; margin: 8px 0; }
+  .alert-item.done { border-left-color: #16a34a; background: #f0fdf4; }
   .face-notes { position: absolute; inset: 0; pointer-events: none; background: linear-gradient(0deg, rgba(124,45,18,.55), rgba(124,45,18,0) 55%); }
   .face-notes span { position: absolute; left: -40px; bottom: 30%; font-size: 40px; color: #fff; text-shadow: 0 2px 8px rgba(0,0,0,.5); animation: notefly 3.2s linear infinite; }
   .face-notes span:nth-child(2) { animation-delay: .6s; font-size: 30px; bottom: 45%; } .face-notes span:nth-child(3) { animation-delay: 1.2s; bottom: 20%; }
@@ -225,6 +235,79 @@
     </div>
   </section>
 
+  <!-- First open: two doors -->
+  <section id="v-role" class="view hidden">
+    <div class="card sneha-hero">
+      <figure class="sneha-face"><img src="sneha.jpg" width="140" height="140" alt="स्नेहा / Sneha" style="width:140px;height:140px"></figure>
+      <h2><span data-en="Namaste 🙏 Who is using this phone?">नमस्ते 🙏 यह फ़ोन कौन चला रहा है?</span></h2>
+      <button class="door elder" id="door-elder" type="button">👴👵 <span data-en="I am the elder">मैं बुज़ुर्ग हूँ</span><small><span data-en="Talk to Sneha, songs, call family – big and simple">स्नेहा से बात, गाने, घर वालों को फ़ोन – बड़ा और आसान</span></small></button>
+      <button class="door family" id="door-family" type="button">🤝 <span data-en="I am family / a caretaker">मैं परिवार / देखभाल करने वाला हूँ</span><small><span data-en="Sign up, see how they are, get alerts">पंजीकरण, उनका हाल, ज़रूरी ख़बरें</span></small></button>
+    </div>
+  </section>
+
+  <!-- The elder's phone: the code from the family, once -->
+  <section id="v-elogin" class="view hidden">
+    <div class="card">
+      <h2>🔑 <span data-en="Your family's code">घर वालों से मिला कोड</span></h2>
+      <p class="muted"><span data-en="Ask your son or daughter for the SadaSneha code (like GS-4K7P9QX2), or open the link they sent you.">अपने बेटे-बेटी से सदा स्नेहा का कोड पूछिए (जैसे GS-4K7P9QX2), या उनका भेजा लिंक खोलिए।</span></p>
+      <input id="ecode-in" autocomplete="off" autocapitalize="characters" placeholder="GS-XXXXXXXX" style="font-size:22px;text-align:center">
+      <div id="ecode-err" class="err"></div>
+      <button class="btn primary" id="ecode-go" type="button"><span data-en="Start">शुरू करें</span></button>
+      <button class="btn secondary" data-go="role" type="button"><span data-en="Back">वापस</span></button>
+    </div>
+  </section>
+
+  <!-- The elder's simple home -->
+  <section id="v-elder" class="view hidden">
+    <div class="card" style="text-align:center">
+      <h2 style="margin:4px 0"><span data-en="Namaste">नमस्ते</span>, <span id="e-name">—</span> 🙏</h2>
+      <p class="muted" id="e-date" style="margin:0"></p>
+    </div>
+    <div id="e-new" class="card hidden"></div>
+    <div class="tiles">
+      <button class="tile" data-go="talk" type="button"><span class="ic">🗣️</span><span data-en="Talk to Sneha">स्नेहा से बात</span></button>
+      <button class="tile" id="t-songs" type="button"><span class="ic">🎵</span><span data-en="Songs & bhajans">गाने और भजन</span></button>
+      <button class="tile" id="t-calls" type="button"><span class="ic">📞</span><span data-en="Call family">घर वालों को फ़ोन</span></button>
+      <button class="tile" id="t-msgs" type="button"><span class="ic">💌</span><span data-en="Messages">संदेश</span></button>
+      <button class="tile sos" id="t-help" type="button">🚨 <span data-en="Help – tell my family now">मदद – घर वालों को अभी बताएँ</span></button>
+    </div>
+    <div id="e-panel" class="card hidden" style="margin-top:12px"></div>
+    <div class="card" style="margin-top:12px">
+      <h2 style="font-size:18px">👥 <span data-en="Who can see my news">मेरी ख़बर कौन देख सकता है</span></h2>
+      <div id="e-circle"><p class="muted">—</p></div>
+    </div>
+    <p style="text-align:center"><button class="linkbtn" id="e-switch" type="button"><span data-en="Open the family app on this phone">इस फ़ोन पर परिवार वाला ऐप खोलें</span></button></p>
+  </section>
+
+  <!-- Invited to the family circle -->
+  <section id="v-join" class="view hidden">
+    <div class="card sneha-hero">
+      <figure class="sneha-face"><img src="sneha.jpg" width="120" height="120" alt="स्नेहा / Sneha" style="width:120px;height:120px"></figure>
+      <h2 id="join-title">—</h2>
+      <p id="join-text" class="muted"></p>
+      <div id="join-g" class="g-btn"></div>
+      <p id="join-msg" class="err"></p>
+      <p class="muted" style="font-size:14px"><span data-en="We use your Google account only to know it is you. Your email is not shown to anyone.">Google खाते से हम सिर्फ़ यह जानते हैं कि यह आप ही हैं। आपका ईमेल किसी को नहीं दिखता।</span></p>
+    </div>
+  </section>
+
+  <!-- A family-circle member's view -->
+  <section id="v-care" class="view hidden">
+    <div class="card" style="text-align:center">
+      <h2 style="margin:4px 0" id="c-title">—</h2>
+      <p class="muted" id="c-sub" style="margin:0"></p>
+    </div>
+    <div class="card"><h2 style="font-size:18px">🚨 <span data-en="Alerts (last 3 days)">ज़रूरी ख़बरें (पिछले 3 दिन)</span></h2><div id="c-alerts"></div></div>
+    <div class="card"><h2 style="font-size:18px">☀️ <span data-en="Today">आज</span></h2><div id="c-today"></div></div>
+    <div id="c-family" class="hidden">
+      <div class="card"><h2 style="font-size:18px">💌 <span data-en="Messages">संदेश</span></h2><div id="c-msgs"></div>
+        <textarea id="c-text" maxlength="300" placeholder="पापा, शाम को फ़ोन करूँगी।"></textarea>
+        <button class="btn primary" id="c-send" type="button"><span data-en="Send to them">उन्हें भेजें</span></button><p id="c-send-msg" class="muted"></p></div>
+      <div class="card" id="c-song-card"></div>
+    </div>
+    <p style="text-align:center"><button class="linkbtn" id="c-out" type="button"><span data-en="Sign out on this phone">इस फ़ोन पर लॉग-आउट</span></button></p>
+  </section>
+
   <!-- Enter code -->
   <section id="v-perm" class="view hidden">
     <div class="card sneha-hero">
@@ -300,6 +383,26 @@
       <div id="msg-err" class="err"></div>
       <div id="msg-list"></div>
     </div>
+
+    <div class="card" id="circle-card">
+      <h2>👥 <span data-en="Family & caretakers">परिवार और देखभाल करने वाले</span></h2>
+      <p class="muted"><span data-en="Add people who should know how they are. Family see daily news and messages; a caretaker or neighbour sees only today's status and alerts. Nobody sees payments.">उन्हें जोड़िए जिन्हें हाल पता होना चाहिए। परिवार: रोज़ की ख़बर और संदेश। देखभाल करने वाले / पड़ोसी: सिर्फ़ आज का हाल और ज़रूरी ख़बर। भुगतान कोई नहीं देखता।</span></p>
+      <div id="circle-list"></div>
+      <label for="ci-name"><span data-en="Name">नाम</span></label><input id="ci-name" maxlength="40" placeholder="जैसे: काव्या / शर्मा जी">
+      <label for="ci-rel"><span data-en="Relation">रिश्ता</span></label>
+      <select id="ci-rel"><option>बेटा</option><option>बेटी</option><option>बहू</option><option>दामाद</option><option>पोता</option><option>पोती</option><option>नाती</option><option>नातिन</option><option>भाई</option><option>बहन</option><option>भतीजा</option><option>भतीजी</option><option>पड़ोसी</option><option>दोस्त</option><option>देखभाल करने वाले</option><option>अन्य</option></select>
+      <label for="ci-level"><span data-en="What may they see?">वे क्या देख सकें?</span></label>
+      <select id="ci-level"><option value="family">परिवार: रोज़ की ख़बर, संदेश, गाना भेजना / Family: daily news, messages, send songs</option><option value="care">देखभाल: सिर्फ़ आज का हाल और ज़रूरी ख़बर / Caretaker: today's status and alerts only</option></select>
+      <label class="check"><input type="checkbox" id="ci-consent"> <span><span data-en="The elder knows and agrees that this person may see their news.">बुज़ुर्ग को पता है और वे सहमत हैं कि यह व्यक्ति उनकी ख़बर देख सके।</span></span></label>
+      <button class="btn primary" id="ci-add" type="button"><span data-en="Make an invite link">बुलाने का लिंक बनाएँ</span></button>
+      <p id="ci-msg" class="muted"></p>
+      <hr style="border:0;border-top:1px solid #fde3cf;margin:14px 0">
+      <p style="margin:0 0 6px"><b>📱 <span data-en="Set up their own phone">उनके फ़ोन पर ऐप</span></b></p>
+      <p class="muted" style="font-size:14px;margin:0 0 6px"><span data-en="Send this link to their phone once: the app opens in the big, simple elder view.">यह लिंक एक बार उनके फ़ोन पर भेजिए: ऐप बड़े, आसान रूप में खुलेगा।</span></p>
+      <button class="btn secondary" id="elder-link" type="button"><span data-en="Share the link for their phone">उनके फ़ोन का लिंक भेजें</span></button>
+    </div>
+
+    <div class="card" id="song-send-card"></div>
 
     <div class="card" id="up-card">
       <h2>📮 परिवार को संदेश / Message to family</h2>
@@ -417,7 +520,7 @@
         <video id="talk-self" class="hidden" playsinline muted></video>
         <span class="talk-ai">स्नेहा – आपकी AI सहायिका</span><span id="talk-cam-on" class="talk-cam hidden">● कैमरा चालू</span><span id="talk-mood" class="talk-mood hidden"></span>
         <div id="face-notes" class="face-notes hidden" aria-hidden="true"><span>♪</span><span>♫</span><span>♩</span><span>♬</span><span>♪</span><p>🎵 गाना ढूँढ रही हूँ…</p></div></div>
-      <p class="muted" style="font-size:11px;margin:4px 0 0">v46</p>
+      <p class="muted" style="font-size:11px;margin:4px 0 0">v47</p>
       <p id="talk-state" class="talk-state"><span data-en="Press the button and speak">बटन दबाकर बोलिए</span></p>
       <button class="talk-mic" id="talk-mic" type="button" aria-label="बोलें / Speak">🎤</button>
       <div class="talk-row">
@@ -608,7 +711,8 @@ const DEMO_CODE = 'GS-DEMO';
   const D = {
     family: { elder_name: 'रामप्रसाद शर्मा', address_as: 'पापा जी', status: 'Active', plan: 'प्लस (रोज़ एक कॉल) / Plus', state: 'मध्य प्रदेश / Madhya Pradesh',
       language: 'हिंदी / Hindi', city: 'Jabalpur', since: '2026-10-02T06:00:00Z', next_payment: '2026-12-02', elder_gender: 'पुरुष / Male', elder_birthday: md(0),
-      times: { breakfast: '08:30', lunch: '13:30', medicine: '20:30' }, contacts: ['सुनील (बेटा)', 'प्रिया (बेटी)'] },
+      times: { breakfast: '08:30', lunch: '13:30', medicine: '20:30' }, contacts: ['सुनील (बेटा)', 'प्रिया (बेटी)'],
+      calls: [{ name: 'सुनील', relation: 'बेटा', phone: '+910000000000' }, { name: 'प्रिया', relation: 'बेटी', phone: '+910000000001' }] },
     messages: [
       { id: 1, direction: 'to_family', from: 'पापा जी', text: 'बेटा, मेरी बीपी की दवाई ख़त्म होने वाली है', level: 'important', ack_by: 'सुनील', created_at: at(9, 10) },
       { id: 2, direction: 'to_elder', from: 'प्रिया', text: 'पापा, आज शाम को मैं फ़ोन करूँगी', status: 'delivered', reply: 'ठीक है बेटा, इंतज़ार करूँगा', created_at: at(8, 0) },
@@ -644,6 +748,14 @@ const DEMO_CODE = 'GS-DEMO';
       return reply({ ok: true, code: DEMO_CODE, status: 'New', suggested_plan: 'plus', preview: true });
     }
     if (u.includes('/app-status')) return reply({ ok: true, ...D });
+    if (u.includes('/app-circle')) {   // the family circle, pretend
+      D.circle = D.circle || [{ member_id: 'D1', name: 'काव्या', relation: 'पोती', level: 'family', status: 'active' }, { member_id: 'D2', name: 'शर्मा जी', relation: 'पड़ोसी', level: 'care', status: 'invited' }];
+      if (body.action === 'list') return reply({ ok: true, members: D.circle });
+      if (body.action === 'invite') { D.circle.push({ member_id: 'D' + (++nextId), name: body.name, relation: body.relation, level: body.level, status: 'invited' }); return reply({ ok: true, link: 'https://sadasneha.in/?join=DEMO-LINK' }); }
+      if (body.action === 'remove') { D.circle = D.circle.filter((m) => m.member_id !== body.member_id); return reply({ ok: true }); }
+      if (body.action === 'song') { D.messages.unshift({ id: ++nextId, direction: 'to_elder', category: 'song', from: body.from || 'परिवार', text: '🎵 ' + body.song, created_at: new Date().toISOString() }); return reply({ ok: true }); }
+      return reply({ ok: false, why: 'demo' });
+    }
     if (u.includes('/app-talk')) return real(url, opt);   // demo talks to the real Sneha (sample elder, no family alerts)
     if (u.includes('/app-medicines')) return reply({ ok: true, medicines: D.medicines });
     if (u.includes('/app-medicine-add')) { D.medicines.push({ id: ++nextId, simple: body.simple || body.name, name: body.name, dose: body.dose || '', times: body.times || [], food: body.food, stock: body.stock }); return reply({ ok: true }); }
@@ -747,7 +859,10 @@ function show(view) {
   $('#tabs').classList.toggle('hidden', !tabbed);
   document.querySelectorAll('nav button').forEach((b) => b.classList.toggle('on', b.dataset.go === view));
   window.scrollTo(0, 0);
-  if (view === 'home') loadStatus();
+  if (view === 'home') { loadStatus(); circleList(); if (!$('#song-send-card').innerHTML) songCard($('#song-send-card'), { needFrom: true, body: () => ({ code: store.get('gs_code') }) }); }
+  if (view === 'elder') loadElder();
+  if (view === 'care') loadCare();
+  if (view === 'join') loadJoin();
   if (view === 'meds') loadMeds();
   if (view === 'signup') applyGoogle();
   try { TALK.open = view === 'talk'; } catch (e) {}
@@ -1143,7 +1258,7 @@ $('#login-go').addEventListener('click', () => {
   if (!/^GS-[A-Z0-9]{8}$/.test(c)) { $('#login-err').textContent = 'कोड ऐसा दिखना चाहिए: GS-XXXXXXXX'; return; }
   store.set('gs_code', c); $('#login-err').textContent = ''; show('home');
 });
-$('#logout').addEventListener('click', () => { store.del('gs_code'); store.del('gs_last'); show('welcome'); });
+$('#logout').addEventListener('click', () => { store.del('gs_code'); store.del('gs_last'); store.del('gs_role'); show('role'); });
 
 // ---- weather for the family's city (Open-Meteo, free, no key; kept 30 minutes on this phone) ----
 // Weather in plain words for Sneha and the app (Open-Meteo daily forecast).
@@ -1413,6 +1528,7 @@ $('#perm-yes').addEventListener('click', async () => {
 });
 $('#perm-later').addEventListener('click', () => { store.set('gs_media', 'later'); show(afterPerm); });
 async function onGoogle(credential) {
+  if (window.__gMode === 'join') return onJoinGoogle(credential);
   $('#g-msg').textContent = 'रुकिए… / Please wait…';
   try {
     const j = await (await fetch(API.google, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ credential }) })).json();
@@ -1420,6 +1536,8 @@ async function onGoogle(credential) {
     $('#g-msg').textContent = '';
     store.set('gs_g_email', j.email || ''); store.set('gs_g_name', j.name || '');
     if (j.code) { store.set('gs_code', j.code); return askPermsThen('home'); }
+    // not a family owner: perhaps a member of someone's family circle
+    try { const m = await circleCall({ action: 'login', cred: credential }); if (m.ok) { store.set('gs_member', m.key); return show('care'); } } catch (e) {}
     askPermsThen('signup');
   } catch (e) { $('#g-msg').textContent = 'इंटरनेट नहीं / Offline'; }
 }
@@ -1436,6 +1554,202 @@ if (window.__PREVIEW) {
   gs.onerror = () => { $('#g-msg').textContent = 'Google बटन लोड नहीं हुआ; "मेरे पास कोड है" से आगे बढ़ें / Google did not load; use "I have a code"'; };
   document.head.appendChild(gs);
 }
+
+
+// ---- Two doors (elder / family), the elder's simple home, and the family circle ----
+API.circle = API_BASE + '/app-circle';
+const SONGS = {"_note":"Songs Sneha suggests (real, well-loved; she always names one exactly). Any other song the elder asks for is played too.","सुबह / भक्ति":["ऐ मालिक तेरे बंदे हम - लता मंगेशकर","इतनी शक्ति हमें देना दाता - लता मंगेशकर","ओम जय जगदीश हरे - अनुराधा पौडवाल","तू प्यार का सागर है - मन्ना डे","अच्युतम केशवम - विक्रम हज़रा"],"ख़ुशी":["ये दोस्ती हम नहीं तोड़ेंगे - किशोर कुमार","मेरे सपनों की रानी - किशोर कुमार","आज कल तेरे मेरे प्यार के चर्चे - मोहम्मद रफ़ी","चल चल चल मेरे साथी - किशोर कुमार","ज़िंदगी एक सफ़र है सुहाना - किशोर कुमार"],"पुरानी यादें / सुकून":["लग जा गले - लता मंगेशकर","कहीं दूर जब दिन ढल जाए - मुकेश","अभी न जाओ छोड़ कर - मोहम्मद रफ़ी","चौदहवीं का चाँद हो - मोहम्मद रफ़ी","तेरे मेरे मिलन की ये रैना - लता मंगेशकर"],"उदासी में हौसला":["रुक जाना नहीं तू कहीं हार के - किशोर कुमार","आने वाला पल जाने वाला है - किशोर कुमार","ज़िंदगी कैसी है पहेली - मन्ना डे","कभी कभी मेरे दिल में - मुकेश"],"देशभक्ति / त्योहार":["ऐ मेरे वतन के लोगो - लता मंगेशकर","मेरे देश की धरती - महेंद्र कपूर","आज मौसम बड़ा बेईमान है - मोहम्मद रफ़ी"]};
+const circleCall = async (body) => (await fetch(API.circle, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(body) })).json();
+const songOptions = () => Object.entries(SONGS).filter(([k]) => !k.startsWith('_')).map(([mood, list]) =>
+  `<optgroup label="${esc(mood)}">` + list.map((x) => `<option>${esc(x)}</option>`).join('') + '</optgroup>').join('');
+const ago = (iso) => { const m = Math.round((Date.now() - Date.parse(iso)) / 60000); return m < 1 ? T('अभी', 'just now') : m < 60 ? T(m + ' मिनट पहले', m + ' min ago') : m < 1440 ? T(Math.round(m / 60) + ' घंटे पहले', Math.round(m / 60) + ' h ago') : new Date(iso).toLocaleDateString('hi-IN'); };
+const CHECK_NAME = { breakfast: ['नाश्ता', 'Breakfast'], lunch: ['दोपहर का खाना', 'Lunch'], medicine: ['रात की दवाई', 'Night medicine'], wake: ['सुबह', 'Morning'] };
+function todayHtml(today) {
+  if (!today || !today.length) return '<p class="muted">' + T('आज अभी कोई कॉल नहीं हुई।', 'No calls yet today.') + '</p>';
+  const last = {}; for (const c of today) last[c.checkin] = c;
+  return Object.values(last).map((c) => `<div class="rowline"><span>${esc(T(...(CHECK_NAME[c.checkin] || [c.checkin, c.checkin])))}</span><b>${c.answered ? T('✓ बात हुई', '✓ Talked') : T('फ़ोन नहीं उठा', 'No answer')}</b></div>`).join('');
+}
+
+// first open
+$('#door-elder').addEventListener('click', () => { store.set('gs_role', 'elder'); show(store.get('gs_code') ? 'elder' : 'elogin'); });
+$('#door-family').addEventListener('click', () => { store.set('gs_role', 'family'); show(store.get('gs_code') ? 'home' : 'welcome'); });
+$('#ecode-go').addEventListener('click', () => {
+  const c = $('#ecode-in').value.trim().toUpperCase().replace(/\s/g, '');
+  if (!/^GS-[A-Z0-9]{8}$/.test(c)) { $('#ecode-err').textContent = T('कोड ऐसा दिखना चाहिए: GS-XXXXXXXX', 'The code looks like GS-XXXXXXXX'); return; }
+  store.set('gs_code', c); store.set('gs_role', 'elder'); show('elder');
+});
+$('#e-switch').addEventListener('click', () => { store.set('gs_role', 'family'); show('home'); });
+
+// ---- the elder's home ----
+let ELDER = null;
+async function loadElder() {
+  const d = new Date(); $('#e-date').textContent = d.toLocaleDateString(LANG === 'en' ? 'en-IN' : 'hi-IN', { weekday: 'long', day: 'numeric', month: 'long' });
+  try {
+    const j = await (await fetch(API.status + '?code=' + encodeURIComponent(store.get('gs_code')))).json();
+    if (!j.ok) { $('#e-name').textContent = '—'; return; }
+    ELDER = j; $('#e-name').textContent = j.family.address_as || j.family.elder_name;
+    const songs = (j.messages || []).filter((m) => m.direction === 'to_elder' && m.category === 'song' && Date.now() - Date.parse(m.created_at) < 3 * 864e5);
+    const box = $('#e-new');
+    if (songs.length) {
+      const m = songs[0]; const song = String(m.text).replace(/^🎵\s*/, '');
+      box.innerHTML = `<p style="margin:0 0 8px;font-size:19px">🎵 <b>${esc(m.from)}</b> ${T('ने आपके लिए गाना भेजा है', 'sent you a song')} 💛<br><span class="muted">${esc(song)}</span></p><button class="btn primary" type="button" id="e-play">▶ ${T('सुनें', 'Play')}</button>`;
+      box.classList.remove('hidden');
+      $('#e-play').onclick = () => elderAskSneha(`${m.from} ने मेरे लिए ${song.split(' - ')[0]} भेजा है, सुनाओ`);
+    } else box.classList.add('hidden');
+  } catch (e) {}
+  elderCircle();
+}
+function elderPanel(html) { const p = $('#e-panel'); p.innerHTML = html; p.classList.remove('hidden'); p.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+// a song from the list: Sneha is asked in words, as if spoken, and plays it
+function elderAskSneha(text) { show('talk'); setTimeout(() => talkSend(null, text), 400); }
+$('#t-songs').addEventListener('click', () => {
+  elderPanel('<h2>🎵 ' + T('कौन-सा गाना सुनेंगे?', 'Which song?') + '</h2>' + Object.entries(SONGS).filter(([k]) => !k.startsWith('_')).map(([mood, list]) =>
+    `<p style="margin:12px 0 4px"><b>${esc(mood)}</b></p>` + list.map((x) => `<button class="btn secondary" type="button" data-song="${esc(x)}" style="margin:6px 0;text-align:left">▶ ${esc(x)}</button>`).join('')).join('') +
+    `<p class="muted" style="margin-top:12px">${T('कोई और गाना? स्नेहा से बोलकर माँगिए।', 'Another song? Just ask Sneha.')}</p>`);
+  $('#e-panel').querySelectorAll('[data-song]').forEach((b) => { b.onclick = () => elderAskSneha(b.dataset.song.split(' - ')[0] + ' सुनाओ'); });
+});
+$('#t-calls').addEventListener('click', () => {
+  const calls = (ELDER && ELDER.family.calls) || [];
+  elderPanel('<h2>📞 ' + T('किसे फ़ोन करें?', 'Whom to call?') + '</h2>' + (calls.length ? calls.map((c) =>
+    `<a class="btn primary" style="margin:8px 0;text-decoration:none;text-align:center" href="tel:${esc(c.phone)}">📞 ${esc(c.name)}${c.relation ? ' (' + esc(c.relation) + ')' : ''}</a>`).join('')
+    : '<p class="muted">' + T('अभी कोई नंबर नहीं है। घर वाले ऐप में नंबर जोड़ सकते हैं।', 'No numbers yet. Your family can add them in their app.') + '</p>'));
+});
+$('#t-msgs').addEventListener('click', () => {
+  const msgs = ((ELDER && ELDER.messages) || []).filter((m) => m.direction === 'to_elder').slice(0, 6);
+  elderPanel('<h2>💌 ' + T('घर वालों के संदेश', 'Messages from family') + '</h2>' + (msgs.length ? msgs.map((m, i) =>
+    `<div class="rowline"><span><b>${esc(m.from)}</b>: ${esc(m.text)}<br><small class="muted">${ago(m.created_at)}</small></span><button class="btn secondary" type="button" data-read="${i}" style="width:auto;padding:10px 14px">🔊</button></div>`).join('')
+    : '<p class="muted">' + T('अभी कोई संदेश नहीं।', 'No messages yet.') + '</p>') +
+    '<p style="margin-top:14px"><b>📮 ' + T('घर वालों को संदेश भेजें', 'Send a message to family') + '</b></p><textarea id="e-text" maxlength="300" placeholder="बेटा, मेरी दवाई ख़त्म होने वाली है।"></textarea>' +
+    `<button class="btn primary" type="button" id="e-send">${T('भेजें', 'Send')}</button><p id="e-send-msg" class="muted"></p>`);
+  $('#e-panel').querySelectorAll('[data-read]').forEach((b) => { b.onclick = () => { const m = msgs[+b.dataset.read]; try { speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(m.from + ' का संदेश: ' + m.text); u.lang = 'hi-IN'; u.rate = 0.9; speechSynthesis.speak(u); } catch (e) {} }; });
+  $('#e-send').onclick = async () => {
+    const text = $('#e-text').value.trim(); if (!text) return;
+    $('#e-send-msg').textContent = T('भेज रहे हैं…', 'Sending…');
+    try {
+      const j = await (await fetch(API.message, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({ code: store.get('gs_code'), from_name: (ELDER && ELDER.family.address_as) || 'बुज़ुर्ग', text, direction: 'to_family', urgent: false }) })).json();
+      $('#e-send-msg').textContent = j.ok ? T('✓ भेज दिया। घर वालों को मिल जाएगा।', '✓ Sent to your family.') : T('नहीं भेज पाए, फिर कोशिश करें।', 'Could not send; try again.');
+      if (j.ok) $('#e-text').value = '';
+    } catch (e) { $('#e-send-msg').textContent = T('इंटरनेट नहीं', 'Offline'); }
+  };
+});
+$('#t-help').addEventListener('click', async () => {
+  if (!window.confirm(T('क्या घर वालों को अभी बताएँ कि आपको मदद चाहिए? स्नेहा उन्हें तुरंत फ़ोन करेगी। बहुत ज़रूरी हो तो 108 पर भी फ़ोन करें।', 'Tell your family now that you need help? Sneha will phone them at once. In a serious emergency also call 108.'))) return;
+  elderPanel('<h2>🚨 ' + T('भेज रहे हैं…', 'Sending…') + '</h2>');
+  try {
+    const j = await (await fetch(API.message, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ code: store.get('gs_code'), from_name: (ELDER && ELDER.family.address_as) || 'बुज़ुर्ग', text: 'मुझे मदद चाहिए, अभी आइए (ऐप का मदद बटन)', direction: 'to_family', urgent: true }) })).json();
+    elderPanel(j.ok ? '<h2>✓ ' + T('घर वालों को बता दिया', 'Your family has been told') + '</h2><p>' + T('स्नेहा उन्हें फ़ोन कर रही है। आराम से बैठिए, मैं आपके साथ हूँ। बहुत ज़रूरी हो तो 108 पर फ़ोन कीजिए।', 'Sneha is phoning them. Sit down and rest. In a serious emergency call 108.') + '</p><a class="btn warm" href="tel:108" style="text-decoration:none;text-align:center">📞 108</a>'
+      : '<h2>' + T('नहीं भेज पाए', 'Could not send') + '</h2><a class="btn warm" href="tel:108" style="text-decoration:none;text-align:center">📞 108</a>');
+  } catch (e) { elderPanel('<h2>' + T('इंटरनेट नहीं', 'Offline') + '</h2><a class="btn warm" href="tel:108" style="text-decoration:none;text-align:center">📞 108</a>'); }
+});
+// who can see my news (the elder may remove anyone)
+async function elderCircle() {
+  const box = $('#e-circle');
+  try {
+    const j = await circleCall({ action: 'list', code: store.get('gs_code') });
+    const act = (j.members || []).filter((m) => m.status === 'active');
+    if (!act.length) { box.innerHTML = '<p class="muted">' + T('सिर्फ़ आपका परिवार (जिसने पंजीकरण किया)।', 'Only your family (who signed up).') + '</p>'; return; }
+    box.innerHTML = act.map((m) => `<div class="rowline"><span>${esc(m.name)} (${esc(m.relation)})<br><small class="muted">${m.level === 'family' ? T('रोज़ की ख़बर और संदेश', 'Daily news and messages') : T('सिर्फ़ आज का हाल और ज़रूरी ख़बर', 'Only today and alerts')}</small></span><button class="linkbtn" type="button" data-rm="${esc(m.member_id)}">${T('हटाएँ', 'Remove')}</button></div>`).join('');
+    box.querySelectorAll('[data-rm]').forEach((b) => { b.onclick = async () => { if (!window.confirm(T('इन्हें हटाएँ? फिर ये आपकी ख़बर नहीं देख पाएँगे।', 'Remove? They will no longer see your news.'))) return; await circleCall({ action: 'remove', code: store.get('gs_code'), member_id: b.dataset.rm }); elderCircle(); }; });
+  } catch (e) { box.innerHTML = '<p class="muted">—</p>'; }
+}
+
+// ---- the family owner: invite people, set up the elder's phone, send a song ----
+async function circleList() {
+  const box = $('#circle-list'); if (!box) return;
+  try {
+    const j = await circleCall({ action: 'list', code: store.get('gs_code') });
+    const ms = j.members || [];
+    box.innerHTML = ms.length ? ms.map((m) => `<div class="rowline"><span>${esc(m.name)} (${esc(m.relation)}) · ${m.level === 'family' ? T('परिवार', 'Family') : T('देखभाल', 'Caretaker')}<br><small class="muted">${m.status === 'active' ? T('✓ जुड़ गए', '✓ Joined') : T('लिंक भेजा, अभी नहीं जुड़े', 'Invited, not joined yet')}</small></span><button class="linkbtn" type="button" data-rm="${esc(m.member_id)}">${T('हटाएँ', 'Remove')}</button></div>`).join('') : '';
+    box.querySelectorAll('[data-rm]').forEach((b) => { b.onclick = async () => { if (!window.confirm(T('इन्हें हटाएँ?', 'Remove this person?'))) return; await circleCall({ action: 'remove', code: store.get('gs_code'), member_id: b.dataset.rm }); circleList(); }; });
+  } catch (e) {}
+}
+async function shareLink(url, text) {
+  try { if (navigator.share) { await navigator.share({ title: 'सदा स्नेहा', text, url }); return; } } catch (e) { return; }
+  window.open('https://wa.me/?text=' + encodeURIComponent(text + ' ' + url), '_blank', 'noopener');
+}
+$('#ci-add').addEventListener('click', async () => {
+  const name = $('#ci-name').value.trim(), msg = (hi, en) => { $('#ci-msg').textContent = T(hi, en); };
+  if (!name) return msg('पहले नाम लिखिए।', 'Write the name first.');
+  if (!$('#ci-consent').checked) return msg('बुज़ुर्ग की सहमति पर ✓ लगाइए।', 'Tick that the elder agrees.');
+  msg('बना रहे हैं…', 'Making…');
+  try {
+    const j = await circleCall({ action: 'invite', code: store.get('gs_code'), name, relation: $('#ci-rel').value, level: $('#ci-level').value, consent: true });
+    if (!j.ok) return msg(j.why === 'full' ? 'ज़्यादा से ज़्यादा 10 लोग।' : 'नहीं बन पाया, फिर कोशिश करें।', j.why === 'full' ? 'At most 10 people.' : 'Could not make it; try again.');
+    $('#ci-name').value = ''; $('#ci-consent').checked = false; circleList();
+    msg('✓ लिंक बन गया (7 दिन चलेगा)। अब ' + name + ' को भेजिए।', '✓ Link ready (valid 7 days). Now send it to ' + name + '.');
+    shareLink(j.link, `नमस्ते ${/जी$/.test(name) ? name : name + ' जी'}, सदा स्नेहा में आपको जोड़ा गया है, ताकि आपको ख़बर मिलती रहे। यह लिंक खोलिए:`);
+  } catch (e) { msg('इंटरनेट नहीं', 'Offline'); }
+});
+$('#elder-link').addEventListener('click', () => shareLink('https://sadasneha.in/?elder=' + encodeURIComponent(store.get('gs_code')), 'सदा स्नेहा – आपका अपना ऐप। यह लिंक खोलिए, फिर स्नेहा से बात कीजिए:'));
+function songCard(box, send) {
+  box.innerHTML = '<h2>🎵 ' + T('उन्हें गाना भेजें', 'Send them a song') + '</h2><p class="muted">' + T('गाना चुनिए। उनके ऐप पर दिखेगा: "आपने उनके लिए गाना भेजा है", और स्नेहा उसे चला देगी।', 'Pick a song. Their app shows that you sent it, and Sneha plays it.') + '</p>' +
+    `<select class="ss-pick">${songOptions()}<option value="">${T('कोई और (नीचे लिखें)', 'Another (write below)')}</option></select><input class="ss-other" maxlength="80" placeholder="${T('गाने का नाम', 'Song name')}">` +
+    (send.needFrom ? `<input class="ss-from" maxlength="40" placeholder="${T('आपका नाम (जैसे: काव्या)', 'Your name (e.g. Kavya)')}">` : '') +
+    `<button class="btn primary ss-go" type="button">${T('गाना भेजें', 'Send the song')} 💛</button><p class="muted ss-msg"></p>`;
+  box.querySelector('.ss-go').onclick = async () => {
+    const song = box.querySelector('.ss-other').value.trim() || box.querySelector('.ss-pick').value;
+    const m = box.querySelector('.ss-msg');
+    if (!song) { m.textContent = T('गाना चुनिए।', 'Pick a song.'); return; }
+    m.textContent = T('भेज रहे हैं…', 'Sending…');
+    try {
+      const j = await circleCall({ action: 'song', song, ...send.body(), from: send.needFrom ? box.querySelector('.ss-from').value.trim() : '' });
+      m.textContent = j.ok ? T('✓ भेज दिया! अगली बार ऐप खोलते ही उन्हें दिखेगा।', '✓ Sent! They will see it next time they open the app.') : T('नहीं भेज पाए।', 'Could not send.');
+    } catch (e) { m.textContent = T('इंटरनेट नहीं', 'Offline'); }
+  };
+}
+
+// ---- invited: the join page, Google sign-in, then the member's own view ----
+let JOIN = null;
+async function loadJoin() {
+  JOIN = params.get('join');
+  try {
+    const j = await circleCall({ action: 'peek', invite: JOIN });
+    if (!j.ok) { $('#join-title').textContent = T('यह लिंक पुराना है या पहले इस्तेमाल हो चुका है', 'This link is old or already used'); $('#join-text').textContent = T('जिन्होंने भेजा है, उनसे नया लिंक माँगिए।', 'Ask for a new link.'); return; }
+    $('#join-title').textContent = T(`नमस्ते ${/जी$/.test(j.name) ? j.name : j.name + ' जी'} 🙏`, `Namaste ${j.name} 🙏`);
+    $('#join-text').textContent = T(`आपको ${j.elder || 'बुज़ुर्ग'} की देखभाल-मंडली में जोड़ा गया है (${j.level === 'family' ? 'परिवार: रोज़ की ख़बर और संदेश' : 'देखभाल: आज का हाल और ज़रूरी ख़बर'})। आगे बढ़ने के लिए Google से लॉग-इन कीजिए।`,
+      `You have been added to ${j.elder || 'the elder'}'s care circle (${j.level === 'family' ? 'family: daily news and messages' : 'caretaker: today and alerts'}). Continue with Google.`);
+    window.__gMode = 'join';
+    const render = () => { try { google.accounts.id.renderButton($('#join-g'), { theme: 'filled_blue', size: 'large', shape: 'pill', text: 'continue_with', width: 300, locale: LANG === 'en' ? 'en' : 'hi' }); } catch (e) { setTimeout(render, 500); } };
+    render();
+  } catch (e) { $('#join-title').textContent = T('इंटरनेट नहीं', 'Offline'); }
+}
+async function onJoinGoogle(cred) {
+  $('#join-msg').textContent = T('रुकिए…', 'Please wait…');
+  try {
+    const j = await circleCall({ action: 'join', invite: JOIN, cred });
+    if (!j.ok) { $('#join-msg').textContent = T('जुड़ नहीं पाए। लिंक पुराना हो सकता है।', 'Could not join; the link may be old.'); return; }
+    store.set('gs_member', j.key); window.__gMode = '';
+    history.replaceState(null, '', location.pathname); show('care');
+  } catch (e) { $('#join-msg').textContent = T('इंटरनेट नहीं', 'Offline'); }
+}
+async function loadCare() {
+  try {
+    const j = await circleCall({ action: 'care', key: store.get('gs_member') });
+    if (!j.ok) { if (j.why === 'key') { store.del('gs_member'); show('role'); } return; }
+    const who = j.family.address_as || j.family.elder_name;
+    $('#c-title').textContent = T(`${who} का हाल`, `How ${who} is`);
+    $('#c-sub').textContent = T(`आप: ${j.me.name} (${j.me.relation})`, `You: ${j.me.name} (${j.me.relation})`);
+    $('#c-today').innerHTML = todayHtml(j.today);
+    $('#c-alerts').innerHTML = j.alerts.length ? j.alerts.map((a) => `<div class="alert-item ${a.ack_by ? 'done' : ''}"><b>${esc(a.text)}</b><br><small class="muted">${ago(a.created_at)}</small><br>` +
+      (a.ack_by ? `✓ ${esc(a.ack_by)} ${T('देख रहे हैं', 'is on it')}` : `<button class="btn warm" type="button" data-ack="${esc(a.id)}" style="margin-top:8px">🏃 ${T('मैं पहुँच रहा/रही हूँ', "I'm on my way")}</button>`) + '</div>').join('')
+      : '<p class="muted">' + T('✓ कोई ज़रूरी ख़बर नहीं।', '✓ No alerts.') + '</p>';
+    $('#c-alerts').querySelectorAll('[data-ack]').forEach((b) => { b.onclick = async () => { b.disabled = true; await circleCall({ action: 'ack', key: store.get('gs_member'), msg_id: b.dataset.ack }); loadCare(); }; });
+    $('#c-family').classList.toggle('hidden', j.level !== 'family');
+    if (j.level === 'family') {
+      $('#c-msgs').innerHTML = (j.messages || []).slice(0, 6).map((m) => `<div class="rowline"><span><b>${esc(m.from)}</b>${m.direction === 'to_family' ? ' →' : ''}: ${esc(m.text)}${m.reply ? '<br><small>↩ ' + esc(m.reply) + '</small>' : ''}<br><small class="muted">${ago(m.created_at)}</small></span></div>`).join('') || '<p class="muted">—</p>';
+      if (!$('#c-song-card').innerHTML) songCard($('#c-song-card'), { body: () => ({ key: store.get('gs_member') }) });
+    }
+  } catch (e) {}
+}
+$('#c-send').addEventListener('click', async () => {
+  const text = $('#c-text').value.trim(); if (!text) return;
+  $('#c-send-msg').textContent = T('भेज रहे हैं…', 'Sending…');
+  try { const j = await circleCall({ action: 'message', key: store.get('gs_member'), text }); $('#c-send-msg').textContent = j.ok ? T('✓ भेज दिया। स्नेहा उन्हें पढ़कर सुनाएगी।', '✓ Sent. Sneha will read it to them.') : T('नहीं भेज पाए।', 'Could not send.'); if (j.ok) { $('#c-text').value = ''; loadCare(); } }
+  catch (e) { $('#c-send-msg').textContent = T('इंटरनेट नहीं', 'Offline'); }
+});
+$('#c-out').addEventListener('click', () => { if (window.confirm(T('इस फ़ोन पर लॉग-आउट करें?', 'Sign out on this phone?'))) { store.del('gs_member'); store.del('gs_role'); show('role'); } });
 
 // ---- Talk to Sneha: her live face (base picture + mouth moved by her voice), one button to speak ----
 API.talk = API_BASE + '/app-talk';
@@ -1694,14 +2008,14 @@ setInterval(async () => {
   if (!TALK.cam || !FACE.people.length || TALK.whoBusy || document.hidden) return;
   TALK.whoBusy = true; try { const w = await faceWho(); if (w) TALK.who = { at: Date.now(), w }; } finally { TALK.whoBusy = false; }
 }, 3000);
-async function talkSend(blob) {
+async function talkSend(blob, typed) {
   TALK.busy = true; $('#talk-mic').disabled = true; talkState('स्नेहा सोच रही है…', 'Sneha is thinking…');
   const hmm = talkHmm();
   const whoNow = TALK.cam && TALK.who && Date.now() - TALK.who.at < 8000 ? TALK.who.w : null;
-  const b64 = await new Promise((ok) => { const r = new FileReader(); r.onload = () => ok(String(r.result).split(',')[1]); r.readAsDataURL(blob); });
+  const b64 = blob ? await new Promise((ok) => { const r = new FileReader(); r.onload = () => ok(String(r.result).split(',')[1]); r.readAsDataURL(blob); }) : '';
   try {
     const j = await (await fetch(API.talk, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({ code: store.get('gs_code'), audio: b64, mime: blob.type, history: TALK.history, mood: TALK.mood, cam: !!TALK.cam, cam_first: !!TALK.cam && !TALK.camSent, image: talkStill(), photo_ok: store.get('gs_photo_ok') === 'yes', who: whoNow }) })).json();
+      body: JSON.stringify({ code: store.get('gs_code'), audio: b64, mime: blob ? blob.type : '', text: typed || undefined, history: TALK.history, mood: TALK.mood, cam: !!TALK.cam, cam_first: !!TALK.cam && !TALK.camSent, image: talkStill(), photo_ok: store.get('gs_photo_ok') === 'yes', who: whoNow }) })).json();
     if (TALK.cam) TALK.camSent = true;
     if (!j.ok) {
       talkState(j.why === 'limit' ? 'आज बहुत बात हो गई, थोड़ी देर बाद फिर बात करेंगे 💛' : 'माफ़ कीजिए, अभी बात नहीं हो पाई। फिर कोशिश करें।',
@@ -1832,7 +2146,12 @@ $('#song-stop').addEventListener('click', () => { songStop(); talkState('बट�
 buildForm();
 const params = new URLSearchParams(location.search);
 if (params.get('code')) { store.set('gs_code', params.get('code').toUpperCase()); try { history.replaceState(null, '', location.pathname); } catch (e) {} }
-show(params.get('ack') ? 'seen' : store.get('gs_code') ? (location.hash === '#talk' ? 'talk' : 'home') : (params.get('view') === 'signup' ? 'signup' : 'welcome'));
+// ?elder=CODE: the link the family sends to the elder's own phone
+if (/^GS-[A-Z0-9]{8}$/.test(String(params.get('elder') || '').toUpperCase())) { store.set('gs_code', params.get('elder').toUpperCase()); store.set('gs_role', 'elder'); history.replaceState(null, '', location.pathname); }
+show(params.get('ack') ? 'seen' : params.get('join') ? 'join'
+  : store.get('gs_code') ? (location.hash === '#talk' ? 'talk' : store.get('gs_role') === 'elder' ? 'elder' : 'home')
+  : store.get('gs_member') ? 'care'
+  : params.get('view') === 'signup' ? 'signup' : store.get('gs_role') === 'family' ? 'welcome' : 'role');
 </script>
 </body>
 </html>
