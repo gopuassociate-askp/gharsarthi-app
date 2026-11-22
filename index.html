@@ -106,6 +106,33 @@
   .talk-bar button b { display: block; font-size: 22px; line-height: 1.2; }
   .talk-bar #tb-mic { background: #ea580c; color: #fff; } .talk-bar #tb-end { background: #fee2e2; color: #991b1b; }
   #v-talk { padding-bottom: 90px; }
+  html.snap { scroll-snap-type: y proximity; }
+  .site .pg { min-height: calc(100svh - 70px); scroll-snap-align: start; display: flex; flex-direction: column; justify-content: center; padding: 28px 18px; box-sizing: border-box; max-width: 720px; margin: 0 auto; border-bottom: 1px solid var(--line); }
+  .site h1 { font-size: 32px; line-height: 1.25; margin: 6px 0 10px; color: var(--maroon); }
+  .site h2 { font-size: 26px; line-height: 1.3; margin: 4px 0 14px; color: var(--maroon); }
+  .site .kicker { margin: 0; font-size: 14px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--brand); }
+  .site .lead { font-size: 19px; }
+  .site .small { font-size: 14px; }
+  .hero-pg { text-align: center; background: radial-gradient(circle at 50% 20%, #ffe7cc, var(--bg) 70%); }
+  .hero-face { position: relative; width: 200px; margin: 0 auto 10px; }
+  .hero-face img { width: 200px; height: 200px; border-radius: 50%; object-fit: cover; border: 5px solid var(--marigold); box-shadow: 0 14px 40px rgba(194,65,12,.25); animation: breathe 4s ease-in-out infinite; }
+  .hero-face .live { position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); background: #fff; border-radius: 999px; padding: 2px 12px; font-size: 13px; font-weight: 700; color: #15803d; white-space: nowrap; box-shadow: 0 2px 8px rgba(0,0,0,.12); }
+  .doors { text-align: left; }
+  .next { display: inline-block; margin-top: 8px; font-size: 34px; color: var(--brand); text-decoration: none; animation: bob 1.8s ease-in-out infinite; }
+  @keyframes bob { 50% { transform: translateY(6px); } }
+  .site .clip video { width: 100%; border-radius: 18px; background: #000; max-height: 42svh; }
+  .ticks { padding-left: 0; list-style: none; } .ticks li { padding: 6px 0 6px 30px; position: relative; } .ticks li::before { content: '✓'; position: absolute; left: 4px; color: var(--leaf); font-weight: 900; }
+  .feat { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; } .feat div { background: #fff; border: 1px solid var(--line); border-radius: 18px; padding: 12px; font-size: 16px; }
+  .feat b { display: block; font-size: 30px; }
+  .steps { list-style: none; padding: 0; } .steps li { display: flex; gap: 12px; align-items: flex-start; margin: 10px 0; }
+  .steps li > b { flex: none; width: 40px; height: 40px; border-radius: 50%; background: var(--brand-2); color: #fff; display: grid; place-items: center; font-size: 20px; }
+  .plans { display: grid; gap: 12px; } .plan { background: #fff; border: 2px solid var(--line); border-radius: 20px; padding: 14px 16px; }
+  .plan.best { border-color: var(--brand-2); box-shadow: 0 8px 24px rgba(234,88,12,.18); }
+  .plan h3 { margin: 0; font-size: 20px; } .plan .rs { font-size: 28px; font-weight: 800; color: var(--brand); } .plan .rs small { font-size: 15px; color: var(--muted); font-weight: 500; }
+  .plan p { margin: 4px 0 10px; font-size: 15px; }
+  .site details { background: #fff; border: 1px solid var(--line); border-radius: 14px; padding: 10px 14px; margin: 8px 0; } .site summary { font-weight: 700; cursor: pointer; }
+  .site-foot { margin-top: 18px; font-size: 15px; } .site-foot .links a { white-space: nowrap; }
+  @media (min-width: 640px) { .feat { grid-template-columns: 1fr 1fr 1fr 1fr; } .plans { grid-template-columns: 1fr 1fr 1fr; } .site h1 { font-size: 40px; } }
   .tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
   .tile { border: 0; border-radius: 22px; padding: 20px 10px; font: inherit; font-weight: 800; font-size: 20px; color: #7c2d12; background: #ffedd5; box-shadow: 0 4px 14px rgba(234,88,12,.15); min-height: 120px; cursor: pointer; }
   .tile .ic { display: block; font-size: 42px; margin-bottom: 6px; }
@@ -243,12 +270,112 @@
   </section>
 
   <!-- First open: two doors -->
-  <section id="v-role" class="view hidden">
-    <div class="card sneha-hero">
-      <figure class="sneha-face"><img src="sneha.jpg" width="140" height="140" alt="स्नेहा / Sneha" style="width:140px;height:140px"></figure>
-      <h2><span data-en="Namaste 🙏 Who is using this phone?">नमस्ते 🙏 यह फ़ोन कौन चला रहा है?</span></h2>
-      <button class="door elder" id="door-elder" type="button">👴👵 <span data-en="I will talk to Sneha myself">मैं ख़ुद स्नेहा से बात करूँगा / करूँगी</span><small><span data-en="Talk to Sneha, songs, call family – big and simple">स्नेहा से बात, गाने, घर वालों को फ़ोन – बड़ा और आसान</span></small></button>
-      <button class="door family" id="door-family" type="button">🤝 <span data-en="I am family / a caretaker">मैं परिवार / देखभाल करने वाला हूँ</span><small><span data-en="Sign up, see how they are, get alerts">पंजीकरण, उनका हाल, ज़रूरी ख़बरें</span></small></button>
+  <!-- The website: what SadaSneha is, page by page (first open) -->
+  <section id="v-role" class="view hidden site">
+    <div class="pg hero-pg">
+      <div class="hero-in">
+        <div class="hero-face"><img src="sneha.jpg" width="220" height="220" alt="स्नेहा / Sneha"><span class="live">● <span data-en="Sneha is here">स्नेहा यहाँ है</span></span></div>
+        <p class="kicker"><span data-en="SadaSneha · Always with love">सदा स्नेहा · हमेशा प्यार से</span></p>
+        <h1><span data-en="You are far away. They are not alone.">आप दूर हैं, पर वे अकेले नहीं।</span></h1>
+        <p class="lead"><span data-en="Sneha is a warm AI companion for your parents. She talks with them every day in their own language, plays their favourite old songs, reminds them of meals and medicines – and tells you at once if anything is wrong.">स्नेहा आपके माता-पिता की प्यारी AI साथी है। वह रोज़ उनकी अपनी भाषा में बात करती है, उनके पसंदीदा पुराने गाने सुनाती है, खाने-दवाई की याद दिलाती है – और कुछ भी गड़बड़ लगे तो तुरंत आपको बताती है।</span></p>
+        <div class="doors">
+        <button class="door family" type="button" data-door="family">🤝 <span data-en="For my parents / family">अपने माता-पिता / परिवार के लिए</span><small><span data-en="Sign up in 2 minutes, see how they are, get alerts">2 मिनट में पंजीकरण, रोज़ का हाल, ज़रूरी ख़बरें</span></small></button>
+        <button class="door elder" type="button" data-door="elder">🙏 <span data-en="I will talk to Sneha myself">मैं ख़ुद स्नेहा से बात करूँगा / करूँगी</span><small><span data-en="Big, simple buttons: Sneha, songs, call family">बड़े, आसान बटन: स्नेहा, गाने, घर वालों को फ़ोन</span></small></button>
+      </div>
+        <p class="muted small"><span data-en="From ₹449 a month · Cancel any time · No hidden charges">₹449 प्रति माह से · कभी भी बंद करें · कोई छुपा शुल्क नहीं</span></p>
+        <a class="next" href="#pg-sneha" aria-label="आगे / Next">⌄</a>
+      </div>
+    </div>
+
+    <div class="pg" id="pg-sneha">
+      <p class="kicker"><span data-en="Meet Sneha">स्नेहा से मिलिए</span></p>
+      <h2><span data-en="Like a loving granddaughter, every day">जैसे एक प्यारी पोती, हर दिन</span></h2>
+      <div class="clip"><video src="video/welcome.mp4" poster="sneha.jpg" controls playsinline preload="none"></video></div>
+      <ul class="ticks">
+        <li><b><span data-en="Talks in 11 languages">11 भाषाओं में बात</span></b> – <span data-en="Hindi, Marathi, Gujarati, Punjabi, Bangla, Odia, Telugu, Tamil, Kannada, Malayalam, English.">हिंदी, मराठी, गुजराती, पंजाबी, बांग्ला, ओड़िया, तेलुगु, तमिल, कन्नड़, मलयालम, अंग्रेज़ी।</span></li>
+        <li><b><span data-en="Remembers what matters">याद रखती है</span></b> – <span data-en="family names, their stories, who visited.">परिवार के नाम, उनके क़िस्से, कौन मिलने आया।</span></li>
+        <li><b><span data-en="Honest">सच्ची</span></b> – <span data-en="she is an AI and says so; she never pretends to be human.">वह AI है और यह साफ़ बताती है; कभी इंसान होने का दिखावा नहीं।</span></li>
+      </ul>
+    </div>
+
+    <div class="pg" id="pg-fun">
+      <p class="kicker"><span data-en="Joy, every day">रोज़ की ख़ुशी</span></p>
+      <h2><span data-en="Old songs, bhajans and good company">पुराने गाने, भजन और अच्छी संगत</span></h2>
+      <div class="feat">
+        <div><b>🎵</b><span data-en="Any old film song or bhajan, on request – Lata, Kishore, Rafi, Mukesh…">कोई भी पुराना फ़िल्मी गाना या भजन, बस कहिए – लता, किशोर, रफ़ी, मुकेश…</span></div>
+        <div><b>💛</b><span data-en="Grandchildren send a song from their phone – Sneha plays it: “Kavya sent this for you”.">पोते-पोती अपने फ़ोन से गाना भेजें – स्नेहा सुनाती है: “काव्या ने आपके लिए भेजा है”।</span></div>
+        <div><b>🗣️</b><span data-en="Stories, riddles, festivals, recipes – she loves to listen to their memories.">क़िस्से, पहेलियाँ, त्योहार, रसोई – उनकी यादें सुनना उसे बहुत पसंद है।</span></div>
+        <div><b>📹</b><span data-en="Face-to-face talk in the app; with the camera on she senses their mood.">ऐप में आमने-सामने बात; कैमरा चालू हो तो उनका मन समझती है।</span></div>
+      </div>
+    </div>
+
+    <div class="pg" id="pg-care">
+      <p class="kicker"><span data-en="Care that never sleeps">देखभाल, हर पल</span></p>
+      <h2><span data-en="If something is wrong, you know at once">कुछ गड़बड़ हो, तो आपको तुरंत पता</span></h2>
+      <div class="feat">
+        <div><b>📞</b><span data-en="A daily call: How are you? Did you eat? Medicines taken?">रोज़ एक कॉल: कैसे हैं? खाना खाया? दवाई ली?</span></div>
+        <div><b>🚨</b><span data-en="Words like chest pain or a fall – your family is phoned at once, until someone answers.">“सीने में दर्द”, “गिर गया” जैसे शब्द – घर वालों को तुरंत फ़ोन, जब तक कोई सुन न ले।</span></div>
+        <div><b>👥</b><span data-en="A care circle: family, a neighbour, an attendant – each sees only what they should.">देखभाल-मंडली: परिवार, पड़ोसी, देखभाल करने वाले – हर कोई सिर्फ़ उतना देखे जितना ज़रूरी।</span></div>
+        <div><b>🔴</b><span data-en="One big help button on their phone.">उनके फ़ोन पर एक बड़ा “मदद” बटन।</span></div>
+      </div>
+      <p class="muted small"><span data-en="SadaSneha is not an ambulance or a doctor. In an emergency, call 108 / 112 first.">सदा स्नेहा एम्बुलेंस या डॉक्टर नहीं है। आपात स्थिति में पहले 108 / 112 पर फ़ोन करें।</span></p>
+    </div>
+
+    <div class="pg" id="pg-privacy">
+      <p class="kicker"><span data-en="Your trust first">आपका भरोसा पहले</span></p>
+      <h2><span data-en="Private by design">शुरू से ही निजी</span></h2>
+      <ul class="ticks">
+        <li><span data-en="No recordings: voice, photos and video are never saved.">कोई रिकॉर्डिंग नहीं: आवाज़, फ़ोटो, वीडियो कभी सेव नहीं होते।</span></li>
+        <li><span data-en="Camera only when they press it; face patterns stay only on their phone.">कैमरा सिर्फ़ उनके दबाने पर; चेहरे का पैटर्न सिर्फ़ उनके फ़ोन में।</span></li>
+        <li><span data-en="Nothing shared without consent – as the DPDP Act 2023 requires.">बिना सहमति कुछ भी साझा नहीं – DPDP अधिनियम 2023 के अनुसार।</span></li>
+        <li><span data-en="We never sell your data. Delete everything any time.">आपकी जानकारी कभी बेची नहीं जाती। कभी भी सब मिटवाएँ।</span></li>
+      </ul>
+      <p><a href="privacy.html"><span data-en="Read our privacy notice">गोपनीयता नीति पढ़ें</span> →</a></p>
+    </div>
+
+    <div class="pg" id="pg-how">
+      <p class="kicker"><span data-en="How it works">कैसे काम करता है</span></p>
+      <h2><span data-en="Three simple steps">तीन आसान क़दम</span></h2>
+      <ol class="steps">
+        <li><b>1</b><span><b><span data-en="Sign up (2 minutes)">पंजीकरण (2 मिनट)</span></b><br><span data-en="Their name, language, meal and medicine times.">उनका नाम, भाषा, खाने-दवाई का समय।</span></span></li>
+        <li><b>2</b><span><b><span data-en="Sneha's welcome call">स्नेहा की पहली कॉल</span></b><br><span data-en="She introduces herself gently and asks how they like to be called.">वह प्यार से परिचय देती है और पूछती है कि उन्हें क्या कहकर बुलाए।</span></span></li>
+        <li><b>3</b><span><b><span data-en="Every day, together">हर दिन, साथ-साथ</span></b><br><span data-en="Calls, songs, reminders – and you see how they are, in your app.">कॉल, गाने, याद दिलाना – और उनका हाल आपके ऐप में।</span></span></li>
+      </ol>
+      <p class="muted small"><span data-en="Works even on a keypad phone (calls); the app needs a smartphone.">कीपैड फ़ोन पर भी चलता है (कॉल); ऐप के लिए स्मार्टफ़ोन चाहिए।</span></p>
+    </div>
+
+    <div class="pg" id="pg-plans">
+      <p class="kicker"><span data-en="Plans">प्लान</span></p>
+      <h2><span data-en="Simple, honest prices">आसान, साफ़ क़ीमतें</span></h2>
+      <div id="site-plans" class="plans"></div>
+      <p class="muted small"><span data-en="Save 5% quarterly, 10% half-yearly, 15% yearly. Pay online by UPI or card. Cancel any time.">3 महीने पर 5%, 6 महीने पर 10%, साल भर पर 15% की बचत। UPI या कार्ड से ऑनलाइन भुगतान। कभी भी बंद करें।</span> <a href="terms.html"><span data-en="Terms">शर्तें</span></a> · <a href="refund.html"><span data-en="Refunds">रिफ़ंड</span></a></p>
+    </div>
+
+    <div class="pg" id="pg-faq">
+      <p class="kicker"><span data-en="Questions">सवाल-जवाब</span></p>
+      <h2><span data-en="What families ask us">परिवार हमसे क्या पूछते हैं</span></h2>
+      <details><summary><span data-en="Is Sneha a real person?">क्या स्नेहा असली इंसान है?</span></summary><p><span data-en="No. Sneha is an AI companion, and she says so honestly. Our team watches over the service.">नहीं। स्नेहा एक AI साथी है और यह साफ़ बताती है। सेवा पर हमारी टीम नज़र रखती है।</span></p></details>
+      <details><summary><span data-en="Will she give medical advice?">क्या वह इलाज या दवाई की सलाह देगी?</span></summary><p><span data-en="Never. She reminds, listens and alerts the family; medical decisions stay with doctors.">कभी नहीं। वह याद दिलाती है, सुनती है और परिवार को बताती है; इलाज का फ़ैसला डॉक्टर का।</span></p></details>
+      <details><summary><span data-en="My father has a keypad phone.">पापा के पास कीपैड फ़ोन है।</span></summary><p><span data-en="That is fine: Sneha's daily calls work on any phone. The app adds songs, video talk and the help button.">कोई बात नहीं: स्नेहा की रोज़ की कॉल किसी भी फ़ोन पर चलती है। ऐप से गाने, वीडियो बात और मदद बटन मिलते हैं।</span></p></details>
+      <details><summary><span data-en="Who pays, and can we stop?">भुगतान कौन करे, और क्या बंद कर सकते हैं?</span></summary><p><span data-en="Whoever signs up pays – son, daughter or the senior themselves; the bill is in the payer's name. Stop any time; the paid period continues to its end.">जो पंजीकरण करे वही भुगतान करे – बेटा, बेटी या वे ख़ुद; बिल भुगतान करने वाले के नाम। कभी भी बंद करें; भरा हुआ समय पूरा चलता है।</span></p></details>
+      <details><summary><span data-en="Is our data safe?">क्या हमारी जानकारी सुरक्षित है?</span></summary><p><span data-en="Yes. No recordings, nothing sold, nothing shared without consent. See our privacy notice.">हाँ। कोई रिकॉर्डिंग नहीं, कुछ बेचा नहीं जाता, बिना सहमति कुछ साझा नहीं। गोपनीयता नीति देखें।</span></p></details>
+    </div>
+
+    <div class="pg end-pg" id="pg-about">
+      <p class="kicker"><span data-en="About us">हमारे बारे में</span></p>
+      <h2><span data-en="Our promise">हमारा वादा</span></h2>
+      <p class="lead"><span data-en="Millions of parents in India live alone while their children work in other cities. SadaSneha was born in Jabalpur with one aim: that no parent feels alone, and no child lies awake worrying. Technology with a warm heart – always with love.">भारत में लाखों माता-पिता अकेले रहते हैं, जबकि बच्चे दूसरे शहरों में काम करते हैं। सदा स्नेहा का जन्म जबलपुर में एक ही लक्ष्य से हुआ: कोई माता-पिता अकेला महसूस न करे, और कोई बच्चा चिंता में जागता न रहे। दिल वाली तकनीक – सदा स्नेह के साथ।</span></p>
+      <div class="doors">
+        <button class="door family" type="button" data-door="family">🤝 <span data-en="For my parents / family">अपने माता-पिता / परिवार के लिए</span><small><span data-en="Sign up in 2 minutes, see how they are, get alerts">2 मिनट में पंजीकरण, रोज़ का हाल, ज़रूरी ख़बरें</span></small></button>
+        <button class="door elder" type="button" data-door="elder">🙏 <span data-en="I will talk to Sneha myself">मैं ख़ुद स्नेहा से बात करूँगा / करूँगी</span><small><span data-en="Big, simple buttons: Sneha, songs, call family">बड़े, आसान बटन: स्नेहा, गाने, घर वालों को फ़ोन</span></small></button>
+      </div>
+      <footer class="site-foot">
+        <p><b>सदा स्नेहा – SadaSneha</b><br>Gopu Associate · 1809, Old Napier Town, Jabalpur, Madhya Pradesh, India</p>
+        <p>✉️ <a href="mailto:care@sadasneha.in">care@sadasneha.in</a> · 📞 <span data-en="Support phone: coming soon">सहायता फ़ोन: जल्द</span><br>
+          <span data-en="Grievance Officer: to be appointed (write to care@sadasneha.in)">शिकायत अधिकारी: जल्द नियुक्त (care@sadasneha.in पर लिखें)</span> · GSTIN: —</p>
+        <p class="links"><a href="terms.html"><span data-en="Terms of Service">सेवा की शर्तें</span></a> · <a href="privacy.html"><span data-en="Privacy">गोपनीयता</span></a> · <a href="refund.html"><span data-en="Cancellation & Refund">रद्द और रिफ़ंड</span></a> · <a href="terms.html#disclaimer"><span data-en="Disclaimer">अस्वीकरण</span></a></p>
+        <p class="muted small">© 2026 Gopu Associate. <span data-en="Sneha is an AI companion, not a medical or emergency service.">स्नेहा एक AI साथी है, कोई चिकित्सा या आपात सेवा नहीं।</span></p>
+      </footer>
     </div>
   </section>
 
@@ -526,7 +653,7 @@
         <video id="talk-self" class="hidden" playsinline muted></video>
         <span class="talk-ai">स्नेहा – आपकी AI सहायिका</span><span id="talk-cam-on" class="talk-cam hidden">● कैमरा चालू</span><span id="talk-mood" class="talk-mood hidden"></span>
         <div id="face-notes" class="face-notes hidden" aria-hidden="true"><span>♪</span><span>♫</span><span>♩</span><span>♬</span><span>♪</span><p>🎵 गाना ढूँढ रही हूँ…</p></div></div>
-      <p class="muted" style="font-size:11px;margin:4px 0 0">v48</p>
+      <p class="muted" style="font-size:11px;margin:4px 0 0">v49</p>
       <p id="talk-state" class="talk-state"><span data-en="Press the button and speak">बटन दबाकर बोलिए</span></p>
       <button class="talk-mic" id="talk-mic" type="button" aria-label="बोलें / Speak">🎤</button>
       <div class="talk-row">
@@ -874,6 +1001,7 @@ function show(view) {
   window.scrollTo(0, 0);
   if (view === 'home') { loadStatus(); circleList(); if (!$('#song-send-card').innerHTML) songCard($('#song-send-card'), { needFrom: true, body: () => ({ code: store.get('gs_code') }) }); }
   $('#talk-bar').classList.toggle('hidden', view !== 'talk');
+  document.documentElement.classList.toggle('snap', view === 'role');
   if (view === 'elder') loadElder();
   if (view === 'care') loadCare();
   if (view === 'join') loadJoin();
@@ -1573,6 +1701,7 @@ if (window.__PREVIEW) {
 // ---- Two doors (elder / family), the elder's simple home, and the family circle ----
 API.circle = API_BASE + '/app-circle';
 const SONGS = {"_note":"Songs Sneha suggests (real, well-loved; she always names one exactly). Any other song the elder asks for is played too.","सुबह / भक्ति":["ऐ मालिक तेरे बंदे हम - लता मंगेशकर","इतनी शक्ति हमें देना दाता - लता मंगेशकर","ओम जय जगदीश हरे - अनुराधा पौडवाल","तू प्यार का सागर है - मन्ना डे","अच्युतम केशवम - विक्रम हज़रा"],"ख़ुशी":["ये दोस्ती हम नहीं तोड़ेंगे - किशोर कुमार","मेरे सपनों की रानी - किशोर कुमार","आज कल तेरे मेरे प्यार के चर्चे - मोहम्मद रफ़ी","चल चल चल मेरे साथी - किशोर कुमार","ज़िंदगी एक सफ़र है सुहाना - किशोर कुमार"],"पुरानी यादें / सुकून":["लग जा गले - लता मंगेशकर","कहीं दूर जब दिन ढल जाए - मुकेश","अभी न जाओ छोड़ कर - मोहम्मद रफ़ी","चौदहवीं का चाँद हो - मोहम्मद रफ़ी","तेरे मेरे मिलन की ये रैना - लता मंगेशकर"],"उदासी में हौसला":["रुक जाना नहीं तू कहीं हार के - किशोर कुमार","आने वाला पल जाने वाला है - किशोर कुमार","ज़िंदगी कैसी है पहेली - मन्ना डे","कभी कभी मेरे दिल में - मुकेश"],"देशभक्ति / त्योहार":["ऐ मेरे वतन के लोगो - लता मंगेशकर","मेरे देश की धरती - महेंद्र कपूर","आज मौसम बड़ा बेईमान है - मोहम्मद रफ़ी"]};
+const PLAN_HI = { active: 'ऐप में स्नेहा: बात, गाने-भजन, देखभाल-मंडली, ज़रूरी ख़बरें', plus: 'साथी + स्नेहा रोज़ फ़ोन करती है (लगभग 2 मिनट)', care: 'प्लस + खाने और दवाई की याद वाली कॉल, ज़रूरी ख़बर सबसे पहले' };
 const circleCall = async (body) => (await fetch(API.circle, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(body) })).json();
 const songOptions = () => Object.entries(SONGS).filter(([k]) => !k.startsWith('_')).map(([mood, list]) =>
   `<optgroup label="${esc(mood)}">` + list.map((x) => `<option>${esc(x)}</option>`).join('') + '</optgroup>').join('');
@@ -1584,9 +1713,19 @@ function todayHtml(today) {
   return Object.values(last).map((c) => `<div class="rowline"><span>${esc(T(...(CHECK_NAME[c.checkin] || [c.checkin, c.checkin])))}</span><b>${c.answered ? T('✓ बात हुई', '✓ Talked') : T('फ़ोन नहीं उठा', 'No answer')}</b></div>`).join('');
 }
 
-// first open
-$('#door-elder').addEventListener('click', () => { store.set('gs_role', 'elder'); show(store.get('gs_code') ? 'elder' : 'elogin'); });
-$('#door-family').addEventListener('click', () => { store.set('gs_role', 'family'); show(store.get('gs_code') ? 'home' : 'welcome'); });
+// first open: the website, with both doors
+const PLANS = {"_note":"Membership plans and billing cycles. Prices are per month and INCLUDE GST once GST registration is on (until then no GST is charged or shown). Repriced 22 Nov 2026 with the founder: every plan keeps at least 40% margin on every cycle, worked out from 'costs' and each plan's 'usage' (see accounts.handler.js margin()).","gst":{"registered":false,"rate":0.18,"gstin":""},"plans":[{"key":"active","hi":"साथी (ऐप पर स्नेहा)","en":"Saathi","per_month":449,"includes":"Sneha in the app: talk, songs and bhajans, family circle, alerts","usage":{"call_min":0,"chats":150}},{"key":"plus","hi":"प्लस (रोज़ एक कॉल)","en":"Plus","per_month":1249,"includes":"Saathi + Sneha phones every day (about 2 minutes)","usage":{"call_min":60,"chats":150}},{"key":"care","hi":"केयर (पूरी देखभाल)","en":"Care","per_month":2799,"includes":"Plus + meal and medicine reminder calls, priority alerts","usage":{"call_min":150,"chats":300}},{"key":"founding","hi":"फ़ाउंडिंग फ़ैमिली (मुफ़्त)","en":"Founding family (free)","per_month":0,"includes":"Pilot families, free","usage":{"call_min":60,"chats":150}}],"cycles":[{"key":"monthly","hi":"हर महीने","en":"Monthly","months":1,"discount":0},{"key":"bimonthly","hi":"हर 2 महीने","en":"Every 2 months","months":2,"discount":0},{"key":"quarterly","hi":"हर 3 महीने","en":"Quarterly","months":3,"discount":0.05},{"key":"halfyearly","hi":"हर 6 महीने","en":"Half-yearly","months":6,"discount":0.1},{"key":"yearly","hi":"सालाना","en":"Yearly","months":12,"discount":0.15}],"expense_categories":["Calls (Bolna)","Voice (Sarvam)","n8n / server","Domain / email","Agent commission","Staff","Marketing","Software / tools","Office / travel","Bank / payment charges","Professional fees (CA, legal)","Other"],"costs":{"_note":"Estimated cost per family per month, from vendor price lists (Nov 2026): Bolna about Rs 5.5/min self-serve; app chat about Rs 0.85 (Sarvam speech in/out + Claude); overhead = server, email, tools spread over families; gateway = Razorpay 2% + 18% GST on the fee. Update when real bills come in; the admin panel recalculates margins.","call_per_min":5.5,"chat":0.85,"overhead_per_family":50,"gateway_rate":0.0236,"target_margin":0.4}};
+document.querySelectorAll('[data-door]').forEach((d) => d.addEventListener('click', () => {
+  if (d.dataset.door === 'elder') { store.set('gs_role', 'elder'); show(store.get('gs_code') ? 'elder' : 'elogin'); }
+  else { store.set('gs_role', 'family'); show(store.get('gs_code') ? 'home' : 'welcome'); }
+}));
+(function sitePlans() {
+  const box = $('#site-plans'); if (!box || !PLANS.plans) return;
+  box.innerHTML = PLANS.plans.filter((p) => p.per_month > 0).map((p, i) => `<div class="plan ${p.key === 'plus' ? 'best' : ''}"><h3>${esc(p.hi.split(' (')[0])} <small class="muted">${esc(p.en)}</small>${p.key === 'plus' ? ' <span class="pill ok" style="font-size:12px">' + T('सबसे पसंदीदा', 'Most chosen') + '</span>' : ''}</h3>` +
+    `<div class="rs">₹${p.per_month.toLocaleString('en-IN')}<small> / ${T('माह', 'month')}</small></div><p>${esc(T(PLAN_HI[p.key] || p.includes, p.includes))}</p>` +
+    `<button class="btn ${p.key === 'plus' ? 'primary' : 'secondary'}" type="button" data-plan="${p.key}">${T('यह प्लान चुनें', 'Choose this plan')}</button></div>`).join('');
+  box.querySelectorAll('[data-plan]').forEach((b) => b.addEventListener('click', () => { store.set('gs_plan_pick', b.dataset.plan); store.set('gs_role', 'family'); show(store.get('gs_code') ? 'pay' : 'welcome'); }));
+})();
 $('#ecode-go').addEventListener('click', () => {
   const c = $('#ecode-in').value.trim().toUpperCase().replace(/\s/g, '');
   if (!/^GS-[A-Z0-9]{8}$/.test(c)) { $('#ecode-err').textContent = T('कोड ऐसा दिखना चाहिए: GS-XXXXXXXX', 'The code looks like GS-XXXXXXXX'); return; }
