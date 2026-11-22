@@ -98,6 +98,8 @@
         <button class="btn" id="e-save">Save expense</button> <span id="e-msg" class="muted"></span></div>
       <div class="card"><h2>Profit and loss by month</h2><div class="tbl"><table><thead><tr><th>Month</th><th>Received</th><th>GST collected</th><th>Income</th><th>Expenses</th><th>GST paid (credit)</th><th>GST payable</th><th>Profit</th></tr></thead><tbody id="acc-months"></tbody></table></div>
         <p class="muted">Income = received − GST collected. Profit = income − expenses (without their GST). Income tax is on profit; GST payable = GST collected − GST credit.</p></div>
+      <div class="card"><h2>Books for the CA</h2><p class="muted">This financial year in one Excel file: summary, sales register (invoice numbers), expense register, monthly profit and loss, GST summary. Send it to your CA for audit and returns.</p>
+        <button class="btn" id="ca-xlsx" type="button">⬇ Download books (Excel)</button> <span id="ca-msg" class="muted"></span></div>
       <div class="card"><h2>Price list (GST included)</h2><div class="tbl"><table><thead><tr><th>Plan</th><th>Monthly</th><th>2 months</th><th>Quarterly</th><th>Half-yearly</th><th>Yearly</th></tr></thead><tbody id="acc-prices"></tbody></table></div>
         <p class="muted">Members by plan: <span id="acc-members"></span></p></div>
       <div class="card"><h2>Recent payments</h2><div class="tbl"><table><thead><tr><th>Paid on</th><th>Elder</th><th>Amount</th><th>Plan</th><th>Cycle</th><th>Covers</th><th>Method</th><th>Note</th></tr></thead><tbody id="acc-pays"></tbody></table></div></div>
@@ -225,6 +227,41 @@ function fillForms() {
     const pr = row && row.prices.find((x) => x.cycle === $('#p-cycle').value); if (pr) $('#p-amount').value = pr.total; };
   $('#p-plan').addEventListener('change', suggest); $('#p-cycle').addEventListener('change', suggest); suggest();
 }
+// One Excel workbook for the CA (SheetJS, self-hosted in /vendor)
+function loadXlsx() { return window.XLSX ? Promise.resolve(window.XLSX) : new Promise((ok, no) => { const sc = document.createElement('script'); sc.src = 'vendor/xlsx.full.min.js'; sc.onload = () => ok(window.XLSX); sc.onerror = no; document.head.appendChild(sc); }); }
+async function caBooks() {
+  const a = ACC; if (!a) return;
+  $('#ca-msg').textContent = 'Preparing…';
+  try {
+    const X = await loadXlsx(); const wb = X.utils.book_new();
+    const add = (name, rows, cols) => { const ws = X.utils.json_to_sheet(rows.length ? rows : [Object.fromEntries(cols.map((c) => [c, '']))], { header: cols }); ws['!cols'] = cols.map((c) => ({ wch: Math.max(12, c.length + 2) })); X.utils.book_append_sheet(wb, ws, name); };
+    const y = a.ytd || {};
+    add('Summary', [
+      { Item: 'Business', Value: 'Gopu Associate (SadaSneha), 1809 Old Napier Town, Jabalpur, Madhya Pradesh' },
+      { Item: 'GSTIN', Value: a.gst_registered ? '' : 'Not registered (no GST charged)' },
+      { Item: 'Financial year', Value: a.fy },
+      { Item: 'Turnover (receipts) this FY', Value: a.turnover_fy },
+      { Item: 'Income net of GST', Value: y.net_income || 0 }, { Item: 'GST collected', Value: y.gst_collected || 0 },
+      { Item: 'Expenses net of GST', Value: y.expenses || 0 }, { Item: 'GST paid on expenses (input credit)', Value: y.gst_paid || 0 },
+      { Item: 'GST payable', Value: y.gst_payable || 0 }, { Item: 'Profit before tax', Value: y.profit || 0 },
+      { Item: 'Prepared on', Value: a.today },
+    ], ['Item', 'Value']);
+    add('Sales register', a.sales_register.map((r) => ({ 'Invoice no': r.invoice_no, Date: r.date, Customer: r.customer, 'Family code': r.family_code, 'State (place of supply)': r.state,
+      Plan: r.plan, Cycle: r.cycle, Period: r.period, 'Taxable value': r.taxable_value, CGST: r.cgst, SGST: r.sgst, IGST: r.igst, Total: r.total, 'Paid by': r.method, Reference: r.reference })),
+      ['Invoice no', 'Date', 'Customer', 'Family code', 'State (place of supply)', 'Plan', 'Cycle', 'Period', 'Taxable value', 'CGST', 'SGST', 'IGST', 'Total', 'Paid by', 'Reference']);
+    add('Expense register', a.expense_register.map((e) => ({ Date: e.date, Vendor: e.vendor, Category: e.category, 'Amount (incl. GST)': e.amount, 'GST paid (input)': e.gst_paid, Note: e.note })),
+      ['Date', 'Vendor', 'Category', 'Amount (incl. GST)', 'GST paid (input)', 'Note']);
+    add('Monthly P&L', a.months.map((m) => ({ Month: m.month, Income: m.income, 'GST collected': m.gst_collected, 'Income net of GST': m.net_income, 'Expenses net of GST': m.expenses, 'GST paid': m.gst_paid, 'GST payable': m.gst_payable, Profit: m.profit })),
+      ['Month', 'Income', 'GST collected', 'Income net of GST', 'Expenses net of GST', 'GST paid', 'GST payable', 'Profit']);
+    const byState = {};
+    for (const r of a.sales_register) { const k = r.state || 'Unknown'; const t = byState[k] = byState[k] || { 'Place of supply': k, Invoices: 0, 'Taxable value': 0, CGST: 0, SGST: 0, IGST: 0, Total: 0 };
+      t.Invoices++; for (const [c, f] of [['Taxable value', 'taxable_value'], ['CGST', 'cgst'], ['SGST', 'sgst'], ['IGST', 'igst'], ['Total', 'total']]) t[c] = Math.round((t[c] + r[f]) * 100) / 100; }
+    add('GST summary (B2C)', Object.values(byState), ['Place of supply', 'Invoices', 'Taxable value', 'CGST', 'SGST', 'IGST', 'Total']);
+    X.writeFile(wb, `SadaSneha-books-FY${a.fy}.xlsx`);
+    $('#ca-msg').textContent = '✓ Downloaded';
+  } catch (e) { $('#ca-msg').textContent = 'Could not prepare the file.'; }
+}
+document.addEventListener('click', (e) => { if (e.target && e.target.id === 'ca-xlsx') caBooks(); });
 function renderAccounts() {
   const a = ACC; fillForms();
   const fams = (DATA ? DATA.families : []).filter((f) => f.status !== 'Test');

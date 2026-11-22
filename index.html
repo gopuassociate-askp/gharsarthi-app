@@ -99,6 +99,7 @@
   #talk-cam.pulse { animation: campulse 1.2s ease-in-out 6; border-color: #ea580c; }
   @keyframes campulse { 50% { transform: scale(1.08); box-shadow: 0 0 0 6px rgba(234,88,12,.25); } }
   .linkbtn { background: none; border: 0; padding: 0; color: #c2410c; text-decoration: underline; font: inherit; cursor: pointer; }
+  .rs-big { font-size: 30px; font-weight: 800; color: var(--brand); margin: 10px 0; }
   .sn-head { display: flex; gap: 14px; align-items: center; }
   .sn-mini { width: 76px; height: 76px; border-radius: 50%; object-fit: cover; border: 3px solid #f59e0b; flex: none; }
   .talk-bar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 30; display: flex; gap: 4px; padding: 8px 8px calc(8px + env(safe-area-inset-bottom)); background: #fff; border-top: 1px solid #fde3cf; box-shadow: 0 -6px 20px rgba(124,45,18,.12); }
@@ -639,6 +640,18 @@
 
   <!-- Payments -->
   <section id="v-pay" class="view hidden">
+    <div class="card" id="pay-now">
+      <h2>💳 <span data-en="Choose a plan and pay online">प्लान चुनें और ऑनलाइन भुगतान करें</span></h2>
+      <label for="pn-plan"><span data-en="Plan">प्लान</span></label><select id="pn-plan"></select>
+      <label for="pn-cycle"><span data-en="Pay for">कितने समय का</span></label><select id="pn-cycle"></select>
+      <p class="rs-big" id="pn-amount">—</p>
+      <label for="pn-name"><span data-en="Bill in the name of">बिल किसके नाम पर</span></label><input id="pn-name" maxlength="60" autocomplete="name">
+      <label for="pn-email"><span data-en="Email for the bill">बिल के लिए ईमेल</span></label><input id="pn-email" type="email" maxlength="80" autocomplete="email">
+      <label for="pn-state"><span data-en="State">राज्य</span></label><input id="pn-state" maxlength="60" placeholder="मध्य प्रदेश">
+      <button class="btn primary" id="pn-go" type="button">🔒 <span data-en="Pay securely (UPI / card)">सुरक्षित भुगतान करें (UPI / कार्ड)</span></button>
+      <p id="pn-msg" class="muted"></p>
+      <p class="muted" style="font-size:13px"><span data-en="Payments by Razorpay. By paying you accept our">भुगतान Razorpay से। भुगतान करके आप हमारी</span> <a href="terms.html" target="_blank" rel="noopener"><span data-en="Terms">शर्तें</span></a> <span data-en="and">और</span> <a href="refund.html" target="_blank" rel="noopener"><span data-en="Refund policy">रिफ़ंड नीति</span></a> <span data-en="">मानते हैं।</span></p>
+    </div>
     <div class="card">
       <h2>भुगतान / Payments</h2>
       <div id="pay-empty" class="note"><span data-en="No payments yet. The service is free for founding families.">अभी कोई भुगतान नहीं। फ़ाउंडिंग फ़ैमिली के लिए सेवा मुफ़्त है।</span><br><span class="muted">No payments yet. The service is free for founding families.</span></div>
@@ -653,7 +666,7 @@
         <video id="talk-self" class="hidden" playsinline muted></video>
         <span class="talk-ai">स्नेहा – आपकी AI सहायिका</span><span id="talk-cam-on" class="talk-cam hidden">● कैमरा चालू</span><span id="talk-mood" class="talk-mood hidden"></span>
         <div id="face-notes" class="face-notes hidden" aria-hidden="true"><span>♪</span><span>♫</span><span>♩</span><span>♬</span><span>♪</span><p>🎵 गाना ढूँढ रही हूँ…</p></div></div>
-      <p class="muted" style="font-size:11px;margin:4px 0 0">v49</p>
+      <p class="muted" style="font-size:11px;margin:4px 0 0">v50</p>
       <p id="talk-state" class="talk-state"><span data-en="Press the button and speak">बटन दबाकर बोलिए</span></p>
       <button class="talk-mic" id="talk-mic" type="button" aria-label="बोलें / Speak">🎤</button>
       <div class="talk-row">
@@ -1002,6 +1015,7 @@ function show(view) {
   if (view === 'home') { loadStatus(); circleList(); if (!$('#song-send-card').innerHTML) songCard($('#song-send-card'), { needFrom: true, body: () => ({ code: store.get('gs_code') }) }); }
   $('#talk-bar').classList.toggle('hidden', view !== 'talk');
   document.documentElement.classList.toggle('snap', view === 'role');
+  if (view === 'pay') payInit();
   if (view === 'elder') loadElder();
   if (view === 'care') loadCare();
   if (view === 'join') loadJoin();
@@ -1697,6 +1711,50 @@ if (window.__PREVIEW) {
   document.head.appendChild(gs);
 }
 
+
+
+// ---- pay online (Razorpay): the amount is set by the server from the price list ----
+API.pay = API_BASE + '/app-pay';
+const payCall = async (body) => (await fetch(API.pay, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(body) })).json();
+function payTotal(planKey, cycleKey) { const p = PLANS.plans.find((x) => x.key === planKey), c = PLANS.cycles.find((x) => x.key === cycleKey); return p && c ? Math.round(p.per_month * c.months * (1 - c.discount)) : 0; }
+function payInit() {
+  if (!PLANS.plans || $('#pn-plan').options.length) return;
+  $('#pn-plan').innerHTML = PLANS.plans.filter((p) => p.per_month > 0).map((p) => `<option value="${p.key}">${esc(p.hi.split(' (')[0])} / ${esc(p.en)} – ₹${p.per_month.toLocaleString('en-IN')}/${T('माह', 'month')}</option>`).join('');
+  $('#pn-cycle').innerHTML = PLANS.cycles.map((c) => `<option value="${c.key}">${esc(T(c.hi, c.en))}${c.discount ? ` (−${Math.round(c.discount * 100)}%)` : ''}</option>`).join('');
+  const pick = store.get('gs_plan_pick'); if (pick) $('#pn-plan').value = pick;
+  if (store.get('gs_g_name')) $('#pn-name').value = store.get('gs_g_name');
+  if (store.get('gs_g_email')) $('#pn-email').value = store.get('gs_g_email');
+  const upd = () => { $('#pn-amount').textContent = '₹' + payTotal($('#pn-plan').value, $('#pn-cycle').value).toLocaleString('en-IN'); };
+  $('#pn-plan').onchange = upd; $('#pn-cycle').onchange = upd; upd();
+}
+function loadRzp() { return window.Razorpay ? Promise.resolve() : new Promise((ok, no) => { const sc = document.createElement('script'); sc.src = 'https://checkout.razorpay.com/v1/checkout.js'; sc.onload = ok; sc.onerror = no; document.head.appendChild(sc); }); }
+$('#pn-go').addEventListener('click', async () => {
+  const msg = (hi, en) => { $('#pn-msg').textContent = T(hi, en); };
+  const body = { action: 'order', code: store.get('gs_code'), plan: $('#pn-plan').value, cycle: $('#pn-cycle').value,
+    payer_name: $('#pn-name').value.trim(), payer_email: $('#pn-email').value.trim(), payer_state: $('#pn-state').value.trim() };
+  if (!body.payer_name) return msg('बिल के लिए नाम लिखिए।', 'Write the name for the bill.');
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(body.payer_email)) return msg('सही ईमेल लिखिए।', 'Write a valid email.');
+  msg('तैयार कर रहे हैं…', 'Preparing…');
+  try {
+    const o = await payCall(body);
+    if (!o.ok) return msg(o.why === 'not_ready' ? 'ऑनलाइन भुगतान कुछ ही दिनों में शुरू होगा। अभी care@sadasneha.in पर लिखें।' : 'भुगतान शुरू नहीं हो पाया, फिर कोशिश करें।',
+      o.why === 'not_ready' ? 'Online payment starts in a few days. For now write to care@sadasneha.in.' : 'Could not start the payment; try again.');
+    await loadRzp();
+    const rz = new window.Razorpay({ key: o.key, order_id: o.order_id, amount: o.amount, currency: 'INR', name: 'सदा स्नेहा – SadaSneha', description: $('#pn-plan').selectedOptions[0].textContent,
+      image: 'https://sadasneha.in/icon-192.png', prefill: { name: o.name, email: o.email }, theme: { color: '#ea580c' },
+      handler: async (r) => {
+        msg('पुष्टि कर रहे हैं…', 'Confirming…');
+        try {
+          const v = await payCall({ action: 'verify', code: store.get('gs_code'), order_id: r.razorpay_order_id, payment_id: r.razorpay_payment_id });
+          msg(v.ok ? `✓ भुगतान मिल गया, धन्यवाद! अगली तारीख़: ${v.next_payment || '—'} · रसीद: ${v.reference}` : 'भुगतान की पुष्टि नहीं हुई। पैसा कटा हो तो care@sadasneha.in पर लिखें।',
+            v.ok ? `✓ Payment received, thank you! Next due: ${v.next_payment || '—'} · Receipt: ${v.reference}` : 'Could not confirm. If money was taken, write to care@sadasneha.in.');
+          if (v.ok) loadStatus();
+        } catch (e) { msg('इंटरनेट नहीं', 'Offline'); }
+      } });
+    rz.on('payment.failed', () => msg('भुगतान नहीं हुआ। फिर कोशिश करें।', 'Payment failed; try again.'));
+    rz.open(); msg('', '');
+  } catch (e) { msg('इंटरनेट नहीं', 'Offline'); }
+});
 
 // ---- Two doors (elder / family), the elder's simple home, and the family circle ----
 API.circle = API_BASE + '/app-circle';
