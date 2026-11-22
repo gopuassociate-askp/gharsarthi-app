@@ -396,7 +396,7 @@
       <div class="talk-face"><canvas id="talk-canvas" width="512" height="512" aria-label="स्नेहा"></canvas>
         <video id="talk-self" class="hidden" playsinline muted></video>
         <span class="talk-ai">स्नेहा – आपकी AI सहायिका</span><span id="talk-cam-on" class="talk-cam hidden">● कैमरा चालू</span></div>
-      <p class="muted" style="font-size:11px;margin:4px 0 0">v30</p>
+      <p class="muted" style="font-size:11px;margin:4px 0 0">v31</p>
       <p id="talk-state" class="talk-state"><span data-en="Press the button and speak">बटन दबाकर बोलिए</span></p>
       <button class="talk-mic" id="talk-mic" type="button" aria-label="बोलें / Speak">🎤</button>
       <div class="talk-row">
@@ -1501,7 +1501,7 @@ async function talkSend(blob) {
       return;
     }
     if (j.heard) { talkLog('u', j.heard); TALK.history.push({ r: 'u', t: j.heard }); }
-    talkLog('s' + (j.urgent ? ' urgent' : ''), j.reply); TALK.history.push({ r: 's', t: j.reply }); TALK.history = TALK.history.slice(-6);
+    talkLog('s' + (j.urgent ? ' urgent' : ''), j.reply); TALK.history.push({ r: 's', t: j.reply }); TALK.history = TALK.history.slice(-10);
     talkState(j.urgent ? 'घर वालों को ख़बर दी जा रही है 🚨' : 'स्नेहा बोल रही है…', j.urgent ? 'The family is being told now 🚨' : 'Sneha is speaking…');
     await talkSpeak(j.audio, j.mime, j.reply);
     talkState('बटन दबाकर बोलिए', 'Press the button and speak');
