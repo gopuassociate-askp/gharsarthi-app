@@ -399,7 +399,7 @@
       <div class="talk-face"><canvas id="talk-canvas" width="512" height="512" aria-label="स्नेहा"></canvas>
         <video id="talk-self" class="hidden" playsinline muted></video>
         <span class="talk-ai">स्नेहा – आपकी AI सहायिका</span><span id="talk-cam-on" class="talk-cam hidden">● कैमरा चालू</span></div>
-      <p class="muted" style="font-size:11px;margin:4px 0 0">v33</p>
+      <p class="muted" style="font-size:11px;margin:4px 0 0">v34</p>
       <p id="talk-state" class="talk-state"><span data-en="Press the button and speak">बटन दबाकर बोलिए</span></p>
       <button class="talk-mic" id="talk-mic" type="button" aria-label="बोलें / Speak">🎤</button>
       <div class="talk-row">
@@ -565,8 +565,12 @@ const DEMO_CODE = 'GS-DEMO';
   const ls = (k, v) => { try { return v === undefined ? localStorage.getItem(k) : v === null ? localStorage.removeItem(k) : localStorage.setItem(k, v); } catch (e) { return null; } };
   const PREVIEW = q.get('preview') === '1' || (() => { try { return sessionStorage.getItem('gs_preview') === '1'; } catch (e) { return false; } })();
   if (PREVIEW) { try { sessionStorage.setItem('gs_preview', '1'); } catch (e) {} window.__PREVIEW = true; }
-  if (!PREVIEW && q.get('demo') === '1' && ls('gs_code') !== DEMO_CODE) { ls('gs_code_before_demo', ls('gs_code') || ''); ls('gs_code', DEMO_CODE); }
-  if (!PREVIEW && ls('gs_code') !== DEMO_CODE) return;
+  // ?demo=1: a sample family; ?demo=founder: the founder, whom Sneha talks to as her boss
+  const want = q.get('demo') === 'founder' ? 'GS-FOUNDER' : q.get('demo') === '1' ? DEMO_CODE : null;
+  const isDemo = (c) => c === DEMO_CODE || c === 'GS-FOUNDER';
+  if (!PREVIEW && want && ls('gs_code') !== want) { if (!isDemo(ls('gs_code'))) ls('gs_code_before_demo', ls('gs_code') || ''); ls('gs_code', want); }
+  if (!PREVIEW && !isDemo(ls('gs_code'))) return;
+  const FOUNDER = ls('gs_code') === 'GS-FOUNDER';
   const at = (h, m) => { const d = new Date(); d.setUTCHours(h - 5, m - 30, 0, 0); return d.toISOString(); };
   const md = (off) => { const d = new Date(Date.now() + off * 864e5); return d.toISOString().slice(5, 10); };
   const D = {
@@ -626,6 +630,7 @@ const DEMO_CODE = 'GS-DEMO';
     bar.style.cssText = 'position:sticky;top:0;z-index:50;background:#7c3aed;color:#fff;padding:8px 12px;font-size:15px;display:flex;gap:10px;align-items:center;justify-content:space-between';
     bar.innerHTML = PREVIEW
       ? '<span>👀 नए विज़िटर का पूर्वावलोकन: कुछ भी सेव नहीं होता / Preview as a new visitor: nothing is saved</span><button style="background:#fff;color:#0f766e;border:0;border-radius:8px;padding:6px 10px;font:inherit">Exit preview</button>'
+      : FOUNDER ? '<span>👔 संस्थापक मोड: स्नेहा आपसे अपने बॉस की तरह बात करेगी / Founder mode: Sneha talks to you as her boss</span><button style="background:#fff;color:#7c3aed;border:0;border-radius:8px;padding:6px 10px;font:inherit">Exit</button>'
       : '<span>🧪 डेमो परिवार: सब नमूना है, कुछ भी असली नहीं भेजा जाता / Demo family: sample data, nothing real is sent</span><button style="background:#fff;color:#7c3aed;border:0;border-radius:8px;padding:6px 10px;font:inherit">Exit demo</button>';
     if (PREVIEW) bar.style.background = '#0f766e';
     bar.querySelector('button').onclick = () => {
@@ -1584,7 +1589,7 @@ $('#song-stop').addEventListener('click', () => { songStop(); talkState('बट�
 buildForm();
 const params = new URLSearchParams(location.search);
 if (params.get('code')) { store.set('gs_code', params.get('code').toUpperCase()); try { history.replaceState(null, '', location.pathname); } catch (e) {} }
-show(params.get('ack') ? 'seen' : store.get('gs_code') ? 'home' : (params.get('view') === 'signup' ? 'signup' : 'welcome'));
+show(params.get('ack') ? 'seen' : store.get('gs_code') ? (location.hash === '#talk' ? 'talk' : 'home') : (params.get('view') === 'signup' ? 'signup' : 'welcome'));
 </script>
 </body>
 </html>
