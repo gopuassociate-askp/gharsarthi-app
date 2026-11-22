@@ -417,7 +417,7 @@
         <video id="talk-self" class="hidden" playsinline muted></video>
         <span class="talk-ai">स्नेहा – आपकी AI सहायिका</span><span id="talk-cam-on" class="talk-cam hidden">● कैमरा चालू</span><span id="talk-mood" class="talk-mood hidden"></span>
         <div id="face-notes" class="face-notes hidden" aria-hidden="true"><span>♪</span><span>♫</span><span>♩</span><span>♬</span><span>♪</span><p>🎵 गाना ढूँढ रही हूँ…</p></div></div>
-      <p class="muted" style="font-size:11px;margin:4px 0 0">v41</p>
+      <p class="muted" style="font-size:11px;margin:4px 0 0">v42</p>
       <p id="talk-state" class="talk-state"><span data-en="Press the button and speak">बटन दबाकर बोलिए</span></p>
       <button class="talk-mic" id="talk-mic" type="button" aria-label="बोलें / Speak">🎤</button>
       <div class="talk-row">
@@ -1586,7 +1586,7 @@ async function talkSend(blob) {
     for (const a of (j.audios && j.audios.length ? j.audios : [j.audio])) { if (TALK.cut) break; await talkSpeak(a, j.mime, j.reply); }
     talkState('बटन दबाकर बोलिए', 'Press the button and speak');
     if (j.play && !TALK.cut) songPlay(j.play, j.play_id);
-    else if (!j.urgent && !TALK.cut && TALK.open) setTimeout(() => { if (!TALK.busy && TALK.open && !TALK.speaking) talkListen({ auto: 0 }); }, 300);
+    else if (!j.urgent && !j.end && !TALK.cut && TALK.open) setTimeout(() => { if (!TALK.busy && TALK.open && !TALK.speaking) talkListen({ auto: 0 }); }, 300);
   } catch (e) { talkState('इंटरनेट नहीं; थोड़ी देर बाद कोशिश करें', 'No internet; try again shortly'); }
   finally { TALK.busy = false; $('#talk-mic').disabled = false; }
 }
