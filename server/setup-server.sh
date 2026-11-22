@@ -2,6 +2,12 @@
 # One-time setup of a fresh Ubuntu 22.04/24.04 server for SadaSneha.
 # Run as root:  bash setup-server.sh
 set -euo pipefail
+# Small servers (1 GB RAM): add 2 GB of swap once, so n8n and its database never run out of memory
+if [ ! -f /swapfile ] && [ "$(awk '/MemTotal/ {print int($2/1024)}' /proc/meminfo)" -lt 1900 ]; then
+  fallocate -l 2G /swapfile && chmod 600 /swapfile && mkswap /swapfile && swapon /swapfile
+  grep -q '^/swapfile' /etc/fstab || echo '/swapfile none swap sw 0 0' >> /etc/fstab
+  sysctl -w vm.swappiness=10 >/dev/null; grep -q swappiness /etc/sysctl.conf || echo 'vm.swappiness=10' >> /etc/sysctl.conf
+fi
 apt-get update -y
 apt-get install -y ca-certificates curl ufw
 if ! command -v docker >/dev/null; then curl -fsSL https://get.docker.com | sh; fi
