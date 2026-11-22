@@ -399,7 +399,7 @@
       <div class="talk-face"><canvas id="talk-canvas" width="512" height="512" aria-label="स्नेहा"></canvas>
         <video id="talk-self" class="hidden" playsinline muted></video>
         <span class="talk-ai">स्नेहा – आपकी AI सहायिका</span><span id="talk-cam-on" class="talk-cam hidden">● कैमरा चालू</span></div>
-      <p class="muted" style="font-size:11px;margin:4px 0 0">v34</p>
+      <p class="muted" style="font-size:11px;margin:4px 0 0">v35</p>
       <p id="talk-state" class="talk-state"><span data-en="Press the button and speak">बटन दबाकर बोलिए</span></p>
       <button class="talk-mic" id="talk-mic" type="button" aria-label="बोलें / Speak">🎤</button>
       <div class="talk-row">
@@ -1491,7 +1491,7 @@ async function talkListen() {
   const vad = setInterval(() => {
     an.getByteTimeDomainData(buf); let s = 0; for (const v of buf) s += (v - 128) * (v - 128); const rms = Math.sqrt(s / buf.length);
     if (rms > 6) { heard = true; quietSince = performance.now(); }
-    if ((heard && performance.now() - quietSince > 1500) || performance.now() - started > 25000) { if (rec.state === 'recording') rec.stop(); }
+    if ((heard && performance.now() - quietSince > 1200) || performance.now() - started > 25000) { if (rec.state === 'recording') rec.stop(); }
   }, 100);
   rec.onstop = async () => {
     clearInterval(vad); st.getTracks().forEach((t) => t.stop()); $('#talk-mic').classList.remove('rec');
