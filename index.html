@@ -108,7 +108,8 @@
   .talk-log .s { align-self: flex-start; background: #fff7ed; border: 1px solid #fed7aa; padding: 8px 12px; border-radius: 14px 14px 14px 4px; max-width: 85%; }
   .talk-log .s.urgent { background: #fee2e2; border-color: #fca5a5; }
   .song { margin-top: 12px; } .song-title { font-weight: 700; color: #9a3412; margin: 0 0 6px; }
-  .song iframe { width: 100%; aspect-ratio: 16 / 9; border: 0; border-radius: 14px; }
+  .song iframe { width: 100%; height: auto; aspect-ratio: 16 / 9; border: 0; border-radius: 14px; }
+  #song-tap { font-size: 22px; padding: 16px; }
   .g-btn { display: flex; justify-content: center; min-height: 48px; margin: 14px 0 6px; }
   .clips { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; }
   .clips figure { margin: 0; text-align: center; font-size: 15px; color: #9a3412; }
@@ -398,7 +399,7 @@
       <div class="talk-face"><canvas id="talk-canvas" width="512" height="512" aria-label="स्नेहा"></canvas>
         <video id="talk-self" class="hidden" playsinline muted></video>
         <span class="talk-ai">स्नेहा – आपकी AI सहायिका</span><span id="talk-cam-on" class="talk-cam hidden">● कैमरा चालू</span></div>
-      <p class="muted" style="font-size:11px;margin:4px 0 0">v32</p>
+      <p class="muted" style="font-size:11px;margin:4px 0 0">v33</p>
       <p id="talk-state" class="talk-state"><span data-en="Press the button and speak">बटन दबाकर बोलिए</span></p>
       <button class="talk-mic" id="talk-mic" type="button" aria-label="बोलें / Speak">🎤</button>
       <div class="talk-row">
@@ -406,6 +407,7 @@
         <button class="btn secondary" data-go="home" type="button" id="talk-end">✖ <span data-en="End">बंद करें</span></button>
       </div>
       <div id="song-box" class="song hidden"><p id="song-title" class="song-title"></p><div id="song-frame"></div>
+        <button class="btn primary hidden" id="song-tap" type="button">▶ <span data-en="Play the song">गाना चलाएँ</span></button>
         <button class="btn secondary" id="song-stop" type="button">⏹ <span data-en="Stop the song">गाना बंद करें</span></button></div>
       <div id="talk-log" class="talk-log"></div>
       <p class="muted" style="font-size:13px"><span data-en="Nothing is recorded. Your words go only to Sneha; the camera stays on this phone.">कुछ भी रिकॉर्ड नहीं होता। आपकी बात सिर्फ़ स्नेहा तक जाती है; कैमरा इसी फ़ोन पर रहता है।</span></p>
@@ -1552,12 +1554,31 @@ async function songPlay(q, id) {
     const r = id ? { id } : null;
     if (!r) { talkState('यह गाना नहीं मिला, कोई और बताइए?', 'Could not find that song; another one?'); return; }
     $('#song-title').textContent = '🎵 ' + q;
-    $('#song-frame').innerHTML = `<iframe src="https://www.youtube.com/embed/${encodeURIComponent(r.id)}?autoplay=1&rel=0&modestbranding=1&playsinline=1" allow="autoplay; encrypted-media" allowfullscreen title="${q.replace(/"/g, '')}"></iframe>`;
-    $('#song-box').classList.remove('hidden');
+    $('#song-frame').innerHTML = '<div id="song-player"></div>';
+    $('#song-box').classList.remove('hidden'); $('#song-tap').classList.add('hidden');
+    await songApi();
+    let started = false;
+    SONG.player = new YT.Player('song-player', { width: '100%', videoId: r.id,
+      playerVars: { autoplay: 1, rel: 0, modestbranding: 1, playsinline: 1 },
+      events: { onReady: (e) => { try { e.target.playVideo(); } catch (x) {} },
+        onStateChange: (e) => { if (e.data === 1) { started = true; $('#song-tap').classList.add('hidden'); } },
+        onError: () => talkState('यह गाना अभी नहीं चल पा रहा, कोई और बताइए?', 'This song cannot play now; another one?') } });
+    // phones that do not start a song by themselves: one big tap starts it
+    setTimeout(() => {
+      let st = -1; try { st = SONG.player.getPlayerState(); } catch (e) {}
+      if (!started && st !== 1 && st !== 3 && !$('#song-box').classList.contains('hidden')) $('#song-tap').classList.remove('hidden');
+    }, 4000);
     talkState('गाना चल रहा है 🎶', 'Song playing 🎶');
   } catch (e) { talkState('गाना नहीं चल पाया; इंटरनेट देखिए', 'The song could not play; check the internet'); }
 }
-function songStop() { $('#song-frame').innerHTML = ''; $('#song-box').classList.add('hidden'); }
+const SONG = { player: null, api: null };
+function songApi() {
+  if (window.YT && YT.Player) return Promise.resolve();
+  if (!SONG.api) SONG.api = new Promise((ok) => { window.onYouTubeIframeAPIReady = ok; const sc = document.createElement('script'); sc.src = 'https://www.youtube.com/iframe_api'; document.head.appendChild(sc); });
+  return SONG.api;
+}
+function songStop() { try { if (SONG.player) SONG.player.destroy(); } catch (e) {} SONG.player = null; $('#song-frame').innerHTML = ''; $('#song-box').classList.add('hidden'); }
+$('#song-tap').addEventListener('click', () => { try { SONG.player.playVideo(); } catch (e) {} $('#song-tap').classList.add('hidden'); });
 $('#song-stop').addEventListener('click', () => { songStop(); talkState('बटन दबाकर बोलिए', 'Press the button and speak'); });
 
 buildForm();
