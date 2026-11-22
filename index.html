@@ -399,7 +399,7 @@
       <div class="talk-face"><canvas id="talk-canvas" width="512" height="512" aria-label="स्नेहा"></canvas>
         <video id="talk-self" class="hidden" playsinline muted></video>
         <span class="talk-ai">स्नेहा – आपकी AI सहायिका</span><span id="talk-cam-on" class="talk-cam hidden">● कैमरा चालू</span></div>
-      <p class="muted" style="font-size:11px;margin:4px 0 0">v35</p>
+      <p class="muted" style="font-size:11px;margin:4px 0 0">v36</p>
       <p id="talk-state" class="talk-state"><span data-en="Press the button and speak">बटन दबाकर बोलिए</span></p>
       <button class="talk-mic" id="talk-mic" type="button" aria-label="बोलें / Speak">🎤</button>
       <div class="talk-row">
@@ -1507,7 +1507,7 @@ async function talkSend(blob) {
   const b64 = await new Promise((ok) => { const r = new FileReader(); r.onload = () => ok(String(r.result).split(',')[1]); r.readAsDataURL(blob); });
   try {
     const j = await (await fetch(API.talk, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({ code: store.get('gs_code'), audio: b64, mime: blob.type, history: TALK.history, mood: TALK.mood }) })).json();
+      body: JSON.stringify({ code: store.get('gs_code'), audio: b64, mime: blob.type, history: TALK.history, mood: TALK.mood, cam: !!TALK.cam }) })).json();
     if (!j.ok) {
       talkState(j.why === 'limit' ? 'आज बहुत बात हो गई, थोड़ी देर बाद फिर बात करेंगे 💛' : 'माफ़ कीजिए, अभी बात नहीं हो पाई। फिर कोशिश करें।',
         j.why === 'limit' ? 'We have talked a lot; let us talk again in a while 💛' : 'Sorry, that did not work. Please try again.');
