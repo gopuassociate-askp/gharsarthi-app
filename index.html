@@ -417,7 +417,7 @@
         <video id="talk-self" class="hidden" playsinline muted></video>
         <span class="talk-ai">स्नेहा – आपकी AI सहायिका</span><span id="talk-cam-on" class="talk-cam hidden">● कैमरा चालू</span><span id="talk-mood" class="talk-mood hidden"></span>
         <div id="face-notes" class="face-notes hidden" aria-hidden="true"><span>♪</span><span>♫</span><span>♩</span><span>♬</span><span>♪</span><p>🎵 गाना ढूँढ रही हूँ…</p></div></div>
-      <p class="muted" style="font-size:11px;margin:4px 0 0">v45</p>
+      <p class="muted" style="font-size:11px;margin:4px 0 0">v46</p>
       <p id="talk-state" class="talk-state"><span data-en="Press the button and speak">बटन दबाकर बोलिए</span></p>
       <button class="talk-mic" id="talk-mic" type="button" aria-label="बोलें / Speak">🎤</button>
       <div class="talk-row">
@@ -1538,7 +1538,7 @@ function talkBargeStop() {
   if (b && b.iv) { clearInterval(b.iv); b.st.getTracks().forEach((t) => t.stop()); }
 }
 // A short "जी…" in her voice the moment the elder stops speaking, so there is no dead silence while she thinks
-const HMM = ['face/hmm1.mp3', 'face/hmm3.mp3', 'face/hmm1.mp3'];   // "जी…" mostly; never "हम्म" (it sounded like the word हम)
+const HMM = ['face/hmm1.mp3'];   // "जी…" mostly; never "हम्म" (it sounded like the word हम)
 async function talkHmm() {
   try {
     TALK.hmmN = ((TALK.hmmN || 0) + 1) % HMM.length;
