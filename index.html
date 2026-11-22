@@ -417,7 +417,7 @@
         <video id="talk-self" class="hidden" playsinline muted></video>
         <span class="talk-ai">स्नेहा – आपकी AI सहायिका</span><span id="talk-cam-on" class="talk-cam hidden">● कैमरा चालू</span><span id="talk-mood" class="talk-mood hidden"></span>
         <div id="face-notes" class="face-notes hidden" aria-hidden="true"><span>♪</span><span>♫</span><span>♩</span><span>♬</span><span>♪</span><p>🎵 गाना ढूँढ रही हूँ…</p></div></div>
-      <p class="muted" style="font-size:11px;margin:4px 0 0">v42</p>
+      <p class="muted" style="font-size:11px;margin:4px 0 0">v43</p>
       <p id="talk-state" class="talk-state"><span data-en="Press the button and speak">बटन दबाकर बोलिए</span></p>
       <button class="talk-mic" id="talk-mic" type="button" aria-label="बोलें / Speak">🎤</button>
       <div class="talk-row">
@@ -1463,6 +1463,7 @@ async function talkOpen() {
   talkState('बटन दबाकर बोलिए', 'Press the button and speak');
 }
 window.talkClose = () => {
+  try { talkBargeStop(); } catch (e) {}
   try { if (TALK.rec && TALK.rec.state === 'recording') TALK.rec.stop(); } catch (e) {}
   if (TALK.cam) { TALK.cam.getTracks().forEach((t) => t.stop()); TALK.cam = null; $('#talk-self').classList.add('hidden'); $('#talk-cam-on').classList.add('hidden'); }
   if (TALK.audio) { TALK.audio.pause(); }
@@ -1486,7 +1487,7 @@ function talkSpeak(b64, mime, text) {
     }
     const a = new Audio('data:' + (mime || 'audio/mpeg') + ';base64,' + b64); TALK.audio = a;
     try { const src = TALK.ac.createMediaElementSource(a); src.connect(TALK.an); } catch (e) {}
-    a.onplay = () => { TALK.speaking = true; $('#talk-mic').textContent = '⏹'; }; a.onended = a.onerror = () => { TALK.speaking = false; $('#talk-mic').textContent = '🎤'; done(); };
+    a.onplay = () => { TALK.speaking = true; $('#talk-mic').textContent = '⏹'; talkBargeStart(); }; a.onended = a.onerror = () => { TALK.speaking = false; $('#talk-mic').textContent = '🎤'; done(); };
     a.play().catch(() => { TALK.speaking = false; done(); });
   });
 }
@@ -1494,9 +1495,49 @@ function talkMime() {
   for (const m of ['audio/webm;codecs=opus', 'audio/webm', 'audio/mp4', 'audio/ogg']) if (window.MediaRecorder && MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(m)) return m;
   return '';
 }
+// Talking over Sneha: while she speaks, the microphone listens for the elder's own voice (the phone
+// removes her voice by echo cancellation). Speech for about half a second stops her, and she listens.
+async function talkBargeStart() {
+  if (TALK.barge || store.get('gs_media') !== 'granted' || !TALK.open) return;
+  TALK.barge = { pending: true };
+  try {
+    const st = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true } });
+    if (!TALK.barge) { st.getTracks().forEach((t) => t.stop()); return; }
+    const src = TALK.ac.createMediaStreamSource(st); const an = TALK.ac.createAnalyser(); an.fftSize = 512; src.connect(an);
+    const buf = new Uint8Array(an.fftSize); let loud = 0, floor = 0, n = 0; const t0 = performance.now();
+    const iv = setInterval(() => {
+      const playing = TALK.speaking || (TALK.audio && !TALK.audio.paused);
+      if (!playing && performance.now() - t0 > 1500) { talkBargeStop(); return; }
+      an.getByteTimeDomainData(buf); let sum = 0; for (const v of buf) sum += (v - 128) * (v - 128); const rms = Math.sqrt(sum / buf.length);
+      if (performance.now() - t0 < 500) { floor = (floor * n + rms) / (++n); return; }
+      loud = rms > Math.max(14, floor * 3) ? loud + 100 : Math.max(0, loud - 60);
+      if (loud >= 500) {
+        talkBargeStop(); talkInterrupt();
+        talkState('जी, बोलिए… 👂', 'Yes, go on… 👂');
+        setTimeout(() => talkListen({ auto: 0 }), 120);
+      }
+    }, 100);
+    TALK.barge = { st, iv };
+  } catch (e) { TALK.barge = null; }
+}
+function talkBargeStop() {
+  const b = TALK.barge; TALK.barge = null;
+  if (b && b.iv) { clearInterval(b.iv); b.st.getTracks().forEach((t) => t.stop()); }
+}
+// A short "जी…" in her voice the moment the elder stops speaking, so there is no dead silence while she thinks
+const HMM = ['face/hmm1.mp3', 'face/hmm2.mp3', 'face/hmm3.mp3'];
+async function talkHmm() {
+  try {
+    TALK.hmmN = ((TALK.hmmN || 0) + 1) % HMM.length;
+    const a = new Audio(HMM[TALK.hmmN]); TALK.audio = a;
+    try { const src = TALK.ac.createMediaElementSource(a); src.connect(TALK.an); } catch (e) {}
+    await new Promise((ok) => { a.onended = a.onerror = ok; a.play().catch(ok); setTimeout(ok, 2500); });
+  } catch (e) {}
+}
 async function talkListen(opt) {
   const auto = opt && typeof opt.auto === 'number' ? opt.auto : -1;
   if (auto >= 0 && (TALK.busy || TALK.speaking || !TALK.open)) return;
+  talkBargeStop();
   if (TALK.speaking || (TALK.audio && !TALK.audio.paused)) { talkInterrupt(); }
   else if (TALK.busy) return;
   songStop();
@@ -1518,9 +1559,9 @@ async function talkListen(opt) {
     an.getByteTimeDomainData(buf); let s = 0; for (const v of buf) s += (v - 128) * (v - 128); const rms = Math.sqrt(s / buf.length);
     const t = performance.now();
     if (t - started < 400) { floor = (floor * samples + rms) / (++samples); return; }
-    const level = Math.max(6, floor * 2.5);
+    const level = Math.max(5, floor * 2.2);
     if (rms > level) { spoken += 100; if (spoken >= 500) heard = true; quietSince = t; }
-    if ((heard && t - quietSince > 2200) || t - started > 40000 || (auto >= 0 && !heard && t - started > 9000) || !TALK.open) { if (rec.state === 'recording') rec.stop(); }
+    if ((heard && t - quietSince > 3000) || t - started > 40000 || (auto >= 0 && !heard && t - started > 9000) || !TALK.open) { if (rec.state === 'recording') rec.stop(); }
   }, 100);
   rec.onstop = async () => {
     clearInterval(vad); st.getTracks().forEach((t) => t.stop()); $('#talk-mic').classList.remove('rec');
@@ -1566,6 +1607,7 @@ async function talkNudge(n) {
 }
 async function talkSend(blob) {
   TALK.busy = true; $('#talk-mic').disabled = true; talkState('स्नेहा सोच रही है…', 'Sneha is thinking…');
+  const hmm = talkHmm();
   const b64 = await new Promise((ok) => { const r = new FileReader(); r.onload = () => ok(String(r.result).split(',')[1]); r.readAsDataURL(blob); });
   try {
     const j = await (await fetch(API.talk, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
@@ -1579,12 +1621,13 @@ async function talkSend(blob) {
     if (j.heard) { talkLog('u', j.heard); TALK.history.push({ r: 'u', t: j.heard }); }
     talkLog('s' + (j.urgent ? ' urgent' : ''), j.reply); TALK.history.push({ r: 's', t: j.reply + (j.play ? ` (गाना चलाया: ${j.play})` : '') + (j.seen ? ` [[देखा: ${j.seen}]]` : '') }); TALK.history = TALK.history.slice(-10);
     talkState(j.urgent ? 'घर वालों को ख़बर दी जा रही है 🚨' : 'स्नेहा बोल रही है… (रोकने के लिए ⏹ दबाएँ)', j.urgent ? 'The family is being told now 🚨' : 'Sneha is speaking… (tap ⏹ to stop)');
+    await hmm;
     TALK.busy = false; $('#talk-mic').disabled = false; TALK.cut = false;
     if (j.ask_cam && !TALK.cam) $('#talk-cam').classList.add('pulse');
     if (j.play) { $('#song-box').classList.remove('hidden'); $('#song-title').textContent = '🎵 ' + j.play; $('#song-notes').classList.remove('hidden'); $('#face-notes').classList.remove('hidden'); }
     // her voice comes in up to two pieces, made at the same time on the server: play them one after another
     for (const a of (j.audios && j.audios.length ? j.audios : [j.audio])) { if (TALK.cut) break; await talkSpeak(a, j.mime, j.reply); }
-    talkState('बटन दबाकर बोलिए', 'Press the button and speak');
+    if (!(TALK.rec && TALK.rec.state === 'recording')) talkState('बटन दबाकर बोलिए', 'Press the button and speak');
     if (j.play && !TALK.cut) songPlay(j.play, j.play_id);
     else if (!j.urgent && !j.end && !TALK.cut && TALK.open) setTimeout(() => { if (!TALK.busy && TALK.open && !TALK.speaking) talkListen({ auto: 0 }); }, 300);
   } catch (e) { talkState('इंटरनेट नहीं; थोड़ी देर बाद कोशिश करें', 'No internet; try again shortly'); }
