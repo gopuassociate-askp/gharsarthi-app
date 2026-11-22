@@ -96,6 +96,13 @@
   .talk-face video { position: absolute; right: 8px; bottom: 8px; width: 28%; border-radius: 12px; border: 2px solid #fff; transform: scaleX(-1); }
   .talk-ai { position: absolute; left: 8px; top: 8px; background: rgba(255,255,255,.85); color: #9a3412; font-size: 12px; padding: 2px 8px; border-radius: 99px; }
   .talk-mood { position: absolute; left: 8px; bottom: 8px; background: rgba(255,255,255,.9); color: #7c2d12; font-size: 13px; padding: 3px 10px; border-radius: 99px; }
+  #talk-cam.pulse { animation: campulse 1.2s ease-in-out 6; border-color: #ea580c; }
+  @keyframes campulse { 50% { transform: scale(1.08); box-shadow: 0 0 0 6px rgba(234,88,12,.25); } }
+  .face-notes { position: absolute; inset: 0; pointer-events: none; background: linear-gradient(0deg, rgba(124,45,18,.55), rgba(124,45,18,0) 55%); }
+  .face-notes span { position: absolute; left: -40px; bottom: 30%; font-size: 40px; color: #fff; text-shadow: 0 2px 8px rgba(0,0,0,.5); animation: notefly 3.2s linear infinite; }
+  .face-notes span:nth-child(2) { animation-delay: .6s; font-size: 30px; bottom: 45%; } .face-notes span:nth-child(3) { animation-delay: 1.2s; bottom: 20%; }
+  .face-notes span:nth-child(4) { animation-delay: 1.8s; font-size: 28px; bottom: 55%; } .face-notes span:nth-child(5) { animation-delay: 2.4s; bottom: 35%; }
+  .face-notes p { position: absolute; inset: auto 0 10px 0; margin: 0; font-size: 16px; font-weight: 700; color: #fff; text-align: center; text-shadow: 0 1px 4px rgba(0,0,0,.6); }
   .notes { position: relative; height: 90px; overflow: hidden; border-radius: 14px; background: linear-gradient(90deg, #fff7ed, #ffedd5, #fff7ed); margin-bottom: 8px; }
   .notes span { position: absolute; left: -40px; font-size: 30px; color: #c2410c; animation: notefly 3.2s linear infinite; }
   .notes span:nth-child(2) { animation-delay: .6s; font-size: 24px; } .notes span:nth-child(3) { animation-delay: 1.2s; }
@@ -407,8 +414,9 @@
     <div class="card talk">
       <div class="talk-face"><canvas id="talk-canvas" width="512" height="512" aria-label="स्नेहा"></canvas>
         <video id="talk-self" class="hidden" playsinline muted></video>
-        <span class="talk-ai">स्नेहा – आपकी AI सहायिका</span><span id="talk-cam-on" class="talk-cam hidden">● कैमरा चालू</span><span id="talk-mood" class="talk-mood hidden"></span></div>
-      <p class="muted" style="font-size:11px;margin:4px 0 0">v39</p>
+        <span class="talk-ai">स्नेहा – आपकी AI सहायिका</span><span id="talk-cam-on" class="talk-cam hidden">● कैमरा चालू</span><span id="talk-mood" class="talk-mood hidden"></span>
+        <div id="face-notes" class="face-notes hidden" aria-hidden="true"><span>♪</span><span>♫</span><span>♩</span><span>♬</span><span>♪</span><p>🎵 गाना ढूँढ रही हूँ…</p></div></div>
+      <p class="muted" style="font-size:11px;margin:4px 0 0">v40</p>
       <p id="talk-state" class="talk-state"><span data-en="Press the button and speak">बटन दबाकर बोलिए</span></p>
       <button class="talk-mic" id="talk-mic" type="button" aria-label="बोलें / Speak">🎤</button>
       <div class="talk-row">
@@ -727,6 +735,7 @@ function show(view) {
   if (view === 'home') loadStatus();
   if (view === 'meds') loadMeds();
   if (view === 'signup') applyGoogle();
+  try { TALK.open = view === 'talk'; } catch (e) {}
   if (view === 'talk') talkOpen(); else if (window.talkClose) talkClose();
 }
 // A short buzz and a visible press on every button, so elders know the tap worked.
@@ -1483,12 +1492,15 @@ function talkMime() {
   for (const m of ['audio/webm;codecs=opus', 'audio/webm', 'audio/mp4', 'audio/ogg']) if (window.MediaRecorder && MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(m)) return m;
   return '';
 }
-async function talkListen() {
+async function talkListen(opt) {
+  const auto = opt && typeof opt.auto === 'number' ? opt.auto : -1;
+  if (auto >= 0 && (TALK.busy || TALK.speaking || !TALK.open)) return;
   if (TALK.speaking || (TALK.audio && !TALK.audio.paused)) { talkInterrupt(); }
   else if (TALK.busy) return;
   songStop();
   talkAudioCtx();
-  if (TALK.rec && TALK.rec.state === 'recording') { TALK.rec.stop(); return; }   // second tap: done speaking
+  if (TALK.rec && TALK.rec.state === 'recording') { TALK.tapStop = true; TALK.rec.stop(); return; }   // second tap: done speaking
+  TALK.tapStop = false;
   let st;
   try { st = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true } }); store.set('gs_media', 'granted'); }
   catch (e) { talkState('माइक की अनुमति चाहिए। फ़ोन की सेटिंग में इस साइट को माइक दीजिए।', 'Microphone permission is needed. Allow it for this site in the phone settings.'); return; }
@@ -1506,12 +1518,15 @@ async function talkListen() {
     if (t - started < 400) { floor = (floor * samples + rms) / (++samples); return; }
     const level = Math.max(6, floor * 2.5);
     if (rms > level) { spoken += 100; if (spoken >= 500) heard = true; quietSince = t; }
-    if ((heard && t - quietSince > 2200) || t - started > 40000) { if (rec.state === 'recording') rec.stop(); }
+    if ((heard && t - quietSince > 2200) || t - started > 40000 || (auto >= 0 && !heard && t - started > 9000) || !TALK.open) { if (rec.state === 'recording') rec.stop(); }
   }, 100);
   rec.onstop = async () => {
     clearInterval(vad); st.getTracks().forEach((t) => t.stop()); $('#talk-mic').classList.remove('rec');
     const blob = new Blob(TALK.chunks, { type: (rec.mimeType || mime || 'audio/webm').split(';')[0] });
-    if (!heard || blob.size < 1500) { talkState('कुछ सुनाई नहीं दिया, फिर से दबाकर बोलिए', 'I heard nothing; press and speak again'); return; }
+    if (!heard || blob.size < 1500) {
+      if (auto >= 0 && auto < 2 && !TALK.tapStop && TALK.open) { talkNudge(auto + 1); return; }
+      talkState(auto >= 0 ? 'बटन दबाकर बोलिए' : 'कुछ सुनाई नहीं दिया, फिर से दबाकर बोलिए', auto >= 0 ? 'Press the button and speak' : 'I heard nothing; press and speak again'); return;
+    }
     talkSend(blob);
   };
   rec.start(250); $('#talk-mic').classList.add('rec');
@@ -1534,6 +1549,19 @@ function talkStill() {
     return c.toDataURL('image/jpeg', 0.7).split(',')[1];
   } catch (e) { return ''; }
 }
+async function talkNudge(n) {
+  TALK.busy = true; TALK.cut = false;
+  try {
+    const j = await (await fetch(API.talk, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ code: store.get('gs_code'), nudge: n, history: TALK.history }) })).json();
+    TALK.busy = false;
+    if (!j.ok || !TALK.open) return;
+    talkLog('s', j.reply);
+    for (const a of (j.audios && j.audios.length ? j.audios : [j.audio])) { if (TALK.cut) break; await talkSpeak(a, j.mime, j.reply); }
+    if (!TALK.cut && TALK.open) { if (n < 2) talkListen({ auto: n }); else talkState('बटन दबाकर बोलिए', 'Press the button and speak'); }
+  } catch (e) { talkState('बटन दबाकर बोलिए', 'Press the button and speak'); }
+  finally { TALK.busy = false; }
+}
 async function talkSend(blob) {
   TALK.busy = true; $('#talk-mic').disabled = true; talkState('स्नेहा सोच रही है…', 'Sneha is thinking…');
   const b64 = await new Promise((ok) => { const r = new FileReader(); r.onload = () => ok(String(r.result).split(',')[1]); r.readAsDataURL(blob); });
@@ -1547,17 +1575,20 @@ async function talkSend(blob) {
       return;
     }
     if (j.heard) { talkLog('u', j.heard); TALK.history.push({ r: 'u', t: j.heard }); }
-    talkLog('s' + (j.urgent ? ' urgent' : ''), j.reply); TALK.history.push({ r: 's', t: j.reply + (j.play ? ` (गाना चलाया: ${j.play})` : '') }); TALK.history = TALK.history.slice(-10);
+    talkLog('s' + (j.urgent ? ' urgent' : ''), j.reply); TALK.history.push({ r: 's', t: j.reply + (j.play ? ` (गाना चलाया: ${j.play})` : '') + (j.seen ? ` [[देखा: ${j.seen}]]` : '') }); TALK.history = TALK.history.slice(-10);
     talkState(j.urgent ? 'घर वालों को ख़बर दी जा रही है 🚨' : 'स्नेहा बोल रही है… (रोकने के लिए ⏹ दबाएँ)', j.urgent ? 'The family is being told now 🚨' : 'Sneha is speaking… (tap ⏹ to stop)');
     TALK.busy = false; $('#talk-mic').disabled = false; TALK.cut = false;
-    if (j.play) { $('#song-box').classList.remove('hidden'); $('#song-title').textContent = '🎵 ' + j.play; $('#song-notes').classList.remove('hidden'); }
-    await talkSpeak(j.audio, j.mime, j.reply);
+    if (j.ask_cam && !TALK.cam) $('#talk-cam').classList.add('pulse');
+    if (j.play) { $('#song-box').classList.remove('hidden'); $('#song-title').textContent = '🎵 ' + j.play; $('#song-notes').classList.remove('hidden'); $('#face-notes').classList.remove('hidden'); }
+    // her voice comes in up to two pieces, made at the same time on the server: play them one after another
+    for (const a of (j.audios && j.audios.length ? j.audios : [j.audio])) { if (TALK.cut) break; await talkSpeak(a, j.mime, j.reply); }
     talkState('बटन दबाकर बोलिए', 'Press the button and speak');
     if (j.play && !TALK.cut) songPlay(j.play, j.play_id);
+    else if (!j.urgent && !TALK.cut && TALK.open) setTimeout(() => { if (!TALK.busy && TALK.open && !TALK.speaking) talkListen({ auto: 0 }); }, 300);
   } catch (e) { talkState('इंटरनेट नहीं; थोड़ी देर बाद कोशिश करें', 'No internet; try again shortly'); }
   finally { TALK.busy = false; $('#talk-mic').disabled = false; }
 }
-$('#talk-mic').addEventListener('click', talkListen);
+$('#talk-mic').addEventListener('click', () => talkListen());
 // camera: shown small, read on this phone only (smile or not); the picture itself never leaves the phone
 $('#talk-cam').addEventListener('click', async () => {
   if (TALK.cam) { window.talkClose(); TALK.mood = 'neutral'; talkMoodShow(); return; }
@@ -1619,12 +1650,13 @@ async function songPlay(q, id) {
     $('#song-notes').classList.remove('hidden');
     $('#song-frame').innerHTML = '<div id="song-player"></div>';
     $('#song-box').classList.remove('hidden'); $('#song-tap').classList.add('hidden');
+    try { $('#song-box').scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch (e) {}
     await songApi();
     let started = false;
     SONG.player = new YT.Player('song-player', { width: '100%', videoId: r.id,
       playerVars: { autoplay: 1, rel: 0, modestbranding: 1, playsinline: 1 },
       events: { onReady: (e) => { try { e.target.playVideo(); } catch (x) {} },
-        onStateChange: (e) => { if (e.data === 1) { started = true; $('#song-tap').classList.add('hidden'); $('#song-notes').classList.add('hidden'); } },
+        onStateChange: (e) => { if (e.data === 1) { started = true; $('#song-tap').classList.add('hidden'); $('#song-notes').classList.add('hidden'); $('#face-notes').classList.add('hidden'); } },
         onError: () => talkState('यह गाना अभी नहीं चल पा रहा, कोई और बताइए?', 'This song cannot play now; another one?') } });
     // phones that do not start a song by themselves: one big tap starts it
     setTimeout(() => {
@@ -1640,7 +1672,7 @@ function songApi() {
   if (!SONG.api) SONG.api = new Promise((ok) => { window.onYouTubeIframeAPIReady = ok; const sc = document.createElement('script'); sc.src = 'https://www.youtube.com/iframe_api'; document.head.appendChild(sc); });
   return SONG.api;
 }
-function songStop() { try { $('#song-notes').classList.add('hidden'); } catch (e) {} try { if (SONG.player) SONG.player.destroy(); } catch (e) {} SONG.player = null; $('#song-frame').innerHTML = ''; $('#song-box').classList.add('hidden'); }
+function songStop() { try { $('#song-notes').classList.add('hidden'); $('#face-notes').classList.add('hidden'); } catch (e) {} try { if (SONG.player) SONG.player.destroy(); } catch (e) {} SONG.player = null; $('#song-frame').innerHTML = ''; $('#song-box').classList.add('hidden'); }
 $('#song-tap').addEventListener('click', () => { try { SONG.player.playVideo(); } catch (e) {} $('#song-tap').classList.add('hidden'); });
 $('#song-stop').addEventListener('click', () => { songStop(); talkState('बटन दबाकर बोलिए', 'Press the button and speak'); });
 
