@@ -417,12 +417,25 @@
         <video id="talk-self" class="hidden" playsinline muted></video>
         <span class="talk-ai">स्नेहा – आपकी AI सहायिका</span><span id="talk-cam-on" class="talk-cam hidden">● कैमरा चालू</span><span id="talk-mood" class="talk-mood hidden"></span>
         <div id="face-notes" class="face-notes hidden" aria-hidden="true"><span>♪</span><span>♫</span><span>♩</span><span>♬</span><span>♪</span><p>🎵 गाना ढूँढ रही हूँ…</p></div></div>
-      <p class="muted" style="font-size:11px;margin:4px 0 0">v43</p>
+      <p class="muted" style="font-size:11px;margin:4px 0 0">v44</p>
       <p id="talk-state" class="talk-state"><span data-en="Press the button and speak">बटन दबाकर बोलिए</span></p>
       <button class="talk-mic" id="talk-mic" type="button" aria-label="बोलें / Speak">🎤</button>
       <div class="talk-row">
         <button class="btn secondary" id="talk-cam" type="button">📷 <span data-en="Camera on">कैमरा चालू करें</span></button>
         <button class="btn secondary" data-go="home" type="button" id="talk-end">✖ <span data-en="End">बंद करें</span></button>
+      </div>
+      <button class="btn secondary" id="face-open" type="button" style="width:100%;margin-top:8px">👨‍👩‍👧 <span data-en="Sneha knows the family">स्नेहा परिवार को पहचाने</span></button>
+      <div id="face-panel" class="card hidden" style="margin-top:10px;text-align:left">
+        <p style="margin:0 0 6px"><b><span data-en="Faces saved on this phone only">चेहरे सिर्फ़ इसी फ़ोन पर सेव होते हैं</span></b></p>
+        <p class="muted" style="font-size:13px;margin:0 0 8px"><span data-en="Each family member saves their own face, by their own choice. The face pattern stays on this phone; it never goes to our server or anywhere else. Sneha only learns the name. Delete any time.">परिवार का हर सदस्य अपनी मर्ज़ी से अपना चेहरा सेव करता है। चेहरे का पैटर्न इसी फ़ोन में रहता है, हमारे सर्वर या कहीं और नहीं जाता। स्नेहा को सिर्फ़ नाम पता चलता है। कभी भी मिटा सकते हैं।</span></p>
+        <div id="face-list"></div>
+        <label style="display:block;margin-top:8px"><span data-en="Name">नाम</span> <input id="face-name" type="text" maxlength="30" style="width:100%"></label>
+        <label style="display:block;margin-top:6px"><span data-en="Relation">रिश्ता</span> <select id="face-rel" style="width:100%">
+          <option value="स्वयं">स्वयं (जिनका यह फ़ोन है) / Self</option><option>बेटा</option><option>बेटी</option><option>बहू</option><option>दामाद</option><option>पोता</option><option>पोती</option><option>नाती</option><option>नातिन</option><option>पति</option><option>पत्नी</option><option>भाई</option><option>बहन</option><option>दोस्त</option><option>देखभाल करने वाले</option><option>अन्य</option></select></label>
+        <label style="display:flex;gap:8px;align-items:flex-start;margin-top:8px;font-size:14px"><input type="checkbox" id="face-consent" style="margin-top:4px;width:auto;flex:none">
+          <span data-en="I am saving my own face on this phone by my own choice (for a child, I am the parent and agree). I can delete it any time.">मैं अपनी मर्ज़ी से अपना चेहरा इस फ़ोन पर सेव कर रहा/रही हूँ (बच्चे के लिए: मैं माता-पिता हूँ और सहमत हूँ)। इसे कभी भी मिटा सकता/सकती हूँ।</span></label>
+        <button class="btn primary" id="face-add" type="button" style="width:100%;margin-top:8px">📷 <span data-en="Look at the camera and save">कैमरे की ओर देखकर सेव करें</span></button>
+        <p id="face-msg" class="muted" style="font-size:14px;margin:6px 0 0"></p>
       </div>
       <div id="song-box" class="song hidden"><p id="song-title" class="song-title"></p><div id="song-notes" class="notes hidden" aria-hidden="true"><span>♪</span><span>♫</span><span>♩</span><span>♬</span><span>♪</span><p>गाना ढूँढ रही हूँ… / Finding your song…</p></div><div id="song-frame"></div>
         <button class="btn primary hidden" id="song-tap" type="button">▶ <span data-en="Play the song">गाना चलाएँ</span></button>
@@ -1605,13 +1618,90 @@ async function talkNudge(n) {
   } catch (e) { talkState('बटन दबाकर बोलिए', 'Press the button and speak'); }
   finally { TALK.busy = false; }
 }
+// ---- Sneha knows the family: face patterns kept ONLY on this phone (opt-in, each person's own consent) ----
+// face-api (MIT, self-hosted in /faceid) runs inside the browser; only the matched NAME goes to Sneha.
+const FACE = { api: null, loading: null, people: [] };
+function faceLoad() { try { FACE.people = JSON.parse(localStorage.getItem('gs_faces') || '[]'); } catch (e) { FACE.people = []; } }
+function faceSave() { try { localStorage.setItem('gs_faces', JSON.stringify(FACE.people)); } catch (e) {} }
+function faceApi() {
+  if (!FACE.loading) FACE.loading = (async () => {
+    const fa = await import('./faceid/face-api.esm.js');
+    try { await fa.tf.setBackend('webgl'); } catch (e) {}
+    await fa.tf.ready();
+    await fa.nets.tinyFaceDetector.loadFromUri('faceid/model');
+    await fa.nets.faceLandmark68TinyNet.loadFromUri('faceid/model');
+    await fa.nets.faceRecognitionNet.loadFromUri('faceid/model');
+    FACE.api = fa; return fa;
+  })().catch((e) => { FACE.loading = null; throw e; });
+  return FACE.loading;
+}
+async function faceRead(video) {
+  const fa = await faceApi();
+  const r = await fa.detectAllFaces(video, new fa.TinyFaceDetectorOptions({ inputSize: 320, scoreThreshold: 0.5 })).withFaceLandmarks(true).withFaceDescriptors();
+  return r.map((x) => Array.from(x.descriptor));
+}
+function faceMatch(d) {
+  let best = null, bd = 9;
+  for (const p of FACE.people) for (const q of p.d) { let sum = 0; for (let i = 0; i < q.length; i++) sum += (q[i] - d[i]) * (q[i] - d[i]); const dist = Math.sqrt(sum); if (dist < bd) { bd = dist; best = p; } }
+  return bd < 0.5 ? best : null;   // the same person is usually 0.25-0.4 apart; different people above 0.6
+}
+async function faceWho() {
+  if (!TALK.cam || !FACE.people.length) return null;
+  const v = $('#talk-self'); if (!v || !v.videoWidth) return null;
+  try {
+    const ds = await Promise.race([faceRead(v), new Promise((_, no) => setTimeout(() => no(new Error('slow')), 2500))]);
+    const known = [], ids = new Set(); let unknown = 0;
+    for (const d of ds) { const p = faceMatch(d); if (p && !ids.has(p.id)) { ids.add(p.id); known.push({ n: p.name, r: p.rel }); } else if (!p) unknown++; }
+    return { known, unknown };
+  } catch (e) { return null; }
+}
+function faceList() {
+  const el = $('#face-list'); el.innerHTML = '';
+  if (!FACE.people.length) { el.innerHTML = '<p class="muted" style="font-size:14px;margin:0">' + T('अभी कोई चेहरा सेव नहीं है।', 'No faces saved yet.') + '</p>'; return; }
+  for (const p of FACE.people) {
+    const row = document.createElement('div'); row.style.cssText = 'display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid #fde3cf';
+    const name = document.createElement('span'); name.textContent = p.name + ' (' + p.rel + ')';
+    const del = document.createElement('button'); del.type = 'button'; del.className = 'linkbtn'; del.textContent = T('मिटाएँ', 'Delete');
+    del.onclick = () => { if (window.confirm(T(p.name + ' का चेहरा इस फ़ोन से मिटाएँ?', 'Delete ' + p.name + "'s face from this phone?"))) { FACE.people = FACE.people.filter((x) => x.id !== p.id); faceSave(); faceList(); } };
+    row.append(name, del); el.append(row);
+  }
+}
+$('#face-open').addEventListener('click', () => { faceLoad(); faceList(); $('#face-panel').classList.toggle('hidden'); faceApi().catch(() => {}); });
+$('#face-add').addEventListener('click', async () => {
+  const name = $('#face-name').value.trim(), rel = $('#face-rel').value, msg = (hi, en) => { $('#face-msg').textContent = T(hi, en); };
+  if (!name) return msg('पहले नाम लिखिए।', 'Write the name first.');
+  if (!$('#face-consent').checked) return msg('सेव करने के लिए अपनी सहमति पर ✓ लगाइए।', 'Tick your consent to save.');
+  if (!TALK.cam) { msg('पहले "कैमरा चालू करें" दबाइए, फिर यहाँ आइए।', 'First press "Camera on", then come back here.'); return; }
+  msg('रुकिए… सीधे कैमरे की ओर देखिए 🙂 (अकेले, बाकी लोग हट जाएँ)', 'Hold on… look straight at the camera 🙂 (alone in the frame)');
+  try {
+    const got = [];
+    for (let i = 0; i < 8 && got.length < 3; i++) {
+      const ds = await faceRead($('#talk-self'));
+      if (ds.length === 1) got.push(ds[0]);
+      else if (ds.length > 1) { msg('फ़्रेम में सिर्फ़ एक चेहरा होना चाहिए।', 'Only one face should be in the frame.'); }
+      await new Promise((ok) => setTimeout(ok, 400));
+    }
+    if (got.length < 3) return msg('चेहरा साफ़ नहीं दिखा। रोशनी में, कैमरे के पास आकर फिर कोशिश कीजिए।', 'Could not see the face clearly. Try again in good light, closer to the camera.');
+    if (rel === 'स्वयं') FACE.people = FACE.people.filter((x) => x.rel !== 'स्वयं');
+    FACE.people.push({ id: Date.now().toString(36), name, rel, d: got.map((d) => d.map((v) => Math.round(v * 10000) / 10000)), at: new Date().toISOString() });
+    faceSave(); faceList(); $('#face-name').value = ''; $('#face-consent').checked = false;
+    msg('✓ ' + name + ' का चेहरा इसी फ़ोन पर सेव हो गया। अब स्नेहा उन्हें नाम से पहचानेगी।', '✓ ' + name + "'s face is saved on this phone. Sneha will now greet them by name.");
+  } catch (e) { msg('अभी नहीं हो पाया; इंटरनेट देखकर फिर कोशिश कीजिए।', 'That did not work; check the internet and try again.'); }
+});
+faceLoad();
+// checked in the background every few seconds while the camera is on, so it never adds to Sneha's reply time
+setInterval(async () => {
+  if (!TALK.cam || !FACE.people.length || TALK.whoBusy || document.hidden) return;
+  TALK.whoBusy = true; try { const w = await faceWho(); if (w) TALK.who = { at: Date.now(), w }; } finally { TALK.whoBusy = false; }
+}, 3000);
 async function talkSend(blob) {
   TALK.busy = true; $('#talk-mic').disabled = true; talkState('स्नेहा सोच रही है…', 'Sneha is thinking…');
   const hmm = talkHmm();
+  const whoNow = TALK.cam && TALK.who && Date.now() - TALK.who.at < 8000 ? TALK.who.w : null;
   const b64 = await new Promise((ok) => { const r = new FileReader(); r.onload = () => ok(String(r.result).split(',')[1]); r.readAsDataURL(blob); });
   try {
     const j = await (await fetch(API.talk, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({ code: store.get('gs_code'), audio: b64, mime: blob.type, history: TALK.history, mood: TALK.mood, cam: !!TALK.cam, cam_first: !!TALK.cam && !TALK.camSent, image: talkStill(), photo_ok: store.get('gs_photo_ok') === 'yes' }) })).json();
+      body: JSON.stringify({ code: store.get('gs_code'), audio: b64, mime: blob.type, history: TALK.history, mood: TALK.mood, cam: !!TALK.cam, cam_first: !!TALK.cam && !TALK.camSent, image: talkStill(), photo_ok: store.get('gs_photo_ok') === 'yes', who: whoNow }) })).json();
     if (TALK.cam) TALK.camSent = true;
     if (!j.ok) {
       talkState(j.why === 'limit' ? 'आज बहुत बात हो गई, थोड़ी देर बाद फिर बात करेंगे 💛' : 'माफ़ कीजिए, अभी बात नहीं हो पाई। फिर कोशिश करें।',
