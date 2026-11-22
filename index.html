@@ -95,6 +95,15 @@
   .talk-face canvas { width: 100%; height: auto; display: block; transform-origin: 50% 85%; }
   .talk-face video { position: absolute; right: 8px; bottom: 8px; width: 28%; border-radius: 12px; border: 2px solid #fff; transform: scaleX(-1); }
   .talk-ai { position: absolute; left: 8px; top: 8px; background: rgba(255,255,255,.85); color: #9a3412; font-size: 12px; padding: 2px 8px; border-radius: 99px; }
+  .talk-mood { position: absolute; left: 8px; bottom: 8px; background: rgba(255,255,255,.9); color: #7c2d12; font-size: 13px; padding: 3px 10px; border-radius: 99px; }
+  .notes { position: relative; height: 90px; overflow: hidden; border-radius: 14px; background: linear-gradient(90deg, #fff7ed, #ffedd5, #fff7ed); margin-bottom: 8px; }
+  .notes span { position: absolute; left: -40px; font-size: 30px; color: #c2410c; animation: notefly 3.2s linear infinite; }
+  .notes span:nth-child(2) { animation-delay: .6s; font-size: 24px; } .notes span:nth-child(3) { animation-delay: 1.2s; }
+  .notes span:nth-child(4) { animation-delay: 1.8s; font-size: 22px; } .notes span:nth-child(5) { animation-delay: 2.4s; }
+  .notes p { position: absolute; inset: auto 0 6px 0; margin: 0; font-size: 14px; color: #9a3412; text-align: center; }
+  @keyframes notefly { 0% { transform: translate(0, 50px) rotate(-10deg); opacity: 0; } 10% { opacity: 1; } 25% { transform: translate(110px, 15px) rotate(8deg); }
+    50% { transform: translate(220px, 45px) rotate(-8deg); } 75% { transform: translate(330px, 12px) rotate(8deg); } 90% { opacity: 1; } 100% { transform: translate(460px, 40px) rotate(0); opacity: 0; } }
+  @media (prefers-reduced-motion: reduce) { .notes span { animation-duration: 8s; } }
   .talk-cam { position: absolute; right: 8px; top: 8px; background: rgba(220,38,38,.9); color: #fff; font-size: 12px; padding: 2px 8px; border-radius: 99px; }
   @keyframes breathe { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.012); } }
   .talk-state { font-size: 20px; font-weight: 700; color: #9a3412; min-height: 1.6em; margin: 12px 0 8px; }
@@ -398,15 +407,15 @@
     <div class="card talk">
       <div class="talk-face"><canvas id="talk-canvas" width="512" height="512" aria-label="स्नेहा"></canvas>
         <video id="talk-self" class="hidden" playsinline muted></video>
-        <span class="talk-ai">स्नेहा – आपकी AI सहायिका</span><span id="talk-cam-on" class="talk-cam hidden">● कैमरा चालू</span></div>
-      <p class="muted" style="font-size:11px;margin:4px 0 0">v36</p>
+        <span class="talk-ai">स्नेहा – आपकी AI सहायिका</span><span id="talk-cam-on" class="talk-cam hidden">● कैमरा चालू</span><span id="talk-mood" class="talk-mood hidden"></span></div>
+      <p class="muted" style="font-size:11px;margin:4px 0 0">v37</p>
       <p id="talk-state" class="talk-state"><span data-en="Press the button and speak">बटन दबाकर बोलिए</span></p>
       <button class="talk-mic" id="talk-mic" type="button" aria-label="बोलें / Speak">🎤</button>
       <div class="talk-row">
         <button class="btn secondary" id="talk-cam" type="button">📷 <span data-en="Camera on">कैमरा चालू करें</span></button>
         <button class="btn secondary" data-go="home" type="button" id="talk-end">✖ <span data-en="End">बंद करें</span></button>
       </div>
-      <div id="song-box" class="song hidden"><p id="song-title" class="song-title"></p><div id="song-frame"></div>
+      <div id="song-box" class="song hidden"><p id="song-title" class="song-title"></p><div id="song-notes" class="notes hidden" aria-hidden="true"><span>♪</span><span>♫</span><span>♩</span><span>♬</span><span>♪</span><p>गाना ढूँढ रही हूँ… / Finding your song…</p></div><div id="song-frame"></div>
         <button class="btn primary hidden" id="song-tap" type="button">▶ <span data-en="Play the song">गाना चलाएँ</span></button>
         <button class="btn secondary" id="song-stop" type="button">⏹ <span data-en="Stop the song">गाना बंद करें</span></button></div>
       <div id="talk-log" class="talk-log"></div>
@@ -1516,6 +1525,7 @@ async function talkSend(blob) {
     if (j.heard) { talkLog('u', j.heard); TALK.history.push({ r: 'u', t: j.heard }); }
     talkLog('s' + (j.urgent ? ' urgent' : ''), j.reply); TALK.history.push({ r: 's', t: j.reply }); TALK.history = TALK.history.slice(-10);
     talkState(j.urgent ? 'घर वालों को ख़बर दी जा रही है 🚨' : 'स्नेहा बोल रही है…', j.urgent ? 'The family is being told now 🚨' : 'Sneha is speaking…');
+    if (j.play) { $('#song-box').classList.remove('hidden'); $('#song-title').textContent = '🎵 ' + j.play; $('#song-notes').classList.remove('hidden'); }
     await talkSpeak(j.audio, j.mime, j.reply);
     talkState('बटन दबाकर बोलिए', 'Press the button and speak');
     if (j.play) songPlay(j.play, j.play_id);
@@ -1525,14 +1535,28 @@ async function talkSend(blob) {
 $('#talk-mic').addEventListener('click', talkListen);
 // camera: shown small, read on this phone only (smile or not); the picture itself never leaves the phone
 $('#talk-cam').addEventListener('click', async () => {
-  if (TALK.cam) { window.talkClose(); TALK.mood = 'neutral'; return; }
+  if (TALK.cam) { window.talkClose(); TALK.mood = 'neutral'; talkMoodShow(); return; }
+  // the first time only: one clear line about what the camera does; pressing OK is the consent
+  if (!store.get('gs_cam_ok')) {
+    const ok = window.confirm(T('कैमरा चालू करने पर स्नेहा आपका चेहरा देखकर बात करेगी। कुछ भी रिकॉर्ड नहीं होता।', 'With the camera on, Sneha talks while seeing your face. Nothing is recorded.'));
+    if (!ok) return;
+    store.set('gs_cam_ok', new Date().toISOString());
+  }
   try {
     TALK.cam = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: 320, height: 240 } });
     const v = $('#talk-self'); v.srcObject = TALK.cam; v.classList.remove('hidden'); $('#talk-cam-on').classList.remove('hidden'); await v.play();
     store.set('gs_media', 'granted');
+    TALK.mood = 'neutral'; talkMoodShow();
     talkMoodWatch(v);
   } catch (e) { talkState('कैमरे की अनुमति नहीं मिली', 'Camera permission was not given'); }
 });
+const MOOD_LABEL = { smiling: '😊 मुस्कान', laughing: '😄 हँसी', sad: '😔 थोड़ी उदासी', tired: '😴 थकान', surprised: '😮 हैरानी',
+  confused: '🤔 उलझन', away: '👀 दूसरी तरफ़ देख रहे', absent: '🫥 सामने नहीं', neutral: '🙂 सामान्य' };
+function talkMoodShow() {
+  const el = $('#talk-mood'); if (!el) return;
+  if (!TALK.cam) { el.classList.add('hidden'); return; }
+  el.textContent = MOOD_LABEL[TALK.mood] || MOOD_LABEL.neutral; el.classList.remove('hidden');
+}
 async function talkMoodWatch(video) {
   try {
     const vision = await import('https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/vision_bundle.mjs');
@@ -1543,10 +1567,18 @@ async function talkMoodWatch(video) {
       if (!TALK.cam) return;
       const r = fl.detectForVideo(video, performance.now());
       const bs = (((r.faceBlendshapes || [])[0] || {}).categories || []).reduce((o, c) => (o[c.categoryName] = c.score, o), {});
-      const smile = ((bs.mouthSmileLeft || 0) + (bs.mouthSmileRight || 0)) / 2, frown = ((bs.mouthFrownLeft || 0) + (bs.mouthFrownRight || 0)) / 2;
-      const eyes = ((bs.eyeBlinkLeft || 0) + (bs.eyeBlinkRight || 0)) / 2;
-      TALK.mood = smile > 0.45 ? 'smiling' : frown > 0.3 ? 'sad' : eyes > 0.55 ? 'tired' : 'neutral';
-      setTimeout(tick, 700);
+      const av = (a, b) => ((bs[a] || 0) + (bs[b] || 0)) / 2;
+      const smile = av('mouthSmileLeft', 'mouthSmileRight'), frown = av('mouthFrownLeft', 'mouthFrownRight'), eyes = av('eyeBlinkLeft', 'eyeBlinkRight');
+      const jaw = bs.jawOpen || 0, browUp = bs.browInnerUp || 0, browDown = av('browDownLeft', 'browDownRight');
+      const lookAway = Math.max(av('eyeLookOutLeft', 'eyeLookInRight'), av('eyeLookInLeft', 'eyeLookOutRight'));
+      const face = (r.faceBlendshapes || []).length > 0;
+      // a few readings in a row, so one blink or one twitch does not change the mood
+      const now = !face ? 'absent' : smile > 0.5 && jaw > 0.25 ? 'laughing' : smile > 0.4 ? 'smiling' : jaw > 0.55 && eyes > 0.3 ? 'tired'
+        : browUp > 0.5 && jaw > 0.3 ? 'surprised' : browDown > 0.45 ? 'confused' : frown > 0.3 ? 'sad' : eyes > 0.6 ? 'tired' : lookAway > 0.6 ? 'away' : 'neutral';
+      TALK.moods = (TALK.moods || []).concat(now).slice(-4);
+      if (TALK.moods.length >= 3 && TALK.moods.slice(-3).every((m) => m === now)) TALK.mood = now;
+      talkMoodShow();
+      setTimeout(tick, 600);
     };
     tick();
   } catch (e) { TALK.mood = 'neutral'; }   // the talk works the same without it
@@ -1559,6 +1591,7 @@ async function songPlay(q, id) {
     const r = id ? { id } : null;
     if (!r) { talkState('यह गाना नहीं मिला, कोई और बताइए?', 'Could not find that song; another one?'); return; }
     $('#song-title').textContent = '🎵 ' + q;
+    $('#song-notes').classList.remove('hidden');
     $('#song-frame').innerHTML = '<div id="song-player"></div>';
     $('#song-box').classList.remove('hidden'); $('#song-tap').classList.add('hidden');
     await songApi();
@@ -1566,7 +1599,7 @@ async function songPlay(q, id) {
     SONG.player = new YT.Player('song-player', { width: '100%', videoId: r.id,
       playerVars: { autoplay: 1, rel: 0, modestbranding: 1, playsinline: 1 },
       events: { onReady: (e) => { try { e.target.playVideo(); } catch (x) {} },
-        onStateChange: (e) => { if (e.data === 1) { started = true; $('#song-tap').classList.add('hidden'); } },
+        onStateChange: (e) => { if (e.data === 1) { started = true; $('#song-tap').classList.add('hidden'); $('#song-notes').classList.add('hidden'); } },
         onError: () => talkState('यह गाना अभी नहीं चल पा रहा, कोई और बताइए?', 'This song cannot play now; another one?') } });
     // phones that do not start a song by themselves: one big tap starts it
     setTimeout(() => {
@@ -1582,7 +1615,7 @@ function songApi() {
   if (!SONG.api) SONG.api = new Promise((ok) => { window.onYouTubeIframeAPIReady = ok; const sc = document.createElement('script'); sc.src = 'https://www.youtube.com/iframe_api'; document.head.appendChild(sc); });
   return SONG.api;
 }
-function songStop() { try { if (SONG.player) SONG.player.destroy(); } catch (e) {} SONG.player = null; $('#song-frame').innerHTML = ''; $('#song-box').classList.add('hidden'); }
+function songStop() { try { $('#song-notes').classList.add('hidden'); } catch (e) {} try { if (SONG.player) SONG.player.destroy(); } catch (e) {} SONG.player = null; $('#song-frame').innerHTML = ''; $('#song-box').classList.add('hidden'); }
 $('#song-tap').addEventListener('click', () => { try { SONG.player.playVideo(); } catch (e) {} $('#song-tap').classList.add('hidden'); });
 $('#song-stop').addEventListener('click', () => { songStop(); talkState('बटन दबाकर बोलिए', 'Press the button and speak'); });
 
