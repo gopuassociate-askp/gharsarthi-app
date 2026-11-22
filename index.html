@@ -408,7 +408,7 @@
       <div class="talk-face"><canvas id="talk-canvas" width="512" height="512" aria-label="स्नेहा"></canvas>
         <video id="talk-self" class="hidden" playsinline muted></video>
         <span class="talk-ai">स्नेहा – आपकी AI सहायिका</span><span id="talk-cam-on" class="talk-cam hidden">● कैमरा चालू</span><span id="talk-mood" class="talk-mood hidden"></span></div>
-      <p class="muted" style="font-size:11px;margin:4px 0 0">v38</p>
+      <p class="muted" style="font-size:11px;margin:4px 0 0">v39</p>
       <p id="talk-state" class="talk-state"><span data-en="Press the button and speak">बटन दबाकर बोलिए</span></p>
       <button class="talk-mic" id="talk-mic" type="button" aria-label="बोलें / Speak">🎤</button>
       <div class="talk-row">
@@ -1475,7 +1475,7 @@ function talkSpeak(b64, mime, text) {
     }
     const a = new Audio('data:' + (mime || 'audio/mpeg') + ';base64,' + b64); TALK.audio = a;
     try { const src = TALK.ac.createMediaElementSource(a); src.connect(TALK.an); } catch (e) {}
-    a.onplay = () => { TALK.speaking = true; }; a.onended = a.onerror = () => { TALK.speaking = false; done(); };
+    a.onplay = () => { TALK.speaking = true; $('#talk-mic').textContent = '⏹'; }; a.onended = a.onerror = () => { TALK.speaking = false; $('#talk-mic').textContent = '🎤'; done(); };
     a.play().catch(() => { TALK.speaking = false; done(); });
   });
 }
@@ -1484,7 +1484,8 @@ function talkMime() {
   return '';
 }
 async function talkListen() {
-  if (TALK.busy) return;
+  if (TALK.speaking || (TALK.audio && !TALK.audio.paused)) { talkInterrupt(); }
+  else if (TALK.busy) return;
   songStop();
   talkAudioCtx();
   if (TALK.rec && TALK.rec.state === 'recording') { TALK.rec.stop(); return; }   // second tap: done speaking
@@ -1494,13 +1495,18 @@ async function talkListen() {
   const mime = talkMime(); TALK.chunks = [];
   const rec = new MediaRecorder(st, mime ? { mimeType: mime, audioBitsPerSecond: 24000 } : undefined); TALK.rec = rec;
   rec.ondataavailable = (e) => { if (e.data.size) TALK.chunks.push(e.data); };
-  // stop by itself after about 1.5 seconds of quiet, or 25 seconds at most
+  // Patient listening, for elders who speak slowly: learn the room's noise for the first moment,
+  // count only real speech, and stop after about 2.2 seconds of quiet once they have spoken
+  // (a second tap also stops it; 40 seconds at most).
   const src = TALK.ac.createMediaStreamSource(st); const an = TALK.ac.createAnalyser(); an.fftSize = 512; src.connect(an);
-  const buf = new Uint8Array(an.fftSize); let heard = false, quietSince = performance.now(); const started = performance.now();
+  const buf = new Uint8Array(an.fftSize); let heard = false, spoken = 0, quietSince = performance.now(), floor = 0, samples = 0; const started = performance.now();
   const vad = setInterval(() => {
     an.getByteTimeDomainData(buf); let s = 0; for (const v of buf) s += (v - 128) * (v - 128); const rms = Math.sqrt(s / buf.length);
-    if (rms > 6) { heard = true; quietSince = performance.now(); }
-    if ((heard && performance.now() - quietSince > 1200) || performance.now() - started > 25000) { if (rec.state === 'recording') rec.stop(); }
+    const t = performance.now();
+    if (t - started < 400) { floor = (floor * samples + rms) / (++samples); return; }
+    const level = Math.max(6, floor * 2.5);
+    if (rms > level) { spoken += 100; if (spoken >= 500) heard = true; quietSince = t; }
+    if ((heard && t - quietSince > 2200) || t - started > 40000) { if (rec.state === 'recording') rec.stop(); }
   }, 100);
   rec.onstop = async () => {
     clearInterval(vad); st.getTracks().forEach((t) => t.stop()); $('#talk-mic').classList.remove('rec');
@@ -1510,6 +1516,12 @@ async function talkListen() {
   };
   rec.start(250); $('#talk-mic').classList.add('rec');
   talkState('सुन रही हूँ… बोलिए 👂', 'Listening… speak 👂');
+}
+function talkInterrupt() {
+  try { if (TALK.audio) { TALK.audio.pause(); TALK.audio.currentTime = 0; } } catch (e) {}
+  try { speechSynthesis.cancel(); } catch (e) {}
+  TALK.speaking = false; TALK.cut = true;
+  $('#talk-mic').textContent = '🎤';
 }
 // With the camera on: one small still photo of this moment, so Sneha can see (never stored)
 function talkStill() {
@@ -1527,19 +1539,21 @@ async function talkSend(blob) {
   const b64 = await new Promise((ok) => { const r = new FileReader(); r.onload = () => ok(String(r.result).split(',')[1]); r.readAsDataURL(blob); });
   try {
     const j = await (await fetch(API.talk, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({ code: store.get('gs_code'), audio: b64, mime: blob.type, history: TALK.history, mood: TALK.mood, cam: !!TALK.cam, image: talkStill() }) })).json();
+      body: JSON.stringify({ code: store.get('gs_code'), audio: b64, mime: blob.type, history: TALK.history, mood: TALK.mood, cam: !!TALK.cam, cam_first: !!TALK.cam && !TALK.camSent, image: talkStill() }) })).json();
+    if (TALK.cam) TALK.camSent = true;
     if (!j.ok) {
       talkState(j.why === 'limit' ? 'आज बहुत बात हो गई, थोड़ी देर बाद फिर बात करेंगे 💛' : 'माफ़ कीजिए, अभी बात नहीं हो पाई। फिर कोशिश करें।',
         j.why === 'limit' ? 'We have talked a lot; let us talk again in a while 💛' : 'Sorry, that did not work. Please try again.');
       return;
     }
     if (j.heard) { talkLog('u', j.heard); TALK.history.push({ r: 'u', t: j.heard }); }
-    talkLog('s' + (j.urgent ? ' urgent' : ''), j.reply); TALK.history.push({ r: 's', t: j.reply }); TALK.history = TALK.history.slice(-10);
-    talkState(j.urgent ? 'घर वालों को ख़बर दी जा रही है 🚨' : 'स्नेहा बोल रही है…', j.urgent ? 'The family is being told now 🚨' : 'Sneha is speaking…');
+    talkLog('s' + (j.urgent ? ' urgent' : ''), j.reply); TALK.history.push({ r: 's', t: j.reply + (j.play ? ` (गाना चलाया: ${j.play})` : '') }); TALK.history = TALK.history.slice(-10);
+    talkState(j.urgent ? 'घर वालों को ख़बर दी जा रही है 🚨' : 'स्नेहा बोल रही है… (रोकने के लिए ⏹ दबाएँ)', j.urgent ? 'The family is being told now 🚨' : 'Sneha is speaking… (tap ⏹ to stop)');
+    TALK.busy = false; $('#talk-mic').disabled = false; TALK.cut = false;
     if (j.play) { $('#song-box').classList.remove('hidden'); $('#song-title').textContent = '🎵 ' + j.play; $('#song-notes').classList.remove('hidden'); }
     await talkSpeak(j.audio, j.mime, j.reply);
     talkState('बटन दबाकर बोलिए', 'Press the button and speak');
-    if (j.play) songPlay(j.play, j.play_id);
+    if (j.play && !TALK.cut) songPlay(j.play, j.play_id);
   } catch (e) { talkState('इंटरनेट नहीं; थोड़ी देर बाद कोशिश करें', 'No internet; try again shortly'); }
   finally { TALK.busy = false; $('#talk-mic').disabled = false; }
 }
@@ -1557,7 +1571,7 @@ $('#talk-cam').addEventListener('click', async () => {
     TALK.cam = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: 320, height: 240 } });
     const v = $('#talk-self'); v.srcObject = TALK.cam; v.classList.remove('hidden'); $('#talk-cam-on').classList.remove('hidden'); await v.play();
     store.set('gs_media', 'granted');
-    TALK.mood = 'neutral'; talkMoodShow();
+    TALK.mood = 'neutral'; TALK.camSent = false; talkMoodShow();
     talkMoodWatch(v);
   } catch (e) { talkState('कैमरे की अनुमति नहीं मिली', 'Camera permission was not given'); }
 });
