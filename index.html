@@ -682,7 +682,7 @@
         <video id="talk-self" class="hidden" playsinline muted></video>
         <span class="talk-ai">स्नेहा – आपकी AI सहायिका</span><span id="talk-cam-on" class="talk-cam hidden">● कैमरा चालू</span><span id="talk-mood" class="talk-mood hidden"></span>
         <div id="face-notes" class="face-notes hidden" aria-hidden="true"><span>♪</span><span>♫</span><span>♩</span><span>♬</span><span>♪</span><p>🎵 गाना ढूँढ रही हूँ…</p></div></div>
-      <p class="muted" style="font-size:11px;margin:4px 0 0">v55</p>
+      <p class="muted" style="font-size:11px;margin:4px 0 0">v56</p>
       <p id="talk-state" class="talk-state"><span data-en="Press the button and speak">बटन दबाकर बोलिए</span></p>
       <button class="talk-mic" id="talk-mic" type="button" aria-label="बोलें / Speak">🎤</button>
       <div class="talk-row">
@@ -1797,7 +1797,9 @@ $('#pn-go').addEventListener('click', async () => {
 // ---- Free video calls inside the family: WebRTC, phone to phone; our server only passes the "offer" and "answer" ----
 API.call = API_BASE + '/app-call';
 const VC = { pc: null, local: null, id: null, polling: null, ringPoll: null, incoming: null, facing: 'user', tone: null };
-const ICE = [{ urls: ['stun:stun.l.google.com:19302', 'stun:stun1.l.google.com:19302'] }, { urls: 'stun:stun.cloudflare.com:3478' }];
+let ICE = [{ urls: ['stun:stun.l.google.com:19302', 'stun:stun1.l.google.com:19302'] }, { urls: 'stun:stun.cloudflare.com:3478' }];
+// ?relay=1 forces every call through our relay (to test it)
+const ICE_POLICY = new URLSearchParams(location.search).get('relay') === '1' ? 'relay' : 'all';
 function vcAuth() {
   if (store.get('gs_code')) return { code: store.get('gs_code'), as: store.get('gs_role') === 'elder' ? 'elder' : 'family' };
   if (store.get('gs_member')) return { key: store.get('gs_member') };
@@ -1825,7 +1827,7 @@ async function vcMedia(video) {
   $('#vc-local').srcObject = VC.local; $('#vc-local').classList.toggle('hidden', !video);
 }
 function vcPeer() {
-  const pc = new RTCPeerConnection({ iceServers: ICE });
+  const pc = new RTCPeerConnection({ iceServers: ICE, iceTransportPolicy: ICE_POLICY });
   VC.local.getTracks().forEach((t) => pc.addTrack(t, VC.local));
   pc.ontrack = (e) => { $('#vc-remote').srcObject = e.streams[0]; };
   pc.onconnectionstatechange = () => {
@@ -1839,6 +1841,7 @@ function vcOpen(name) { try { talkClose(); } catch (e) {} $('#vc-name').textCont
 async function vcStart(party, name, video = true) {
   if (VC.pc) return;
   vcOpen(name); vcState('कैमरा चालू हो रहा है…', 'Starting the camera…');
+  try { const fresh = await vcCall({ action: 'parties' }); if (fresh && fresh.ice) ICE = fresh.ice; } catch (e) {}
   try { await vcMedia(video); } catch (e) { vcState('कैमरा या माइक की अनुमति चाहिए', 'Camera or microphone permission is needed'); setTimeout(vcHangup, 2500); return; }
   const pc = vcPeer(); await pc.setLocalDescription(await pc.createOffer()); await vcGathered(pc);
   vcState('घंटी जा रही है…', 'Ringing…');
@@ -1896,6 +1899,7 @@ setInterval(async () => {
   let p; try { p = await vcCall({ action: 'poll' }); } catch (e) { return; }
   const inc = p && p.incoming && p.incoming[0];
   if (!inc || VC.pc) return;
+  if (p.ice) ICE = p.ice;
   VC.incoming = inc;
   $('#vc-ring-text').textContent = T(`📹 ${inc.from} वीडियो कॉल कर रहे हैं`, `📹 ${inc.from} is video calling`);
   $('#vc-ring').classList.remove('hidden'); vcTone(true);
@@ -1907,6 +1911,7 @@ async function vcList(box) {
   if (!box) return;
   if (!window.RTCPeerConnection) { box.innerHTML = '<p class="muted">' + T('इस फ़ोन का ब्राउज़र वीडियो कॉल नहीं चलाता। Chrome खोलिए।', 'This browser cannot make video calls. Please use Chrome.') + '</p>'; return; }
   let r; try { r = await vcCall({ action: 'parties' }); } catch (e) { r = null; }
+  if (r && r.ice) ICE = r.ice;
   const ps = (r && r.parties) || [];
   box.innerHTML = ps.length ? ps.map((p, i) => `<button class="btn primary" type="button" data-vc="${i}" style="margin:6px 0">📹 ${esc(p.name)}${p.relation ? ' (' + esc(p.relation) + ')' : ''}</button>`).join('')
     : '<p class="muted">' + T('अभी कोई नहीं जिसे कॉल करें। "परिवार और देखभाल करने वाले" में घर वालों को जोड़िए।', 'Nobody to call yet. Add family under "Family & caretakers".') + '</p>';
