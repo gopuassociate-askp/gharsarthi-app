@@ -7,6 +7,8 @@ set -euo pipefail
 DOMAIN="${DOMAIN:-app.sadasneha.in}"
 N8N_VERSION="${N8N_VERSION:-2.48.5}"
 export DEBIAN_FRONTEND=noninteractive NEEDRESTART_MODE=a
+# wait while Ubuntu's own automatic updates hold the package lock (fresh servers do this for a few minutes)
+for i in $(seq 1 60); do fuser /var/lib/dpkg/lock-frontend /var/lib/apt/lists/lock >/dev/null 2>&1 || break; echo "  waiting for Ubuntu's automatic updates to finish…"; sleep 10; done
 echo "== 1/4 Updating Ubuntu (a few minutes) =="
 apt-get update -y && apt-get -y -o Dpkg::Options::=--force-confold upgrade
 echo "== 2/4 Downloading the SadaSneha server kit =="

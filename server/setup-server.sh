@@ -2,6 +2,8 @@
 # One-time setup of a fresh Ubuntu 22.04/24.04 server for SadaSneha.
 # Run as root:  bash setup-server.sh
 set -euo pipefail
+# wait while Ubuntu's own automatic updates hold the package lock (fresh servers do this for a few minutes)
+for i in $(seq 1 60); do fuser /var/lib/dpkg/lock-frontend /var/lib/apt/lists/lock >/dev/null 2>&1 || break; echo "  waiting for Ubuntu's automatic updates to finish…"; sleep 10; done
 # Small servers (1 GB RAM): add 2 GB of swap once, so n8n and its database never run out of memory
 if [ ! -f /swapfile ] && [ "$(awk '/MemTotal/ {print int($2/1024)}' /proc/meminfo)" -lt 1900 ]; then
   fallocate -l 2G /swapfile && chmod 600 /swapfile && mkswap /swapfile && swapon /swapfile
