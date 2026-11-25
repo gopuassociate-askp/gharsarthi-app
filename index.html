@@ -429,6 +429,7 @@
       <h2 style="font-size:18px">👥 <span data-en="Who can see my news">मेरी ख़बर कौन देख सकता है</span></h2>
       <div id="e-circle"><p class="muted">—</p></div>
     </div>
+    <div class="card push-card" style="margin-top:12px"></div>
     <p style="text-align:center"><button class="linkbtn" id="e-switch" type="button"><span data-en="Open the family app on this phone">इस फ़ोन पर परिवार वाला ऐप खोलें</span></button></p>
   </section>
 
@@ -451,7 +452,7 @@
     <div class="card"><h2 style="font-size:18px">🚨 <span data-en="Alerts (last 3 days)">ज़रूरी ख़बरें (पिछले 3 दिन)</span></h2><div id="c-alerts"></div></div>
     <div class="card"><h2 style="font-size:18px">☀️ <span data-en="Today">आज</span></h2><div id="c-today"></div></div>
     <div id="c-family" class="hidden">
-      <div class="card" id="c-vc-card"><h2 style="font-size:18px">📹 <span data-en="Free voice &amp; video calls">मुफ़्त आवाज़ और वीडियो कॉल</span></h2><div class="vc-list"></div></div>
+      <div class="card" id="c-vc-card"><div class="push-card" style="margin-bottom:8px"></div><h2 style="font-size:18px">📹 <span data-en="Free voice &amp; video calls">मुफ़्त आवाज़ और वीडियो कॉल</span></h2><div class="vc-list"></div></div>
       <div class="card"><h2 style="font-size:18px">💌 <span data-en="Messages">संदेश</span></h2><div id="c-msgs"></div>
         <textarea id="c-text" maxlength="300" placeholder="पापा, शाम को फ़ोन करूँगी।"></textarea>
         <button class="btn primary" id="c-send" type="button"><span data-en="Send to them">उन्हें भेजें</span></button><p id="c-send-msg" class="muted"></p></div>
@@ -536,7 +537,7 @@
       <div id="msg-list"></div>
     </div>
 
-    <div class="card" id="vc-card"><h2>📹 <span data-en="Free voice &amp; video calls">मुफ़्त आवाज़ और वीडियो कॉल</span></h2><p class="muted" style="margin:0 0 8px"><span data-en="Video goes straight between the phones; nothing is recorded.">वीडियो सीधे फ़ोन से फ़ोन जाता है; कुछ रिकॉर्ड नहीं होता।</span></p><div class="vc-list"></div></div>
+    <div class="card" id="vc-card"><div class="push-card" style="margin-bottom:8px"></div><h2>📹 <span data-en="Free voice &amp; video calls">मुफ़्त आवाज़ और वीडियो कॉल</span></h2><p class="muted" style="margin:0 0 8px"><span data-en="Video goes straight between the phones; nothing is recorded.">वीडियो सीधे फ़ोन से फ़ोन जाता है; कुछ रिकॉर्ड नहीं होता।</span></p><div class="vc-list"></div></div>
     <div class="card" id="circle-card">
       <h2>👥 <span data-en="Family & caretakers">परिवार और देखभाल करने वाले</span></h2>
       <p class="muted"><span data-en="Add people who should know how they are. Family see daily news and messages; a caretaker or neighbour sees only today's status and alerts. Nobody sees payments.">उन्हें जोड़िए जिन्हें हाल पता होना चाहिए। परिवार: रोज़ की ख़बर और संदेश। देखभाल करने वाले / पड़ोसी: सिर्फ़ आज का हाल और ज़रूरी ख़बर। भुगतान कोई नहीं देखता।</span></p>
@@ -685,7 +686,7 @@
         <video id="talk-self" class="hidden" playsinline muted></video>
         <span class="talk-ai">स्नेहा – आपकी AI सहायिका</span><span id="talk-cam-on" class="talk-cam hidden">● कैमरा चालू</span><span id="talk-mood" class="talk-mood hidden"></span>
         <div id="face-notes" class="face-notes hidden" aria-hidden="true"><span>♪</span><span>♫</span><span>♩</span><span>♬</span><span>♪</span><p>🎵 गाना ढूँढ रही हूँ…</p></div></div>
-      <p class="muted" style="font-size:11px;margin:4px 0 0">v57</p>
+      <p class="muted" style="font-size:11px;margin:4px 0 0">v58</p>
       <p id="talk-state" class="talk-state"><span data-en="Press the button and speak">बटन दबाकर बोलिए</span></p>
       <button class="talk-mic" id="talk-mic" type="button" aria-label="बोलें / Speak">🎤</button>
       <div class="talk-row">
@@ -1055,6 +1056,7 @@ function show(view) {
   $('#talk-bar').classList.toggle('hidden', view !== 'talk');
   document.documentElement.classList.toggle('snap', view === 'role');
   if (view === 'pay') payInit();
+  if (['home', 'elder', 'care'].includes(view)) setTimeout(pushCard, 50);
   if (view === 'home') vcList($('#vc-card .vc-list'));
   if (view === 'elder') loadElder();
   if (view === 'care') loadCare();
@@ -1923,6 +1925,39 @@ async function vcList(box) {
   box.querySelectorAll('[data-vc]').forEach((b) => { b.onclick = () => { const p = ps[+b.dataset.vc]; vcStart(p.party, p.name, b.dataset.av !== 'audio'); }; });
 }
 $('#t-video').addEventListener('click', () => { elderPanel('<h2>📹 ' + T('किसे कॉल करें? 📞 आवाज़ · 📹 वीडियो', 'Whom to call? 📞 voice · 📹 video') + '</h2><div class="vc-list"></div>'); vcList($('#e-panel .vc-list')); });
+
+
+// ---- Phone notifications: calls ring even when the app is closed (web push; Android Chrome, iPhone from the home screen) ----
+API.push = API_BASE + '/app-push';
+const pushOK = () => 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
+function pushB64(s) { const p = '='.repeat((4 - s.length % 4) % 4); const b = atob((s + p).replace(/-/g, '+').replace(/_/g, '/')); return Uint8Array.from(b, (c) => c.charCodeAt(0)); }
+async function pushOn(quiet) {
+  if (!pushOK() || !vcAuth()) return false;
+  try {
+    if (Notification.permission === 'denied') return false;
+    if (Notification.permission !== 'granted') { if (quiet) return false; if ((await Notification.requestPermission()) !== 'granted') return false; }
+    const k = await (await fetch(API.push, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ action: 'key' }) })).json();
+    if (!k.ok) return false;
+    const reg = await navigator.serviceWorker.ready;
+    let sub = await reg.pushManager.getSubscription();
+    if (!sub) sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: pushB64(k.key) });
+    const r = await (await fetch(API.push, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ action: 'subscribe', ...vcAuth(), sub: sub.toJSON() }) })).json();
+    if (r.ok) store.set('gs_push', vcAuth().code || vcAuth().key || 'yes');
+    return !!r.ok;
+  } catch (e) { return false; }
+}
+function pushCard() {
+  document.querySelectorAll('.push-card').forEach((box) => {
+    const on = pushOK() && Notification.permission === 'granted' && store.get('gs_push');
+    if (!pushOK()) { box.innerHTML = '<p class="muted" style="margin:0">' + T('इस फ़ोन पर बंद ऐप में घंटी नहीं बज सकती। iPhone पर: शेयर → "Add to Home Screen" करके वहीं से खोलिए।', 'Calls cannot ring with the app closed on this phone. On iPhone: Share → "Add to Home Screen", then open it from there.') + '</p>'; return; }
+    box.innerHTML = on ? '<p style="margin:0">🔔 ' + T('ऐप बंद होने पर भी कॉल की घंटी बजेगी ✓', 'Calls will ring even when the app is closed ✓') + '</p>'
+      : `<button class="btn warm" type="button">🔔 ${T('ऐप बंद होने पर भी कॉल की घंटी बजे – चालू करें', 'Ring for calls even when the app is closed – turn on')}</button>`;
+    const b = box.querySelector('button'); if (b) b.onclick = async () => { b.disabled = true; const ok = await pushOn(false); if (!ok) b.disabled = false; pushCard();
+      if (!ok) box.insertAdjacentHTML('beforeend', '<p class="err">' + T('चालू नहीं हो पाया। फ़ोन की सेटिंग में इस साइट को सूचना (notifications) की अनुमति दीजिए।', 'Could not turn on. Allow notifications for this site in the phone settings.') + '</p>'); };
+  });
+}
+// keep this phone's subscription fresh (quietly, only if permission was already given)
+setTimeout(() => { if (pushOK() && Notification.permission === 'granted') pushOn(true).then(pushCard); }, 4000);
 
 // ---- Two doors (elder / family), the elder's simple home, and the family circle ----
 API.circle = API_BASE + '/app-circle';

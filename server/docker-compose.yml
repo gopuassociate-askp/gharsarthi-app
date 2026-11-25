@@ -40,6 +40,7 @@ services:
       N8N_PERSONALIZATION_ENABLED: "false"
       EXECUTIONS_DATA_PRUNE: "true"
       EXECUTIONS_DATA_MAX_AGE: "720"        # keep run history 30 days (call transcripts are private)
+      NODE_FUNCTION_ALLOW_BUILTIN: "crypto"   # web push needs encryption in Code nodes (only the crypto module)
     volumes:
       - n8ndata:/home/node/.n8n
 
