@@ -666,7 +666,7 @@
         <video id="talk-self" class="hidden" playsinline muted></video>
         <span class="talk-ai">स्नेहा – आपकी AI सहायिका</span><span id="talk-cam-on" class="talk-cam hidden">● कैमरा चालू</span><span id="talk-mood" class="talk-mood hidden"></span>
         <div id="face-notes" class="face-notes hidden" aria-hidden="true"><span>♪</span><span>♫</span><span>♩</span><span>♬</span><span>♪</span><p>🎵 गाना ढूँढ रही हूँ…</p></div></div>
-      <p class="muted" style="font-size:11px;margin:4px 0 0">v50</p>
+      <p class="muted" style="font-size:11px;margin:4px 0 0">v51</p>
       <p id="talk-state" class="talk-state"><span data-en="Press the button and speak">बटन दबाकर बोलिए</span></p>
       <button class="talk-mic" id="talk-mic" type="button" aria-label="बोलें / Speak">🎤</button>
       <div class="talk-row">
@@ -1176,7 +1176,7 @@ async function loadStatus() {
   }
 }
 function render(j) {
-  const f = j.family;
+  const f = j.family; try { talkLangFrom(f.language); } catch (e) {}
   const [cls, label, text] = STATUS[f.status] || ['wait', f.status, ''];
   $('#h-elder').textContent = f.address_as || f.elder_name || '—';
   const pill = $('#h-status'); pill.className = 'pill ' + cls; pill.textContent = label;
@@ -1798,7 +1798,7 @@ async function loadElder() {
   try {
     const j = await (await fetch(API.status + '?code=' + encodeURIComponent(store.get('gs_code')))).json();
     if (!j.ok) { $('#e-name').textContent = '—'; return; }
-    ELDER = j; $('#e-name').textContent = j.family.address_as || j.family.elder_name;
+    ELDER = j; $('#e-name').textContent = j.family.address_as || j.family.elder_name; talkLangFrom(j.family.language);
     const songs = (j.messages || []).filter((m) => m.direction === 'to_elder' && m.category === 'song' && Date.now() - Date.parse(m.created_at) < 3 * 864e5);
     const box = $('#e-new');
     if (songs.length) {
@@ -2072,6 +2072,57 @@ async function talkHmm() {
     await new Promise((ok) => { a.onended = a.onerror = ok; a.play().catch(ok); setTimeout(ok, 2500); });
   } catch (e) {}
 }
+// Sneha's reply: her first sentence comes voiced with the answer; the later sentences are voiced
+// on request at the same moment, so they are ready by the time the first one ends.
+async function talkPlayReply(j) {
+  const later = (j.more || []).map((text) => fetch(API.talk, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify({ code: store.get('gs_code'), speak: text }) }).then((r) => r.json()).catch(() => null));
+  for (const a of (j.audios && j.audios.length ? j.audios : [j.audio])) { if (TALK.cut) return; await talkSpeak(a, j.mime, j.reply); }
+  for (let i = 0; i < later.length; i++) {
+    if (TALK.cut) return;
+    const m = await later[i];
+    if (TALK.cut) return;
+    await talkSpeak(m && m.audio ? m.audio : '', 'audio/mpeg', j.more[i]);
+  }
+}
+// The phone's own speech recognition (Chrome, Android, Edge, Safari): the words appear while the elder
+// speaks, so no recording has to be uploaded and heard on the server. Falls back to recording if missing.
+const PHONE_SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+const LANG_CODE = { hindi: 'hi-IN', marathi: 'mr-IN', gujarati: 'gu-IN', punjabi: 'pa-IN', bengali: 'bn-IN', bangla: 'bn-IN', odia: 'or-IN', telugu: 'te-IN', tamil: 'ta-IN', kannada: 'kn-IN', malayalam: 'ml-IN', english: 'en-IN' };
+function talkLangFrom(language) { const k = Object.keys(LANG_CODE).find((x) => String(language || '').toLowerCase().includes(x)); TALK.lang = k ? LANG_CODE[k] : 'hi-IN'; }
+function talkListenPhone(auto) {
+  return new Promise((resolve) => {
+    let rec;
+    try { rec = new PHONE_SR(); } catch (e) { resolve(false); return; }
+    rec.lang = TALK.lang || 'hi-IN'; rec.continuous = true; rec.interimResults = true; rec.maxAlternatives = 1;
+    let finalText = '', interim = '', heardAt = 0, failed = false, ended = false;
+    const started = performance.now();
+    TALK.rec = { get state() { return ended ? 'inactive' : 'recording'; }, stop: () => { try { rec.stop(); } catch (e) {} } };
+    rec.onresult = (e) => {
+      interim = '';
+      for (let i = e.resultIndex; i < e.results.length; i++) { const r = e.results[i]; if (r.isFinal) finalText += r[0].transcript + ' '; else interim += r[0].transcript; }
+      heardAt = performance.now();
+      const words = (finalText + interim).trim();
+      if (words) $('#talk-state').textContent = '👂 ' + words.slice(-70);
+    };
+    rec.onerror = (e) => { if (['not-allowed', 'service-not-allowed', 'network', 'audio-capture', 'language-not-supported'].includes(e.error)) { failed = true; TALK.srOff = true; } };
+    // patient: 3 seconds of quiet after they have spoken ends the turn; 9 seconds of nothing for a nudge
+    const tick = setInterval(() => {
+      const now = performance.now();
+      if ((heardAt && now - heardAt > 3000) || (!heardAt && auto >= 0 && now - started > 9000) || now - started > 40000 || !TALK.open) { try { rec.stop(); } catch (e) {} }
+    }, 200);
+    rec.onend = () => {
+      ended = true; clearInterval(tick); $('#talk-mic').classList.remove('rec');
+      if (!(finalText + interim).trim() && (failed || performance.now() - started < 1500)) { TALK.srOff = true; resolve(false); return; }   // not usable on this phone: record instead
+      const text = (finalText + ' ' + interim).replace(/\s+/g, ' ').trim();
+      resolve(true);
+      if (text) { talkSend(null, text); return; }
+      if (auto >= 0 && auto < 2 && !TALK.tapStop && TALK.open) { talkNudge(auto + 1); return; }
+      talkState(auto >= 0 ? 'बटन दबाकर बोलिए' : 'कुछ सुनाई नहीं दिया, फिर से दबाकर बोलिए', auto >= 0 ? 'Press the button and speak' : 'I heard nothing; press and speak again');
+    };
+    try { rec.start(); $('#talk-mic').classList.add('rec'); talkState('सुन रही हूँ… बोलिए 👂', 'Listening… speak 👂'); } catch (e) { resolve(false); }
+  });
+}
 async function talkListen(opt) {
   const auto = opt && typeof opt.auto === 'number' ? opt.auto : -1;
   if (auto >= 0 && (TALK.busy || TALK.speaking || !TALK.open)) return;
@@ -2082,6 +2133,10 @@ async function talkListen(opt) {
   talkAudioCtx();
   if (TALK.rec && TALK.rec.state === 'recording') { TALK.tapStop = true; TALK.rec.stop(); return; }   // second tap: done speaking
   TALK.tapStop = false;
+  if (PHONE_SR && !TALK.srOff) {
+    try { if (store.get('gs_media') !== 'granted') { const t = await navigator.mediaDevices.getUserMedia({ audio: true }); t.getTracks().forEach((x) => x.stop()); store.set('gs_media', 'granted'); } } catch (e) {}
+    if (await talkListenPhone(auto)) return;
+  }
   let st;
   try { st = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true } }); store.set('gs_media', 'granted'); }
   catch (e) { talkState('माइक की अनुमति चाहिए। फ़ोन की सेटिंग में इस साइट को माइक दीजिए।', 'Microphone permission is needed. Allow it for this site in the phone settings.'); return; }
@@ -2138,7 +2193,7 @@ async function talkNudge(n) {
     TALK.busy = false;
     if (!j.ok || !TALK.open) return;
     talkLog('s', j.reply);
-    for (const a of (j.audios && j.audios.length ? j.audios : [j.audio])) { if (TALK.cut) break; await talkSpeak(a, j.mime, j.reply); }
+    await talkPlayReply(j);
     if (!TALK.cut && TALK.open) { if (n < 2) talkListen({ auto: n }); else talkState('बटन दबाकर बोलिए', 'Press the button and speak'); }
   } catch (e) { talkState('बटन दबाकर बोलिए', 'Press the button and speak'); }
   finally { TALK.busy = false; }
@@ -2241,7 +2296,7 @@ async function talkSend(blob, typed) {
     if (j.ask_cam && !TALK.cam) $('#talk-cam').classList.add('pulse');
     if (j.play) { $('#song-box').classList.remove('hidden'); $('#song-title').textContent = '🎵 ' + j.play; $('#song-notes').classList.remove('hidden'); $('#face-notes').classList.remove('hidden'); }
     // her voice comes in up to two pieces, made at the same time on the server: play them one after another
-    for (const a of (j.audios && j.audios.length ? j.audios : [j.audio])) { if (TALK.cut) break; await talkSpeak(a, j.mime, j.reply); }
+    await talkPlayReply(j);
     if (!(TALK.rec && TALK.rec.state === 'recording')) talkState('बटन दबाकर बोलिए', 'Press the button and speak');
     if (j.play && !TALK.cut) songPlay(j.play, j.play_id);
     else if (!j.urgent && !j.end && !TALK.cut && TALK.open) setTimeout(() => { if (!TALK.busy && TALK.open && !TALK.speaking) talkListen({ auto: 0 }); }, 300);
