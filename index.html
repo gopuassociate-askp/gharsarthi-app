@@ -682,7 +682,7 @@
         <video id="talk-self" class="hidden" playsinline muted></video>
         <span class="talk-ai">स्नेहा – आपकी AI सहायिका</span><span id="talk-cam-on" class="talk-cam hidden">● कैमरा चालू</span><span id="talk-mood" class="talk-mood hidden"></span>
         <div id="face-notes" class="face-notes hidden" aria-hidden="true"><span>♪</span><span>♫</span><span>♩</span><span>♬</span><span>♪</span><p>🎵 गाना ढूँढ रही हूँ…</p></div></div>
-      <p class="muted" style="font-size:11px;margin:4px 0 0">v54</p>
+      <p class="muted" style="font-size:11px;margin:4px 0 0">v55</p>
       <p id="talk-state" class="talk-state"><span data-en="Press the button and speak">बटन दबाकर बोलिए</span></p>
       <button class="talk-mic" id="talk-mic" type="button" aria-label="बोलें / Speak">🎤</button>
       <div class="talk-row">
@@ -2136,15 +2136,23 @@ function talkDraw(F) {
   const g = c.getContext('2d'); const { cfg, base, mouth, blink } = F; const m = cfg.mouth;
   g.drawImage(base, 0, 0, 512, 512);
   // mouth: from the voice level while Sneha speaks
+  let raw = 0;
   if (TALK.an && TALK.speaking) {
     const a = new Uint8Array(TALK.an.fftSize); TALK.an.getByteTimeDomainData(a);
     let sum = 0; for (const v of a) sum += (v - 128) * (v - 128);
-    const rms = Math.sqrt(sum / a.length) / 128;
-    TALK.level = TALK.level * 0.5 + Math.min(1, rms * 5) * 0.5;
-  } else TALK.level *= 0.7;
-  // the head moves a little with her speech (nods and a slight tilt), and rests when she is quiet
-  const tt = performance.now() / 1000, amp = TALK.speaking ? 1 : 0.25;
-  c.style.transform = `translateY(${(Math.sin(tt * 2.1) * 2.5 + TALK.level * 5) * amp}px) rotate(${Math.sin(tt * 1.3) * 1.2 * amp}deg) scale(${1 + TALK.level * 0.012})`;
+    raw = Math.min(1, (Math.sqrt(sum / a.length) / 128) * 5);
+  }
+  // the sound reaches the ear a little after the app plays it (phone speaker, Bluetooth): show the mouth
+  // for the sound that is being HEARD now, so lips and voice match
+  const nowT = performance.now();
+  TALK.lvq = (TALK.lvq || []).concat([{ t: nowT, v: raw }]).filter((x) => nowT - x.t < 1000);
+  const lat = TALK.ac ? Math.max(60, ((TALK.ac.outputLatency || 0) + (TALK.ac.baseLatency || 0)) * 1000 || (/Android|iPhone|iPad/i.test(navigator.userAgent) ? 160 : 60)) : 0;
+  const due = TALK.lvq.filter((x) => x.t <= nowT - lat); const heardNow = due.length ? due[due.length - 1].v : 0;
+  TALK.level = TALK.level * 0.55 + heardNow * 0.45;
+  TALK.head = (TALK.head || 0) * 0.92 + TALK.level * 0.08;   // the head follows slowly: no shaking
+  // the head moves a little with her speech (gentle nods and tilt), and rests when she is quiet
+  const tt = nowT / 1000, amp = TALK.speaking ? 1 : 0.3;
+  c.style.transform = `translateY(${(Math.sin(tt * 1.6) * 1.6 + TALK.head * 4) * amp}px) rotate(${Math.sin(tt * 1.1) * 0.8 * amp}deg) scale(${1 + TALK.head * 0.01})`;
   const k = Math.min(m.n - 1, Math.round(TALK.level * (m.n - 1)));
   if (k > 0) g.drawImage(mouth, k * m.w, 0, m.w, m.h, m.x, m.y, m.w, m.h);
   // a natural blink every few seconds
@@ -2222,13 +2230,19 @@ function talkBargeStop() {
   if (b && b.iv) { clearInterval(b.iv); b.st.getTracks().forEach((t) => t.stop()); }
 }
 // A short "जी…" in her voice the moment the elder stops speaking, so there is no dead silence while she thinks
-const HMM = ['face/hmm1.mp3'];   // "जी…" mostly; never "हम्म" (it sounded like the word हम)
+// "जी…" in Hindi; हो… (Marathi), હા… (Gujarati), ਜੀ… (Punjabi), হ্যাঁ… (Bangla), ହଁ… (Odia), సరే…, சரி…, ಸರಿ…, ശരി…, Mm-hmm… (English)
+const HMM_LANGS = ['hi', 'mr', 'gu', 'pa', 'bn', 'or', 'te', 'ta', 'kn', 'ml', 'en'];
+const hmmFile = () => { const l = String(TALK.lang || 'hi-IN').slice(0, 2); return 'face/hmm/' + (HMM_LANGS.includes(l) ? l : 'hi') + '.mp3'; };
 async function talkHmm() {
+  // about a second into the wait, like a person who has listened and is about to answer; skipped if her reply is already here
+  await new Promise((ok) => setTimeout(ok, 900));
+  if (TALK.replyIn || TALK.cut) return;
   try {
-    TALK.hmmN = ((TALK.hmmN || 0) + 1) % HMM.length;
-    const a = new Audio(HMM[TALK.hmmN]); TALK.audio = a;
+    const a = new Audio(hmmFile()); TALK.audio = a;
     try { const src = TALK.ac.createMediaElementSource(a); src.connect(TALK.an); } catch (e) {}
+    a.onplay = () => { TALK.speaking = true; };
     await new Promise((ok) => { a.onended = a.onerror = ok; a.play().catch(ok); setTimeout(ok, 2500); });
+    TALK.speaking = false;
   } catch (e) {}
 }
 // Sneha's reply: her first sentence comes voiced with the answer; the later sentences are voiced
@@ -2436,6 +2450,7 @@ setInterval(async () => {
 }, 3000);
 async function talkSend(blob, typed) {
   TALK.busy = true; $('#talk-mic').disabled = true; talkState('स्नेहा सोच रही है…', 'Sneha is thinking…');
+  TALK.replyIn = false;
   const hmm = talkHmm();
   const whoNow = TALK.cam && TALK.who && Date.now() - TALK.who.at < 8000 ? TALK.who.w : null;
   const b64 = blob ? await new Promise((ok) => { const r = new FileReader(); r.onload = () => ok(String(r.result).split(',')[1]); r.readAsDataURL(blob); }) : '';
@@ -2451,6 +2466,7 @@ async function talkSend(blob, typed) {
     if (j.heard) { talkLog('u', j.heard); TALK.history.push({ r: 'u', t: j.heard }); }
     talkLog('s' + (j.urgent ? ' urgent' : ''), j.reply); TALK.history.push({ r: 's', t: j.reply + (j.play ? ` (गाना चलाया: ${j.play})` : '') + (j.seen ? ` [[देखा: ${j.seen}]]` : '') }); TALK.history = TALK.history.slice(-10);
     talkState(j.urgent ? 'घर वालों को ख़बर दी जा रही है 🚨' : 'स्नेहा बोल रही है… (रोकने के लिए ⏹ दबाएँ)', j.urgent ? 'The family is being told now 🚨' : 'Sneha is speaking… (tap ⏹ to stop)');
+    TALK.replyIn = true;
     await hmm;
     TALK.busy = false; $('#talk-mic').disabled = false; TALK.cut = false;
     if (j.ask_cam && !TALK.cam) $('#talk-cam').classList.add('pulse');
