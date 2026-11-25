@@ -666,7 +666,7 @@
         <video id="talk-self" class="hidden" playsinline muted></video>
         <span class="talk-ai">स्नेहा – आपकी AI सहायिका</span><span id="talk-cam-on" class="talk-cam hidden">● कैमरा चालू</span><span id="talk-mood" class="talk-mood hidden"></span>
         <div id="face-notes" class="face-notes hidden" aria-hidden="true"><span>♪</span><span>♫</span><span>♩</span><span>♬</span><span>♪</span><p>🎵 गाना ढूँढ रही हूँ…</p></div></div>
-      <p class="muted" style="font-size:11px;margin:4px 0 0">v51</p>
+      <p class="muted" style="font-size:11px;margin:4px 0 0">v52</p>
       <p id="talk-state" class="talk-state"><span data-en="Press the button and speak">बटन दबाकर बोलिए</span></p>
       <button class="talk-mic" id="talk-mic" type="button" aria-label="बोलें / Speak">🎤</button>
       <div class="talk-row">
@@ -2095,12 +2095,13 @@ function talkListenPhone(auto) {
     let rec;
     try { rec = new PHONE_SR(); } catch (e) { resolve(false); return; }
     rec.lang = TALK.lang || 'hi-IN'; rec.continuous = true; rec.interimResults = true; rec.maxAlternatives = 1;
-    let finalText = '', interim = '', heardAt = 0, failed = false, ended = false;
+    let finalText = '', interim = '', heardAt = 0, failed = false, ended = false, sentenceDone = false;
     const started = performance.now();
     TALK.rec = { get state() { return ended ? 'inactive' : 'recording'; }, stop: () => { try { rec.stop(); } catch (e) {} } };
     rec.onresult = (e) => {
       interim = '';
       for (let i = e.resultIndex; i < e.results.length; i++) { const r = e.results[i]; if (r.isFinal) finalText += r[0].transcript + ' '; else interim += r[0].transcript; }
+      sentenceDone = !interim.trim() && !!finalText.trim();   // the phone says the sentence is complete
       heardAt = performance.now();
       const words = (finalText + interim).trim();
       if (words) $('#talk-state').textContent = '👂 ' + words.slice(-70);
@@ -2109,7 +2110,7 @@ function talkListenPhone(auto) {
     // patient: 3 seconds of quiet after they have spoken ends the turn; 9 seconds of nothing for a nudge
     const tick = setInterval(() => {
       const now = performance.now();
-      if ((heardAt && now - heardAt > 3000) || (!heardAt && auto >= 0 && now - started > 9000) || now - started > 40000 || !TALK.open) { try { rec.stop(); } catch (e) {} }
+      if ((heardAt && now - heardAt > (sentenceDone ? 1400 : 3000)) || (!heardAt && auto >= 0 && now - started > 9000) || now - started > 40000 || !TALK.open) { try { rec.stop(); } catch (e) {} }
     }, 200);
     rec.onend = () => {
       ended = true; clearInterval(tick); $('#talk-mic').classList.remove('rec');
