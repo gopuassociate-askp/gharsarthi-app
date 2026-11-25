@@ -102,6 +102,19 @@
   .rs-big { font-size: 30px; font-weight: 800; color: var(--brand); margin: 10px 0; }
   .sn-head { display: flex; gap: 14px; align-items: center; }
   .sn-mini { width: 76px; height: 76px; border-radius: 50%; object-fit: cover; border: 3px solid #f59e0b; flex: none; }
+  .vc { position: fixed; inset: 0; z-index: 60; background: #111; }
+  .vc #vc-remote { width: 100%; height: 100%; object-fit: cover; background: #222; }
+  .vc #vc-local { position: absolute; right: 12px; top: 64px; width: 28%; max-width: 150px; border-radius: 14px; border: 2px solid #fff; transform: scaleX(-1); background: #000; }
+  .vc-top { position: absolute; top: 0; left: 0; right: 0; padding: 14px 16px; color: #fff; background: linear-gradient(rgba(0,0,0,.6), transparent); font-size: 20px; }
+  .vc-top span { display: block; font-size: 15px; opacity: .85; }
+  .vc-bar { position: absolute; left: 0; right: 0; bottom: 0; display: flex; gap: 8px; justify-content: center; padding: 16px 12px calc(16px + env(safe-area-inset-bottom)); background: linear-gradient(transparent, rgba(0,0,0,.7)); }
+  .vc-bar button { width: 76px; border: 0; border-radius: 18px; padding: 8px 4px; background: rgba(255,255,255,.2); color: #fff; font: inherit; font-size: 13px; font-weight: 700; cursor: pointer; }
+  .vc-bar button b { display: block; font-size: 26px; } .vc-bar button.off { background: rgba(255,255,255,.6); color: #111; } .vc-bar button.end { background: #dc2626; }
+  .vc-ring { position: fixed; inset: 0; z-index: 61; background: rgba(124,45,18,.94); color: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px; text-align: center; padding: 24px; }
+  .vc-ring img { width: 90px; height: 90px; border-radius: 50%; border: 4px solid #f59e0b; animation: breathe 1.6s ease-in-out infinite; }
+  .vc-ring p { font-size: 24px; font-weight: 800; margin: 0; }
+  .vc-ring-btns { display: flex; gap: 18px; } .vc-ring-btns button { border: 0; border-radius: 999px; padding: 18px 26px; font: inherit; font-size: 19px; font-weight: 800; color: #fff; cursor: pointer; }
+  .vc-ring-btns .yes { background: #16a34a; } .vc-ring-btns .no { background: #dc2626; }
   .talk-bar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 30; display: flex; gap: 4px; padding: 8px 8px calc(8px + env(safe-area-inset-bottom)); background: #fff; border-top: 1px solid #fde3cf; box-shadow: 0 -6px 20px rgba(124,45,18,.12); }
   .talk-bar button { flex: 1; border: 0; border-radius: 14px; background: #ffedd5; color: #7c2d12; font: inherit; font-size: 13px; font-weight: 700; padding: 6px 2px; min-height: 58px; cursor: pointer; }
   .talk-bar button b { display: block; font-size: 22px; line-height: 1.2; }
@@ -403,6 +416,7 @@
     <div class="tiles">
       <button class="tile" data-go="talk" type="button"><span class="ic">🗣️</span><span data-en="Talk to Sneha">स्नेहा से बात</span></button>
       <button class="tile" id="t-songs" type="button"><span class="ic">🎵</span><span data-en="Songs & bhajans">गाने और भजन</span></button>
+      <button class="tile" id="t-video" type="button"><span class="ic">📹</span><span data-en="Video call family">वीडियो कॉल</span></button>
       <button class="tile" id="t-calls" type="button"><span class="ic">📞</span><span data-en="Call family">घर वालों को फ़ोन</span></button>
       <button class="tile" id="t-msgs" type="button"><span class="ic">💌</span><span data-en="Messages">संदेश</span></button>
       <button class="tile sos" id="t-help" type="button">🚨 <span data-en="Help – tell my family now">मदद – घर वालों को अभी बताएँ</span></button>
@@ -434,6 +448,7 @@
     <div class="card"><h2 style="font-size:18px">🚨 <span data-en="Alerts (last 3 days)">ज़रूरी ख़बरें (पिछले 3 दिन)</span></h2><div id="c-alerts"></div></div>
     <div class="card"><h2 style="font-size:18px">☀️ <span data-en="Today">आज</span></h2><div id="c-today"></div></div>
     <div id="c-family" class="hidden">
+      <div class="card" id="c-vc-card"><h2 style="font-size:18px">📹 <span data-en="Free video call">मुफ़्त वीडियो कॉल</span></h2><div class="vc-list"></div></div>
       <div class="card"><h2 style="font-size:18px">💌 <span data-en="Messages">संदेश</span></h2><div id="c-msgs"></div>
         <textarea id="c-text" maxlength="300" placeholder="पापा, शाम को फ़ोन करूँगी।"></textarea>
         <button class="btn primary" id="c-send" type="button"><span data-en="Send to them">उन्हें भेजें</span></button><p id="c-send-msg" class="muted"></p></div>
@@ -518,6 +533,7 @@
       <div id="msg-list"></div>
     </div>
 
+    <div class="card" id="vc-card"><h2>📹 <span data-en="Free video call">मुफ़्त वीडियो कॉल</span></h2><p class="muted" style="margin:0 0 8px"><span data-en="Video goes straight between the phones; nothing is recorded.">वीडियो सीधे फ़ोन से फ़ोन जाता है; कुछ रिकॉर्ड नहीं होता।</span></p><div class="vc-list"></div></div>
     <div class="card" id="circle-card">
       <h2>👥 <span data-en="Family & caretakers">परिवार और देखभाल करने वाले</span></h2>
       <p class="muted"><span data-en="Add people who should know how they are. Family see daily news and messages; a caretaker or neighbour sees only today's status and alerts. Nobody sees payments.">उन्हें जोड़िए जिन्हें हाल पता होना चाहिए। परिवार: रोज़ की ख़बर और संदेश। देखभाल करने वाले / पड़ोसी: सिर्फ़ आज का हाल और ज़रूरी ख़बर। भुगतान कोई नहीं देखता।</span></p>
@@ -666,7 +682,7 @@
         <video id="talk-self" class="hidden" playsinline muted></video>
         <span class="talk-ai">स्नेहा – आपकी AI सहायिका</span><span id="talk-cam-on" class="talk-cam hidden">● कैमरा चालू</span><span id="talk-mood" class="talk-mood hidden"></span>
         <div id="face-notes" class="face-notes hidden" aria-hidden="true"><span>♪</span><span>♫</span><span>♩</span><span>♬</span><span>♪</span><p>🎵 गाना ढूँढ रही हूँ…</p></div></div>
-      <p class="muted" style="font-size:11px;margin:4px 0 0">v53</p>
+      <p class="muted" style="font-size:11px;margin:4px 0 0">v54</p>
       <p id="talk-state" class="talk-state"><span data-en="Press the button and speak">बटन दबाकर बोलिए</span></p>
       <button class="talk-mic" id="talk-mic" type="button" aria-label="बोलें / Speak">🎤</button>
       <div class="talk-row">
@@ -820,6 +836,25 @@
   </section>
 </main>
 
+<div id="vc" class="vc hidden" role="dialog" aria-label="वीडियो कॉल / Video call">
+  <video id="vc-remote" autoplay playsinline></video>
+  <video id="vc-local" autoplay playsinline muted></video>
+  <div class="vc-top"><b id="vc-name">—</b><span id="vc-state"></span></div>
+  <div class="vc-bar">
+    <button type="button" id="vc-mute"><b>🎤</b><span data-en="Mute">आवाज़ बंद</span></button>
+    <button type="button" id="vc-cam"><b>📷</b><span data-en="Camera">कैमरा</span></button>
+    <button type="button" id="vc-flip"><b>🔄</b><span data-en="Flip">पलटें</span></button>
+    <button type="button" id="vc-end" class="end"><b>📵</b><span data-en="End">काटें</span></button>
+  </div>
+</div>
+<div id="vc-ring" class="vc-ring hidden" role="alertdialog">
+  <img src="sneha.jpg" alt="" width="90" height="90">
+  <p id="vc-ring-text">—</p>
+  <div class="vc-ring-btns">
+    <button type="button" id="vc-decline" class="no">📵 <span data-en="Decline">मना करें</span></button>
+    <button type="button" id="vc-accept" class="yes">📹 <span data-en="Answer">उठाएँ</span></button>
+  </div>
+</div>
 <div id="talk-bar" class="talk-bar hidden" role="toolbar" aria-label="बातचीत के बटन / Talk controls">
   <button type="button" id="tb-mic"><b>🎤</b><span data-en="Speak">बोलें</span></button>
   <button type="button" id="tb-stop"><b>⏹</b><span data-en="Stop">रोकें</span></button>
@@ -901,6 +936,7 @@ const DEMO_CODE = 'GS-DEMO';
       return reply({ ok: true, code: DEMO_CODE, status: 'New', suggested_plan: 'plus', preview: true });
     }
     if (u.includes('/app-status')) return reply({ ok: true, ...D });
+    if (u.includes('/app-call')) return reply(body.action === 'parties' ? { ok: true, parties: [{ party: 'owner', name: 'सुनील', relation: 'बेटा' }, { party: 'M1', name: 'काव्या', relation: 'पोती' }] } : body.action === 'poll' ? { ok: true, incoming: [] } : { ok: false, why: 'demo' });
     if (u.includes('/app-circle')) {   // the family circle, pretend
       D.circle = D.circle || [{ member_id: 'D1', name: 'काव्या', relation: 'पोती', level: 'family', status: 'active' }, { member_id: 'D2', name: 'शर्मा जी', relation: 'पड़ोसी', level: 'care', status: 'invited' }];
       if (body.action === 'list') return reply({ ok: true, members: D.circle });
@@ -1016,6 +1052,7 @@ function show(view) {
   $('#talk-bar').classList.toggle('hidden', view !== 'talk');
   document.documentElement.classList.toggle('snap', view === 'role');
   if (view === 'pay') payInit();
+  if (view === 'home') vcList($('#vc-card .vc-list'));
   if (view === 'elder') loadElder();
   if (view === 'care') loadCare();
   if (view === 'join') loadJoin();
@@ -1756,6 +1793,127 @@ $('#pn-go').addEventListener('click', async () => {
   } catch (e) { msg('इंटरनेट नहीं', 'Offline'); }
 });
 
+
+// ---- Free video calls inside the family: WebRTC, phone to phone; our server only passes the "offer" and "answer" ----
+API.call = API_BASE + '/app-call';
+const VC = { pc: null, local: null, id: null, polling: null, ringPoll: null, incoming: null, facing: 'user', tone: null };
+const ICE = [{ urls: ['stun:stun.l.google.com:19302', 'stun:stun1.l.google.com:19302'] }, { urls: 'stun:stun.cloudflare.com:3478' }];
+function vcAuth() {
+  if (store.get('gs_code')) return { code: store.get('gs_code'), as: store.get('gs_role') === 'elder' ? 'elder' : 'family' };
+  if (store.get('gs_member')) return { key: store.get('gs_member') };
+  return null;
+}
+const vcCall = async (body) => { const a = vcAuth(); if (!a) return { ok: false }; return (await fetch(API.call, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ ...a, ...body }) })).json(); };
+function vcState(hi, en) { $('#vc-state').textContent = T(hi, en); }
+// a soft ring made in the phone itself (no sound file)
+function vcTone(on) {
+  try {
+    if (!on) { if (VC.tone) { clearInterval(VC.tone.iv); VC.tone.ac.close(); } VC.tone = null; return; }
+    if (VC.tone) return;
+    const ac = new (window.AudioContext || window.webkitAudioContext)();
+    const beep = () => { const o = ac.createOscillator(), g = ac.createGain(); o.frequency.value = 660; g.gain.setValueAtTime(0.0001, ac.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.25, ac.currentTime + 0.05); g.gain.exponentialRampToValueAtTime(0.0001, ac.currentTime + 0.9);
+      o.connect(g); g.connect(ac.destination); o.start(); o.stop(ac.currentTime + 1); };
+    beep(); VC.tone = { ac, iv: setInterval(beep, 2200) };
+  } catch (e) {}
+}
+// all connection details in one go (no back-and-forth needed)
+function vcGathered(pc) { return new Promise((ok) => { if (pc.iceGatheringState === 'complete') return ok(); const t = setTimeout(ok, 2500);
+  pc.addEventListener('icegatheringstatechange', () => { if (pc.iceGatheringState === 'complete') { clearTimeout(t); ok(); } }); }); }
+async function vcMedia(video) {
+  VC.local = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true }, video: video ? { facingMode: VC.facing, width: { ideal: 640 }, height: { ideal: 480 } } : false });
+  $('#vc-local').srcObject = VC.local; $('#vc-local').classList.toggle('hidden', !video);
+}
+function vcPeer() {
+  const pc = new RTCPeerConnection({ iceServers: ICE });
+  VC.local.getTracks().forEach((t) => pc.addTrack(t, VC.local));
+  pc.ontrack = (e) => { $('#vc-remote').srcObject = e.streams[0]; };
+  pc.onconnectionstatechange = () => {
+    if (pc.connectionState === 'connected') { vcTone(false); vcState('जुड़ गए ✓', 'Connected ✓'); setTimeout(() => { if (VC.pc === pc) $('#vc-state').textContent = ''; }, 2500); }
+    if (pc.connectionState === 'failed') { vcState('नेटवर्क की वजह से नहीं जुड़ पाए। Wi-Fi या दूसरे नेटवर्क से फिर कोशिश करें।', 'Could not connect over this network. Try again on Wi-Fi or another network.'); }
+    if (pc.connectionState === 'disconnected') { vcState('नेटवर्क कमज़ोर है…', 'Weak network…'); setTimeout(() => { if (VC.pc === pc && ['disconnected', 'failed', 'closed'].includes(pc.connectionState)) { vcState('कॉल कट गई', 'The call dropped'); setTimeout(() => vcHangup(), 1500); } }, 12000); }
+  };
+  VC.pc = pc; return pc;
+}
+function vcOpen(name) { try { talkClose(); } catch (e) {} $('#vc-name').textContent = name; $('#vc').classList.remove('hidden'); $('#vc-mute').classList.remove('off'); $('#vc-cam').classList.remove('off'); }
+async function vcStart(party, name, video = true) {
+  if (VC.pc) return;
+  vcOpen(name); vcState('कैमरा चालू हो रहा है…', 'Starting the camera…');
+  try { await vcMedia(video); } catch (e) { vcState('कैमरा या माइक की अनुमति चाहिए', 'Camera or microphone permission is needed'); setTimeout(vcHangup, 2500); return; }
+  const pc = vcPeer(); await pc.setLocalDescription(await pc.createOffer()); await vcGathered(pc);
+  vcState('घंटी जा रही है…', 'Ringing…');
+  let r; try { r = await vcCall({ action: 'start', to: party, offer: pc.localDescription.sdp, video }); } catch (e) { r = { ok: false }; }
+  if (!r.ok) { vcState(r.why === 'busy' ? 'वे अभी दूसरी कॉल पर हैं' : 'कॉल नहीं लग पाई', r.why === 'busy' ? 'They are on another call' : 'The call could not start'); setTimeout(vcHangup, 2500); return; }
+  VC.id = r.call_id; vcTone(true);
+  VC.polling = setInterval(async () => {
+    let p; try { p = await vcCall({ action: 'poll', call_id: VC.id }); } catch (e) { return; }
+    const c = p && p.call; if (!c || !VC.pc) return;
+    if (c.status === 'answered' && c.answer && !VC.pc.currentRemoteDescription) { vcTone(false); vcState('जुड़ रहे हैं…', 'Connecting…'); await VC.pc.setRemoteDescription({ type: 'answer', sdp: c.answer }); }
+    if (['declined', 'missed', 'ended', 'cancelled'].includes(c.status)) {
+      vcState(c.status === 'declined' ? 'उन्होंने अभी कॉल नहीं उठाई' : c.status === 'missed' ? 'कॉल का जवाब नहीं आया' : 'कॉल ख़त्म', c.status === 'declined' ? 'They declined' : c.status === 'missed' ? 'No answer' : 'Call ended');
+      setTimeout(() => vcHangup(true), 2000);
+    }
+  }, 1500);
+}
+async function vcAnswer() {
+  const inc = VC.incoming; if (!inc) return;
+  $('#vc-ring').classList.add('hidden'); vcTone(false); vcOpen(inc.from); vcState('जुड़ रहे हैं…', 'Connecting…');
+  try { await vcMedia(inc.video); } catch (e) { vcState('कैमरा या माइक की अनुमति चाहिए', 'Camera or microphone permission is needed'); vcCall({ action: 'end', call_id: inc.call_id }); setTimeout(vcHangup, 2500); return; }
+  const pc = vcPeer(); VC.id = inc.call_id;
+  await pc.setRemoteDescription({ type: 'offer', sdp: inc.offer });
+  await pc.setLocalDescription(await pc.createAnswer()); await vcGathered(pc);
+  const r = await vcCall({ action: 'answer', call_id: inc.call_id, answer: pc.localDescription.sdp });
+  if (!r.ok) { vcState('कॉल कट गई', 'The call was cancelled'); setTimeout(vcHangup, 2000); return; }
+  VC.polling = setInterval(async () => {   // notice when the other side hangs up
+    let p; try { p = await vcCall({ action: 'poll', call_id: VC.id }); } catch (e) { return; }
+    if (p && p.call && ['ended', 'cancelled'].includes(p.call.status)) { vcState('कॉल ख़त्म', 'Call ended'); setTimeout(() => vcHangup(true), 1500); }
+  }, 3000);
+}
+function vcHangup(already) {
+  if (VC.id && !already) vcCall({ action: 'end', call_id: VC.id }).catch(() => {});
+  clearInterval(VC.polling); VC.polling = null; vcTone(false);
+  try { VC.pc && VC.pc.close(); } catch (e) {} VC.pc = null; VC.id = null; VC.incoming = null;
+  try { VC.local && VC.local.getTracks().forEach((t) => t.stop()); } catch (e) {} VC.local = null;
+  $('#vc-remote').srcObject = null; $('#vc-local').srcObject = null;
+  $('#vc').classList.add('hidden'); $('#vc-ring').classList.add('hidden');
+}
+$('#vc-end').addEventListener('click', () => vcHangup());
+$('#vc-mute').addEventListener('click', () => { const t = VC.local && VC.local.getAudioTracks()[0]; if (t) { t.enabled = !t.enabled; $('#vc-mute').classList.toggle('off', !t.enabled); } });
+$('#vc-cam').addEventListener('click', () => { const t = VC.local && VC.local.getVideoTracks()[0]; if (t) { t.enabled = !t.enabled; $('#vc-cam').classList.toggle('off', !t.enabled); } });
+$('#vc-flip').addEventListener('click', async () => {
+  if (!VC.pc || !VC.local || !VC.local.getVideoTracks()[0]) return;
+  VC.facing = VC.facing === 'user' ? 'environment' : 'user';
+  try { const s = await navigator.mediaDevices.getUserMedia({ video: { facingMode: VC.facing } }); const nt = s.getVideoTracks()[0];
+    const snd = VC.pc.getSenders().find((x) => x.track && x.track.kind === 'video'); await snd.replaceTrack(nt);
+    VC.local.getVideoTracks().forEach((t) => { t.stop(); VC.local.removeTrack(t); }); VC.local.addTrack(nt); $('#vc-local').srcObject = VC.local;
+    $('#vc-local').style.transform = VC.facing === 'user' ? 'scaleX(-1)' : 'none'; } catch (e) {}
+});
+$('#vc-accept').addEventListener('click', vcAnswer);
+$('#vc-decline').addEventListener('click', () => { const inc = VC.incoming; $('#vc-ring').classList.add('hidden'); vcTone(false); VC.incoming = null; if (inc) vcCall({ action: 'end', call_id: inc.call_id }).catch(() => {}); });
+// listen for incoming calls while the app is open (every 4 seconds, only when the screen is visible)
+setInterval(async () => {
+  if (document.hidden || VC.pc || VC.incoming || !vcAuth() || !window.RTCPeerConnection) return;
+  let p; try { p = await vcCall({ action: 'poll' }); } catch (e) { return; }
+  const inc = p && p.incoming && p.incoming[0];
+  if (!inc || VC.pc) return;
+  VC.incoming = inc;
+  $('#vc-ring-text').textContent = T(`📹 ${inc.from} वीडियो कॉल कर रहे हैं`, `📹 ${inc.from} is video calling`);
+  $('#vc-ring').classList.remove('hidden'); vcTone(true);
+  try { navigator.vibrate && navigator.vibrate([400, 200, 400, 200, 400]); } catch (e) {}
+  setTimeout(() => { if (VC.incoming === inc && !VC.pc) { $('#vc-ring').classList.add('hidden'); vcTone(false); VC.incoming = null; } }, 45000);
+}, 4000);
+// the list of people to call, wherever it appears
+async function vcList(box) {
+  if (!box) return;
+  if (!window.RTCPeerConnection) { box.innerHTML = '<p class="muted">' + T('इस फ़ोन का ब्राउज़र वीडियो कॉल नहीं चलाता। Chrome खोलिए।', 'This browser cannot make video calls. Please use Chrome.') + '</p>'; return; }
+  let r; try { r = await vcCall({ action: 'parties' }); } catch (e) { r = null; }
+  const ps = (r && r.parties) || [];
+  box.innerHTML = ps.length ? ps.map((p, i) => `<button class="btn primary" type="button" data-vc="${i}" style="margin:6px 0">📹 ${esc(p.name)}${p.relation ? ' (' + esc(p.relation) + ')' : ''}</button>`).join('')
+    : '<p class="muted">' + T('अभी कोई नहीं जिसे कॉल करें। "परिवार और देखभाल करने वाले" में घर वालों को जोड़िए।', 'Nobody to call yet. Add family under "Family & caretakers".') + '</p>';
+  box.querySelectorAll('[data-vc]').forEach((b) => { b.onclick = () => { const p = ps[+b.dataset.vc]; vcStart(p.party, p.name, true); }; });
+}
+$('#t-video').addEventListener('click', () => { elderPanel('<h2>📹 ' + T('किसे वीडियो कॉल करें?', 'Whom to video call?') + '</h2><div class="vc-list"></div>'); vcList($('#e-panel .vc-list')); });
+
 // ---- Two doors (elder / family), the elder's simple home, and the family circle ----
 API.circle = API_BASE + '/app-circle';
 const SONGS = {"_note":"Songs Sneha suggests (real, well-loved; she always names one exactly). Any other song the elder asks for is played too.","सुबह / भक्ति":["ऐ मालिक तेरे बंदे हम - लता मंगेशकर","इतनी शक्ति हमें देना दाता - लता मंगेशकर","ओम जय जगदीश हरे - अनुराधा पौडवाल","तू प्यार का सागर है - मन्ना डे","अच्युतम केशवम - विक्रम हज़रा"],"ख़ुशी":["ये दोस्ती हम नहीं तोड़ेंगे - किशोर कुमार","मेरे सपनों की रानी - किशोर कुमार","आज कल तेरे मेरे प्यार के चर्चे - मोहम्मद रफ़ी","चल चल चल मेरे साथी - किशोर कुमार","ज़िंदगी एक सफ़र है सुहाना - किशोर कुमार"],"पुरानी यादें / सुकून":["लग जा गले - लता मंगेशकर","कहीं दूर जब दिन ढल जाए - मुकेश","अभी न जाओ छोड़ कर - मोहम्मद रफ़ी","चौदहवीं का चाँद हो - मोहम्मद रफ़ी","तेरे मेरे मिलन की ये रैना - लता मंगेशकर"],"उदासी में हौसला":["रुक जाना नहीं तू कहीं हार के - किशोर कुमार","आने वाला पल जाने वाला है - किशोर कुमार","ज़िंदगी कैसी है पहेली - मन्ना डे","कभी कभी मेरे दिल में - मुकेश"],"देशभक्ति / त्योहार":["ऐ मेरे वतन के लोगो - लता मंगेशकर","मेरे देश की धरती - महेंद्र कपूर","आज मौसम बड़ा बेईमान है - मोहम्मद रफ़ी"]};
@@ -1948,6 +2106,7 @@ async function loadCare() {
       : '<p class="muted">' + T('✓ कोई ज़रूरी ख़बर नहीं।', '✓ No alerts.') + '</p>';
     $('#c-alerts').querySelectorAll('[data-ack]').forEach((b) => { b.onclick = async () => { b.disabled = true; await circleCall({ action: 'ack', key: store.get('gs_member'), msg_id: b.dataset.ack }); loadCare(); }; });
     $('#c-family').classList.toggle('hidden', j.level !== 'family');
+    if (j.level === 'family') vcList($('#c-vc-card .vc-list'));
     if (j.level === 'family') {
       $('#c-msgs').innerHTML = (j.messages || []).slice(0, 6).map((m) => `<div class="rowline"><span><b>${esc(m.from)}</b>${m.direction === 'to_family' ? ' →' : ''}: ${esc(m.text)}${m.reply ? '<br><small>↩ ' + esc(m.reply) + '</small>' : ''}<br><small class="muted">${ago(m.created_at)}</small></span></div>`).join('') || '<p class="muted">—</p>';
       if (!$('#c-song-card').innerHTML) songCard($('#c-song-card'), { body: () => ({ key: store.get('gs_member') }) });
