@@ -7,7 +7,7 @@
 <meta name="theme-color" content="#ea580c">
 <link rel="manifest" href="./manifest.json">
 <link rel="icon" href="./icon-192.png">
-<link rel="apple-touch-icon" href="./icon-192.png">
+<link rel="apple-touch-icon" href="./apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="सदा स्नेहा">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -1042,6 +1042,7 @@
     <button type="button" id="vc-mute"><b>🎤</b><span data-en="Mute">आवाज़ बंद</span></button>
     <button type="button" id="vc-cam"><b>📷</b><span data-en="Camera">कैमरा</span></button>
     <button type="button" id="vc-flip"><b>🔄</b><span data-en="Flip">पलटें</span></button>
+    <button type="button" id="vc-spk" class="hidden"><b>🔊</b><span data-en="Speaker">स्पीकर</span></button>
     <button type="button" id="vc-end" class="end"><b>📵</b><span data-en="End">काटें</span></button>
   </div>
 </div>
@@ -1899,7 +1900,7 @@ window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); inst
 const installed = () => window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
 const installDismissed = () => { try { return localStorage.getItem('gs_install_x') === '1'; } catch (e) { return false; } };
 function installBar() {
-  const bar = $('#install-bar'); if (!bar || installed() || installDismissed()) return;
+  const bar = $('#install-bar'); if (!bar || NATIVE || installed() || installDismissed()) return;
   const ios = /iphone|ipad/i.test(navigator.userAgent);
   if (!installEvt && !ios) return;
   $('#install-how').textContent = ios ? T('Safari में ⬆️ दबाइए → "Add to Home Screen"', 'In Safari press ⬆️ → "Add to Home Screen"') : T('एक टैप में, Play Store के बिना', 'One tap, no Play Store needed');
@@ -2040,6 +2041,11 @@ const VC = { pc: null, local: null, id: null, polling: null, ringPoll: null, inc
 let ICE = [{ urls: ['stun:stun.l.google.com:19302', 'stun:stun1.l.google.com:19302'] }, { urls: 'stun:stun.cloudflare.com:3478' }];
 // ?relay=1 forces every call through our relay (to test it)
 const ICE_POLICY = new URLSearchParams(location.search).get('relay') === '1' ? 'relay' : 'all';
+// ---- Inside the SadaSneha Android app: native call alerts (ring like a phone call) and earpiece/speaker ----
+const NATIVE = (() => { try { return !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform() && window.Capacitor.Plugins.SnehaNative); } catch (e) { return false; } })();
+const SN = NATIVE ? window.Capacitor.Plugins.SnehaNative : null;
+async function vcSpeaker(on) { if (!SN) return; try { const r = await SN.setSpeaker({ on }); VC.spk = !!(r && r.speaker); } catch (e) { VC.spk = on; }
+  const b = $('#vc-spk'); if (b) { b.querySelector('b').textContent = VC.spk ? '🔊' : '👂'; b.querySelector('span').textContent = VC.spk ? T('स्पीकर', 'Speaker') : T('कान से', 'Earpiece'); b.classList.toggle('on', VC.spk); } }
 // this phone's own id: calls know which phone rang and which picked up (two phones of one person can call each other)
 const DEV = (() => { try { let d = localStorage.getItem('gs_dev'); if (!/^[a-z0-9]{8,24}$/.test(d || '')) { d = Math.random().toString(36).slice(2, 10) + Date.now().toString(36); localStorage.setItem('gs_dev', d); } return d; } catch (e) { return ''; } })();
 function vcAuth() {
@@ -2079,7 +2085,8 @@ function vcPeer() {
   };
   VC.pc = pc; return pc;
 }
-function vcOpen(name, video = true) { try { talkClose(); } catch (e) {} $('#vc-name').textContent = (video ? '📹 ' : '📞 ') + name; $('#vc').classList.toggle('audio', !video);
+function vcOpen(name, video = true) {
+  if (SN) { $('#vc-spk').classList.remove('hidden'); vcSpeaker(!!video); }   // like a phone: video on the speaker, voice at the ear try { talkClose(); } catch (e) {} $('#vc-name').textContent = (video ? '📹 ' : '📞 ') + name; $('#vc').classList.toggle('audio', !video);
   $('#vc-cam').classList.toggle('hidden', !video); $('#vc-flip').classList.toggle('hidden', !video); $('#vc').classList.remove('hidden'); $('#vc-mute').classList.remove('off'); $('#vc-cam').classList.remove('off'); }
 async function vcStart(party, name, video = true) {
   if (VC.pc) return;
@@ -2122,6 +2129,7 @@ async function vcAnswer() {
   }, 2000);
 }
 function vcHangup(already) {
+  if (SN) { try { SN.callEnded(); } catch (e) {} }
   if (VC.id && !already) vcCall({ action: 'end', call_id: VC.id }).catch(() => {});
   clearInterval(VC.polling); VC.polling = null; vcTone(false);
   try { VC.pc && VC.pc.close(); } catch (e) {} VC.pc = null; VC.id = null; VC.incoming = null;
@@ -2141,9 +2149,13 @@ $('#vc-flip').addEventListener('click', async () => {
     $('#vc-local').style.transform = VC.facing === 'user' ? 'scaleX(-1)' : 'none'; } catch (e) {}
 });
 $('#vc-accept').addEventListener('click', vcAnswer);
+$('#vc-spk').addEventListener('click', () => vcSpeaker(!VC.spk));
 $('#vc-decline').addEventListener('click', () => { const inc = VC.incoming; $('#vc-ring').classList.add('hidden'); vcTone(false); VC.incoming = null; if (inc) vcCall({ action: 'end', call_id: inc.call_id }).catch(() => {}); });
 // listen for incoming calls while the app is open (every 4 seconds, only when the screen is visible)
-setInterval(async () => {
+// "उठाएँ" on the Android app's ring opens sadasneha.in/?answer=<call>: answer it at once
+const params0 = (k) => { try { return new URLSearchParams(location.search).get(k) || ''; } catch (e) { return ''; } };
+VC.autoAnswer = /^[A-Za-z0-9]{6,40}$/.test(params0('answer')) ? params0('answer') : '';
+async function vcPollIn() {
   // ringing here: stop when the caller gives up or another phone of the family picked it up
   if (VC.incoming && !VC.pc) { const inc = VC.incoming; let q; try { q = await vcCall({ action: 'poll', call_id: inc.call_id }); } catch (e) { return; }
     const st = q && q.call && q.call.status; if (VC.incoming === inc && st && st !== 'ringing') { $('#vc-ring').classList.add('hidden'); vcTone(false); VC.incoming = null; } return; }
@@ -2159,7 +2171,10 @@ setInterval(async () => {
   $('#vc-ring').classList.remove('hidden'); vcTone(true);
   try { navigator.vibrate && navigator.vibrate([400, 200, 400, 200, 400]); } catch (e) {}
   setTimeout(() => { if (VC.incoming === inc && !VC.pc) { $('#vc-ring').classList.add('hidden'); vcTone(false); VC.incoming = null; } }, 45000);
-}, 4000);
+  if (VC.autoAnswer && VC.autoAnswer === inc.call_id) { VC.autoAnswer = ''; vcAnswer(); }
+}
+setInterval(vcPollIn, 4000);
+if (VC.autoAnswer) { setTimeout(vcPollIn, 400); setTimeout(vcPollIn, 1500); }
 // the list of people to call, wherever it appears
 // ---- People to call, like a phone's call list: one scrolling list; tap a name and the call starts ----
 const AV_COLORS = ['#ea580c', '#16a34a', '#2563eb', '#9333ea', '#db2777', '#0d9488', '#ca8a04', '#dc2626'];
@@ -2206,10 +2221,21 @@ $('#t-people').addEventListener('click', () => {
 
 // ---- Phone notifications: calls ring even when the app is closed (web push; Android Chrome, iPhone from the home screen) ----
 API.push = API_BASE + '/app-push';
-const pushOK = () => 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
+const pushOK = () => NATIVE || ('serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window);
 function pushB64(s) { const p = '='.repeat((4 - s.length % 4) % 4); const b = atob((s + p).replace(/-/g, '+').replace(/_/g, '/')); return Uint8Array.from(b, (c) => c.charCodeAt(0)); }
 async function pushOn(quiet) {
   if (!pushOK() || !vcAuth()) return false;
+  if (NATIVE) {   // the Android app: Firebase call alerts that ring like a phone call
+    try {
+      const c = await (await fetch(API.push, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ action: 'fcm_config' }) })).json();
+      if (!c.ok) return false;
+      const t = await SN.registerPush({ firebase: c.firebase, auth: vcAuth(), api: API_BASE });
+      const r = await (await fetch(API.push, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ action: 'subscribe', ...vcAuth(), fcm: t.token }) })).json();
+      if (r.ok) store.set('gs_push', vcAuth().code || vcAuth().key || 'yes');
+      store.set('gs_fullscreen', t.fullScreen ? 'yes' : 'no');
+      return !!r.ok;
+    } catch (e) { return false; }
+  }
   try {
     if (Notification.permission === 'denied') return false;
     if (Notification.permission !== 'granted') { if (quiet) return false; if ((await Notification.requestPermission()) !== 'granted') return false; }
@@ -2225,6 +2251,14 @@ async function pushOn(quiet) {
 }
 function pushCard() {
   document.querySelectorAll('.push-card').forEach((box) => {
+    if (NATIVE) {   // the Android app: on by itself; Android 14 asks once for full-screen calls
+      const fs = store.get('gs_fullscreen') !== 'no';
+      box.innerHTML = store.get('gs_push') ? (fs ? '<p style="margin:0">📞 ' + T('कॉल आने पर फ़ोन की तरह घंटी बजेगी ✓', 'Calls will ring like a phone call ✓') + '</p>'
+        : `<button class="btn warm" type="button">📞 ${T('लॉक फ़ोन पर भी पूरी स्क्रीन पर घंटी – अनुमति दें', 'Ring full screen on a locked phone – allow')}</button>`)
+        : `<button class="btn warm" type="button">📞 ${T('कॉल की घंटी चालू करें', 'Turn on call ringing')}</button>`;
+      const b = box.querySelector('button'); if (b) b.onclick = async () => { if (store.get('gs_push') && !fs) { try { await SN.openCallSettings(); } catch (e) {} setTimeout(() => { pushOn(true).then(pushCard); }, 4000); } else { await pushOn(false); pushCard(); } };
+      return;
+    }
     const on = pushOK() && Notification.permission === 'granted' && store.get('gs_push');
     if (!pushOK()) { box.innerHTML = '<p class="muted" style="margin:0">' + T('इस फ़ोन पर बंद ऐप में घंटी नहीं बज सकती। iPhone पर: शेयर → "Add to Home Screen" करके वहीं से खोलिए।', 'Calls cannot ring with the app closed on this phone. On iPhone: Share → "Add to Home Screen", then open it from there.') + '</p>'; return; }
     box.innerHTML = on ? '<p style="margin:0">🔔 ' + T('ऐप बंद होने पर भी कॉल की घंटी बजेगी ✓', 'Calls will ring even when the app is closed ✓') + '</p>'
@@ -2234,7 +2268,7 @@ function pushCard() {
   });
 }
 // keep this phone's subscription fresh (quietly, only if permission was already given)
-setTimeout(() => { if (pushOK() && Notification.permission === 'granted') pushOn(true).then(pushCard); }, 4000);
+setTimeout(() => { if (NATIVE || (pushOK() && Notification.permission === 'granted')) pushOn(true).then(pushCard); }, 4000);
 
 
 // ---- Family chat: text, voice notes, photos, files (kept on our own server, for this family only) ----
