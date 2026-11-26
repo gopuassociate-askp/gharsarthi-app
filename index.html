@@ -2006,9 +2006,11 @@ const VC = { pc: null, local: null, id: null, polling: null, ringPoll: null, inc
 let ICE = [{ urls: ['stun:stun.l.google.com:19302', 'stun:stun1.l.google.com:19302'] }, { urls: 'stun:stun.cloudflare.com:3478' }];
 // ?relay=1 forces every call through our relay (to test it)
 const ICE_POLICY = new URLSearchParams(location.search).get('relay') === '1' ? 'relay' : 'all';
+// this phone's own id: calls know which phone rang and which picked up (two phones of one person can call each other)
+const DEV = (() => { try { let d = localStorage.getItem('gs_dev'); if (!/^[a-z0-9]{8,24}$/.test(d || '')) { d = Math.random().toString(36).slice(2, 10) + Date.now().toString(36); localStorage.setItem('gs_dev', d); } return d; } catch (e) { return ''; } })();
 function vcAuth() {
-  if (store.get('gs_code')) return { code: store.get('gs_code'), as: store.get('gs_role') === 'elder' ? 'elder' : 'family' };
-  if (store.get('gs_member')) return { key: store.get('gs_member') };
+  if (store.get('gs_code')) return { code: store.get('gs_code'), as: store.get('gs_role') === 'elder' ? 'elder' : 'family', dev: DEV };
+  if (store.get('gs_member')) return { key: store.get('gs_member'), dev: DEV };
   return null;
 }
 const vcCall = async (body) => { const a = vcAuth(); if (!a) return { ok: false }; return (await fetch(API.call, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ ...a, ...body }) })).json(); };
@@ -2056,6 +2058,7 @@ async function vcStart(party, name, video = true) {
   let r; try { r = await vcCall({ action: 'start', to: party, offer: pc.localDescription.sdp, video }); } catch (e) { r = { ok: false }; }
   if (!r.ok) { vcState(r.why === 'busy' ? 'वे अभी दूसरी कॉल पर हैं' : 'कॉल नहीं लग पाई', r.why === 'busy' ? 'They are on another call' : 'The call could not start'); setTimeout(vcHangup, 2500); return; }
   VC.id = r.call_id; vcTone(true);
+  if (r.everyone) vcState('घंटी जा रही है… (उनका फ़ोन अभी जुड़ा नहीं, इसलिए परिवार के बाक़ी फ़ोनों पर भी)', 'Ringing… (their phone is not connected now, so the other family phones ring too)');
   // no answer for a while: most often their phone does not have the app opened from their own link yet
   const vcHintAt = Date.now() + 20000;
   VC.hint = setInterval(() => { if (!VC.pc || (VC.pc && VC.pc.currentRemoteDescription)) { clearInterval(VC.hint); return; }
@@ -2107,6 +2110,9 @@ $('#vc-accept').addEventListener('click', vcAnswer);
 $('#vc-decline').addEventListener('click', () => { const inc = VC.incoming; $('#vc-ring').classList.add('hidden'); vcTone(false); VC.incoming = null; if (inc) vcCall({ action: 'end', call_id: inc.call_id }).catch(() => {}); });
 // listen for incoming calls while the app is open (every 4 seconds, only when the screen is visible)
 setInterval(async () => {
+  // ringing here: stop when the caller gives up or another phone of the family picked it up
+  if (VC.incoming && !VC.pc) { const inc = VC.incoming; let q; try { q = await vcCall({ action: 'poll', call_id: inc.call_id }); } catch (e) { return; }
+    const st = q && q.call && q.call.status; if (VC.incoming === inc && st && st !== 'ringing') { $('#vc-ring').classList.add('hidden'); vcTone(false); VC.incoming = null; } return; }
   if (document.hidden || VC.pc || VC.incoming || !vcAuth() || !window.RTCPeerConnection) return;
   let p; try { p = await vcCall({ action: 'poll' }); } catch (e) { return; }
   const inc = p && p.incoming && p.incoming[0];
