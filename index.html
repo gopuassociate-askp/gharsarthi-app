@@ -108,6 +108,12 @@
   .radio-row { display: block; width: 100%; text-align: left; border: 0; border-bottom: 1px solid var(--line); background: none; padding: 12px 6px; font: inherit; font-size: 17px; cursor: pointer; }
   .radio-now { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; background: #fff7ed; border: 2px solid var(--brand-2); border-radius: 16px; padding: 12px; margin-bottom: 10px; }
   .radio-now b { flex: 1; font-size: 19px; } .radio-now span { width: 100%; font-size: 14px; color: var(--muted); order: 3; } .radio-now .btn { width: auto; margin: 0; padding: 10px 16px; }
+  .fs { position: fixed !important; inset: 0; z-index: 80; background: #000; margin: 0 !important; border-radius: 0 !important; display: flex !important; flex-direction: column; justify-content: center; padding: 0 !important; }
+  .fs iframe, .fs #song-frame, .fs #song-frame iframe { width: 100% !important; height: auto; aspect-ratio: 16 / 9; max-height: 100vh; border-radius: 0 !important; }
+  .fs-back { position: absolute; top: 12px; left: 12px; z-index: 81; border: 0; border-radius: 999px; padding: 12px 20px; font: inherit; font-size: 20px; font-weight: 800; background: #fff; color: #7c2d12; box-shadow: 0 4px 14px rgba(0,0,0,.4); cursor: pointer; display: none; }
+  .fs .fs-back { display: block; } .fs .fs-hide { display: none !important; }
+  .fs > .btn { width: auto !important; margin: 10px 16px !important; } .fs > p, .fs > p a { color: #ddd !important; text-align: center; }
+  .fs-go { width: auto !important; margin: 8px auto 0 !important; display: block; }
   .tv-player iframe { width: 100%; aspect-ratio: 16 / 9; border: 0; border-radius: 14px; background: #000; }
   #v-chat { display: flex; flex-direction: column; height: calc(100svh - 150px); }
   #v-chat.hidden { display: none; }
@@ -857,7 +863,8 @@
       </div>
       <div id="song-box" class="song hidden"><p id="song-title" class="song-title"></p><div id="song-notes" class="notes hidden" aria-hidden="true"><span>♪</span><span>♫</span><span>♩</span><span>♬</span><span>♪</span><p>गाना ढूँढ रही हूँ… / Finding your song…</p></div><div id="song-frame"></div>
         <button class="btn primary hidden" id="song-tap" type="button">▶ <span data-en="Play the song">गाना चलाएँ</span></button>
-        <button class="btn secondary" id="song-stop" type="button">⏹ <span data-en="Stop the song">गाना बंद करें</span></button></div>
+        <button class="btn secondary fs-go fs-hide" id="song-big" type="button">⛶ <span data-en="Full screen">पूरी स्क्रीन</span></button>
+        <button class="btn secondary fs-hide" id="song-stop" type="button">⏹ <span data-en="Stop the song">गाना बंद करें</span></button></div>
       <button type="button" class="linkbtn" id="talk-cc" style="font-size:14px"></button>
       <div id="talk-log" class="talk-log hidden"></div>
       <p class="muted" style="font-size:13px"><span data-en="Nothing is recorded or saved. With the camera on, Sneha sees a small picture only to understand your mood.">कुछ भी रिकॉर्ड या सेव नहीं होता। कैमरा चालू हो तो स्नेहा सिर्फ़ आपका मन समझने के लिए एक छोटी तस्वीर देखती है।</span>
@@ -1200,12 +1207,20 @@ const store = {
 
 // the family's page in four tabs: आज (today), बात (talk), परिवार (family), खाता (account)
 let HOMETAB = 'today';
+const NAV = { skip: false };
+window.addEventListener('popstate', (e) => {
+  const st = e.state || {};
+  if (FS && !st.fs) { fsClose(true); return; }
+  if (st.view) { NAV.skip = true; try { show(st.view); } finally { NAV.skip = false; } }
+});
 function homeTab(t) {
   HOMETAB = t;
   document.querySelectorAll('#v-home > .card, #v-home > details').forEach((c) => c.classList.toggle('tab-off', (c.dataset.tab || 'today') !== t));
   document.querySelectorAll('nav button').forEach((b) => b.classList.toggle('on', b.dataset.tab === t));
 }
 function show(view) {
+  if (FS) fsClose(true);
+  if (!NAV.skip) { try { const cur = history.state && history.state.view; if (!cur) history.replaceState({ view }, ''); else if (cur !== view) history.pushState({ view }, ''); } catch (e) {} }
   document.querySelectorAll('.view').forEach((v) => v.classList.add('hidden'));
   $('#v-' + view).classList.remove('hidden');
   const tabbed = ['home', 'pay', 'meds', 'sneha', 'help'].includes(view);
@@ -2321,6 +2336,25 @@ function likesRow() {
   box.querySelectorAll('[data-like]').forEach((b) => { b.onclick = () => cmdOpen(top[+b.dataset.like].open || {}); });
 }
 
+// ---- Full screen for TV, songs and films, with a big back button; the phone's back button also comes back here ----
+var FS = null;
+function fsOpen(el) {
+  if (!el || FS === el) return;
+  if (FS) fsClose(true);
+  FS = el; el.classList.add('fs');
+  if (!el.querySelector('.fs-back')) { const b = document.createElement('button'); b.type = 'button'; b.className = 'fs-back'; b.innerHTML = '← ' + T('वापस', 'Back'); b.onclick = () => history.back(); el.prepend(b); }
+  try { history.pushState({ fs: true, view: (history.state && history.state.view) || '' }, ''); } catch (e) {}
+  try { if (el.requestFullscreen && navigator.userActivation && navigator.userActivation.isActive) el.requestFullscreen().then(() => { try { screen.orientation.lock('landscape').catch(() => {}); } catch (e) {} }).catch(() => {}); } catch (e) {}
+}
+function fsClose(silent) {
+  const el = FS; if (!el) return; FS = null; el.classList.remove('fs');
+  try { if (document.fullscreenElement) document.exitFullscreen().catch(() => {}); } catch (e) {}
+  try { screen.orientation.unlock(); } catch (e) {}
+  if (!silent && history.state && history.state.fs) { try { history.back(); } catch (e) {} }
+}
+// leaving full screen with the phone's own gesture: keep our page as it was
+document.addEventListener('fullscreenchange', () => { if (!document.fullscreenElement && FS && history.state && history.state.fs) history.back(); });
+
 // ---- TV: one category at a time (news with the family's own state first, cricket, shows, bhajan, old serials) ----
 let TVCUR = 'news';
 const TV_CATS = [['news', '📰', 'ख़बरें', 'News'], ['cricket', '🏏', 'क्रिकेट', 'Cricket'], ['shows', '😄', 'धारावाहिक', 'Shows'], ['movies', '🎬', 'पुरानी फ़िल्में', 'Old films'], ['bhakti', '🙏', 'भजन', 'Bhajan'], ['old', '📼', 'पुराने धारावाहिक', 'Old serials']];
@@ -2347,7 +2381,7 @@ function tvPlay(c, b, live) {
     (live ? `<button class="btn secondary" type="button" id="tv-recent" style="margin-top:8px">▶ ${T('लाइव नहीं चल रहा? पिछले कार्यक्रम देखें', 'Not live now? Watch recent programmes')}</button>` : '') +
     `<p class="muted" style="font-size:13px;margin:4px 0 0">${T('अगर यहाँ न चले:', 'If it does not play here:')} <a href="${c.list ? 'https://www.youtube.com/playlist?list=' + encodeURIComponent(c.list) : 'https://www.youtube.com/channel/' + encodeURIComponent(c.id) + (live ? '/live' : '/videos')}" target="_blank" rel="noopener">${T('YouTube पर खोलें', 'open in YouTube')}</a></p>`;
   if (live) $('#tv-recent').onclick = () => tvPlay(c, b, false);
-  p.classList.remove('hidden'); p.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  p.classList.remove('hidden'); fsOpen(p);
 }
 function tvCat(cat) {
   TVCUR = cat;
@@ -2442,7 +2476,7 @@ $('#t-songs').addEventListener('click', () => {
   $('#e-panel').querySelectorAll('[data-list]').forEach((b) => { b.onclick = () => { const x = lists[+b.dataset.list]; radioStop(); likeIt('songs', x.list, x.n, { open: { what: 'songs', name: x.n } });
     $('#e-panel').querySelectorAll('[data-list]').forEach((o) => o.classList.toggle('on', o === b));
     const pl = $('#e-song-player'); pl.innerHTML = `<iframe src="https://www.youtube.com/embed/videoseries?list=${encodeURIComponent(x.list)}&autoplay=1&playsinline=1&rel=0" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen title="${esc(x.n)}"></iframe>`;
-    pl.classList.remove('hidden'); pl.scrollIntoView({ behavior: 'smooth', block: 'start' }); }; });
+    pl.classList.remove('hidden'); fsOpen(pl); }; });
 });
 
 $('#t-msgs').addEventListener('click', () => {
@@ -2706,6 +2740,9 @@ function talkMime() {
 // Talking over Sneha: while she speaks, the microphone listens for the elder's own voice (the phone
 // removes her voice by echo cancellation). Speech for about half a second stops her, and she listens.
 async function talkBargeStart() {
+  // phones: opening the mic while she speaks switches Android into call mode and holds her voice back (lips ran ~3 s ahead);
+  // there the elder stops her with ⏹ instead. Computers keep interrupting by voice.
+  if (/Android|iPhone|iPad/i.test(navigator.userAgent)) return;
   if (TALK.barge || store.get('gs_media') !== 'granted' || !TALK.open) return;
   TALK.barge = { pending: true };
   try {
@@ -2984,6 +3021,7 @@ async function talkSend(blob, typed) {
   finally { TALK.busy = false; $('#talk-mic').disabled = false; }
 }
 $('#talk-mic').addEventListener('click', () => talkListen());
+$('#song-big').addEventListener('click', () => fsOpen($('#song-box')));
 $('#tb-mic').addEventListener('click', () => talkListen());
 $('#tb-stop').addEventListener('click', () => { talkBargeStop(); talkInterrupt(); try { if (TALK.rec && TALK.rec.state === 'recording') { TALK.tapStop = true; TALK.rec.stop(); } } catch (e) {} songStop(); talkState('रुक गई। बटन दबाकर बोलिए', 'Stopped. Press the button and speak'); });
 $('#tb-cam').addEventListener('click', () => $('#talk-cam').click());
