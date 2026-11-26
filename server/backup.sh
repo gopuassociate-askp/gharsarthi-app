@@ -7,6 +7,8 @@ mkdir -p backups
 f="backups/n8n-$(date +%Y%m%d-%H%M).sql.gz"
 docker compose exec -T postgres pg_dump -U n8n n8n | gzip > "$f"
 find backups -name 'n8n-*.sql.gz' -mtime +14 -delete
+# family chat files older than 90 days are removed every night (as the privacy notice says)
+docker compose exec -T n8n find /home/node/.n8n-files -maxdepth 1 -name 'chat_*' -mtime +90 -delete || true
 # family chat files: one copy a week (Sundays), the last two kept
 if [ "$(date +%u)" = "7" ]; then
   docker compose exec -T n8n tar -cf - -C /home/node/.n8n-files . > "backups/chatfiles-$(date +%Y%m%d).tar" || true
