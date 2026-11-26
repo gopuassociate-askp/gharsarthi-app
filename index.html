@@ -131,6 +131,16 @@
   .pp-row { display: flex; align-items: center; gap: 8px; padding: 10px 0; border-bottom: 1px solid var(--line); }
   .pp-row b { flex: 1; font-size: 19px; } .pp-row a { width: 58px; text-align: center; text-decoration: none; padding: 12px 0; border-radius: 14px; font-size: 22px; }
   .pp-row .tel { background: #16a34a; color: #fff; } .pp-row .wa { background: #dcfce7; } .pp-row .rm { border: 0; background: none; color: var(--muted); font-size: 18px; cursor: pointer; }
+  .pl-mode { display: flex; gap: 6px; background: #fff7ed; border-radius: 999px; padding: 4px; margin: 4px 0 10px; }
+  .pl-mode button { flex: 1; border: 0; border-radius: 999px; padding: 10px; font: inherit; font-size: 17px; font-weight: 800; background: none; color: #7c2d12; cursor: pointer; }
+  .pl-mode button.on { background: #15803d; color: #fff; }
+  .pl-head { margin: 12px 0 2px; font-size: 14px; font-weight: 700; color: var(--muted); }
+  .pl-row { display: flex; align-items: center; gap: 14px; width: 100%; padding: 12px 4px; border: 0; border-bottom: 1px solid var(--line); background: none; font: inherit; color: inherit; text-align: left; cursor: pointer; }
+  .pl-row:active { background: #fff7ed; }
+  .av { flex: 0 0 auto; width: 54px; height: 54px; border-radius: 50%; color: #fff; display: inline-flex; align-items: center; justify-content: center; font-size: 26px; font-weight: 800; }
+  .av.big { width: 120px; height: 120px; font-size: 56px; border: 4px solid rgba(255,255,255,.6); animation: breathe 1.6s ease-in-out infinite; }
+  .pl-txt { flex: 1; min-width: 0; display: flex; flex-direction: column; } .pl-txt b { font-size: 20px; } .pl-txt small { font-size: 14px; color: var(--muted); }
+  .pl-ic { font-size: 26px; flex: 0 0 auto; width: 52px; height: 52px; border-radius: 50%; background: #dcfce7; display: inline-flex; align-items: center; justify-content: center; }
   .vc-row { display: flex; align-items: center; gap: 8px; padding: 6px 0; border-bottom: 1px solid var(--line); }
   .vc-row b { flex: 1; font-size: 18px; } .vc-row .btn { width: 64px; margin: 0; padding: 12px 0; font-size: 22px; }
   .vc.audio #vc-remote { visibility: hidden; } .vc.audio::before { content: ''; position: absolute; left: 50%; top: 38%; width: 150px; height: 150px; margin: -75px 0 0 -75px; border-radius: 50%; background: url(sneha.jpg) center/cover; opacity: .9; border: 4px solid #f59e0b; }
@@ -145,8 +155,14 @@
   .vc-ring { position: fixed; inset: 0; z-index: 61; background: rgba(124,45,18,.94); color: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px; text-align: center; padding: 24px; }
   .vc-ring img { width: 90px; height: 90px; border-radius: 50%; border: 4px solid #f59e0b; animation: breathe 1.6s ease-in-out infinite; }
   .vc-ring p { font-size: 24px; font-weight: 800; margin: 0; }
-  .vc-ring-btns { display: flex; gap: 18px; } .vc-ring-btns button { border: 0; border-radius: 999px; padding: 18px 26px; font: inherit; font-size: 19px; font-weight: 800; color: #fff; cursor: pointer; }
-  .vc-ring-btns .yes { background: #16a34a; } .vc-ring-btns .no { background: #dc2626; }
+  .vc-ring { background: linear-gradient(180deg, #14532d, #052e16) !important; justify-content: flex-start !important; gap: 14px !important; padding: 80px 24px 60px !important; }
+  .vc-ring-btns { margin-top: auto; }
+  .vc-ring-btns .rb svg { width: 42px; height: 42px; fill: #fff; }
+  .vc-ring-sub { font-size: 17px !important; font-weight: 500 !important; opacity: .85; margin-top: -8px !important; }
+  .vc-ring-btns { display: flex; gap: 70px; } .vc-ring-btns button { border: 0; background: none !important; font: inherit; font-size: 17px; font-weight: 700; color: #fff; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+  .vc-ring-btns .rb { width: 84px; height: 84px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 40px; }
+  .vc-ring-btns .yes .rb { background: #22c55e; animation: breathe 1.2s ease-in-out infinite; } .vc-ring-btns .no .rb { background: #ef4444; transform: rotate(135deg); }
+
   .talk-sym { display: flex; align-items: center; justify-content: center; gap: 14px; min-height: 74px; margin: 10px 0; border-radius: 20px; padding: 10px 16px; background: #1d4ed8; color: #fff; transition: background .25s; }
   .talk-sym .ico { font-size: 44px; line-height: 1; display: inline-block; }
   .talk-sym .lbl { font-size: 24px; font-weight: 800; text-align: center; max-width: 320px; letter-spacing: .01em; }
@@ -1013,11 +1029,12 @@
   </div>
 </div>
 <div id="vc-ring" class="vc-ring hidden" role="alertdialog">
-  <img src="sneha.jpg" alt="" width="90" height="90">
+  <span id="vc-ring-av"></span>
   <p id="vc-ring-text">—</p>
+  <p id="vc-ring-sub" class="vc-ring-sub"></p>
   <div class="vc-ring-btns">
-    <button type="button" id="vc-decline" class="no">📵 <span data-en="Decline">मना करें</span></button>
-    <button type="button" id="vc-accept" class="yes">📹 <span data-en="Answer">उठाएँ</span></button>
+    <button type="button" id="vc-decline" class="no"><span class="rb"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25 11.4 11.4 0 0 0 3.6.57 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.57a1 1 0 0 1-.25 1z"/></svg></span><span data-en="Decline">काटें</span></button>
+    <button type="button" id="vc-accept" class="yes"><span class="rb"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25 11.4 11.4 0 0 0 3.6.57 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.57a1 1 0 0 1-.25 1z"/></svg></span><span data-en="Answer">उठाएँ</span></button>
   </div>
 </div>
 <div id="talk-bar" class="talk-bar hidden" role="toolbar" aria-label="बातचीत के बटन / Talk controls">
@@ -2119,31 +2136,55 @@ setInterval(async () => {
   if (!inc || VC.pc) return;
   if (p.ice) ICE = p.ice;
   VC.incoming = inc;
-  $('#vc-ring-text').textContent = inc.video ? T(`📹 ${inc.from} वीडियो कॉल कर रहे हैं`, `📹 ${inc.from} is video calling`) : T(`📞 ${inc.from} कॉल कर रहे हैं`, `📞 ${inc.from} is calling`);
+  $('#vc-ring-av').innerHTML = avatar(inc.from, 'big');
+  $('#vc-ring-text').textContent = inc.from;
+  $('#vc-ring-sub').textContent = inc.video ? T('📹 सदा स्नेहा वीडियो कॉल', '📹 SadaSneha video call') : T('📞 सदा स्नेहा आवाज़ कॉल', '📞 SadaSneha voice call');
   $('#vc-ring').classList.remove('hidden'); vcTone(true);
   try { navigator.vibrate && navigator.vibrate([400, 200, 400, 200, 400]); } catch (e) {}
   setTimeout(() => { if (VC.incoming === inc && !VC.pc) { $('#vc-ring').classList.add('hidden'); vcTone(false); VC.incoming = null; } }, 45000);
 }, 4000);
 // the list of people to call, wherever it appears
-async function vcList(box) {
+// ---- People to call, like a phone's call list: one scrolling list; tap a name and the call starts ----
+const AV_COLORS = ['#ea580c', '#16a34a', '#2563eb', '#9333ea', '#db2777', '#0d9488', '#ca8a04', '#dc2626'];
+const avColor = (n) => AV_COLORS[[...String(n || '')].reduce((a, c) => a + c.charCodeAt(0), 0) % AV_COLORS.length];
+const avLetter = (n) => (String(n || '?').trim().match(/^[^\s][ऀ-ःऺ-ॏॕ-ॗॢॣ]*/) || ['?'])[0];
+const avatar = (n, cls) => `<span class="av ${cls || ''}" style="background:${avColor(n)}">${esc(avLetter(n))}</span>`;
+const vcMode = () => (store.get('gs_callmode') === 'audio' ? 'audio' : 'video');
+async function vcList(box, opts) {
   if (!box) return;
+  opts = opts || {};
   if (!window.RTCPeerConnection) { box.innerHTML = '<p class="muted">' + T('इस फ़ोन का ब्राउज़र वीडियो कॉल नहीं चलाता। Chrome खोलिए।', 'This browser cannot make video calls. Please use Chrome.') + '</p>'; return; }
+  box.innerHTML = '<p class="muted">…</p>';
   let r; try { r = await vcCall({ action: 'parties' }); } catch (e) { r = null; }
   if (r && r.ice) ICE = r.ice;
   const ps = (r && r.parties) || [];
-  box.innerHTML = ps.length ? ps.map((p, i) => `<div class="vc-row"><b>${esc(p.name)}${p.relation ? ' <small class="muted">(' + esc(p.relation) + ')</small>' : ''}</b>` +
-    `<button class="btn secondary" type="button" data-vc="${i}" data-av="audio" title="${T('आवाज़ कॉल', 'Voice call')}">📞</button><button class="btn primary" type="button" data-vc="${i}" data-av="video" title="${T('वीडियो कॉल', 'Video call')}">📹</button></div>`).join('')
-    : '<p class="muted">' + store.get('gs_role') === 'elder' ? T('अभी कोई नहीं जुड़ा। घर वाले अपने ऐप से लोगों को जोड़ेंगे।', 'Nobody is added yet; your family will add people from their app.') : T('अभी कोई नहीं जिसे कॉल करें। "परिवार और देखभाल करने वाले" में घर वालों को जोड़िए।', 'Nobody to call yet. Add family under "Family & caretakers".') + '</p>';
-  box.querySelectorAll('[data-vc]').forEach((b) => { b.onclick = () => { const p = ps[+b.dataset.vc]; vcStart(p.party, p.name, b.dataset.av !== 'audio'); }; });
+  // the elder's phone also lists numbers to dial from the SIM: family numbers and "my people" (doctor, auto…)
+  let sims = [];
+  if (opts.sim) {
+    const fam = ((ELDER && ELDER.family.calls) || []).map((c) => ({ name: c.name, relation: c.relation || '', phone: c.phone }));
+    const cs = (await contactsGet()).map((c) => ({ name: c.name, relation: c.relation || '', phone: c.phone, kind: kindOf(c) }));
+    sims = fam.concat(cs);
+  }
+  const mode = vcMode();
+  const row = (name, sub, tag, icon, attr) => `<button type="button" class="pl-row" ${attr}>${avatar(name)}<span class="pl-txt"><b>${esc(name)}</b><small>${sub}</small></span><span class="pl-ic">${icon}</span></button>`;
+  box.innerHTML =
+    `<div class="pl-mode" role="radiogroup"><button type="button" data-mode="video" class="${mode === 'video' ? 'on' : ''}">📹 ${T('वीडियो', 'Video')}</button><button type="button" data-mode="audio" class="${mode === 'audio' ? 'on' : ''}">📞 ${T('सिर्फ़ आवाज़', 'Voice only')}</button></div>` +
+    (ps.length ? `<p class="pl-head">${T('ऐप से मुफ़्त कॉल – नाम दबाइए', 'Free calls in the app – tap a name')}</p>` +
+      ps.map((p, i) => row(p.name, esc(p.relation || '') + (p.relation ? ' · ' : '') + (mode === 'video' ? T('वीडियो कॉल', 'video call') : T('आवाज़ कॉल', 'voice call')), '', mode === 'video' ? '📹' : '📞', `data-vc="${i}"`)).join('')
+      : `<p class="muted">${store.get('gs_role') === 'elder' ? T('अभी कोई नहीं जुड़ा। घर वाले अपने ऐप से लोगों को जोड़ेंगे।', 'Nobody is added yet; your family will add people from their app.') : T('अभी कोई नहीं जिसे कॉल करें। "परिवार" में घर वालों को जोड़िए।', 'Nobody to call yet. Add family under "Family".')}</p>`) +
+    (sims.length ? `<p class="pl-head">${T('फ़ोन से (सिम) – नाम दबाइए', 'Phone (SIM) – tap a name')}</p>` +
+      sims.map((c, i) => row(c.name, esc(c.relation || '') + (c.relation ? ' · ' : '') + esc(c.phone), '', ((PP_KINDS.find((k) => k[0] === c.kind) || [])[1]) || '☎️', `data-sim="${i}"`)).join('') : '') +
+    (opts.sim ? `<button class="btn secondary" type="button" data-addpeople style="margin-top:12px">➕ ${T('नंबर जोड़ें (डॉक्टर, ऑटो, दोस्त…)', 'Add a number (doctor, auto, friend…)')}</button>` : '');
+  box.querySelectorAll('[data-mode]').forEach((b) => { b.onclick = () => { store.set('gs_callmode', b.dataset.mode); vcList(box, opts); }; });
+  box.querySelectorAll('[data-vc]').forEach((b) => { b.onclick = () => { const p = ps[+b.dataset.vc]; vcStart(p.party, p.name, vcMode() === 'video'); }; });
+  box.querySelectorAll('[data-sim]').forEach((b) => { b.onclick = () => { const c = sims[+b.dataset.sim]; location.href = 'tel:' + c.phone; }; });
+  const add = box.querySelector('[data-addpeople]'); if (add) add.onclick = () => show('people');
 }
 $('#t-people').addEventListener('click', () => {
-  const calls = (ELDER && ELDER.family.calls) || [];
-  elderPanel('<h2>📞 ' + T('किससे बात करें?', 'Whom to talk to?') + '</h2><p class="muted" style="margin:0 0 6px">' + T('📹 वीडियो या 📞 आवाज़ – ऐप से, मुफ़्त', '📹 video or 📞 voice – free, in the app') + '</p><div class="vc-list"></div>' +
-    (calls.length ? '<p style="margin:14px 0 4px"><b>☎️ ' + T('सिम से फ़ोन', 'Phone call (SIM)') + '</b></p>' + calls.map((c) =>
-      `<a class="btn secondary" style="margin:6px 0;text-decoration:none;text-align:center" href="tel:${esc(c.phone)}">📞 ${esc(c.name)}${c.relation ? ' (' + esc(c.relation) + ')' : ''}</a>`).join('') : '') +
-    `<button class="btn secondary" type="button" id="e-mypeople" style="margin-top:14px">📒 ${T('दोस्तों और दूसरों के नंबर', 'Friends and other numbers')}</button>`);
-  vcList($('#e-panel .vc-list')); $('#e-mypeople').onclick = () => show('people');
+  elderPanel('<h2>📞 ' + T('किससे बात करें?', 'Whom to talk to?') + '</h2><div class="vc-list"></div>');
+  vcList($('#e-panel .vc-list'), { sim: true });
 });
+
 
 
 // ---- Phone notifications: calls ring even when the app is closed (web push; Android Chrome, iPhone from the home screen) ----
