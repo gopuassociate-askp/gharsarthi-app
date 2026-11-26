@@ -1404,6 +1404,9 @@ function render(j) {
   const f = j.family; try { talkLangFrom(f.language); } catch (e) {}
   const [cls, label, text] = STATUS[f.status] || ['wait', f.status, ''];
   $('#h-elder').textContent = f.address_as || f.elder_name || '—';
+  // which phone is this? (testers and families with two phones mix this up)
+  if (!$('#h-me')) $('#next-call').insertAdjacentHTML('beforebegin', '<p id="h-me" style="font-size:14px;margin:2px 0 6px;opacity:.9"></p>');
+  $('#h-me').textContent = T(`📱 यह फ़ोन: परिवार – ${f.family_name || 'आप'}`, `📱 This phone: family – ${f.family_name || 'you'}`);
   const pill = $('#h-status'); pill.className = 'pill ' + cls; pill.textContent = label;
   $('#h-status-text').textContent = f.status === 'Active' ? '' : text;
   $('#t-breakfast').textContent = f.times.breakfast || '—';
@@ -2053,6 +2056,10 @@ async function vcStart(party, name, video = true) {
   let r; try { r = await vcCall({ action: 'start', to: party, offer: pc.localDescription.sdp, video }); } catch (e) { r = { ok: false }; }
   if (!r.ok) { vcState(r.why === 'busy' ? 'वे अभी दूसरी कॉल पर हैं' : 'कॉल नहीं लग पाई', r.why === 'busy' ? 'They are on another call' : 'The call could not start'); setTimeout(vcHangup, 2500); return; }
   VC.id = r.call_id; vcTone(true);
+  // no answer for a while: most often their phone does not have the app opened from their own link yet
+  const vcHintAt = Date.now() + 20000;
+  VC.hint = setInterval(() => { if (!VC.pc || (VC.pc && VC.pc.currentRemoteDescription)) { clearInterval(VC.hint); return; }
+    if (Date.now() > vcHintAt) { clearInterval(VC.hint); vcState('घंटी जा रही है… उनके फ़ोन पर शायद ऐप उनके अपने लिंक से नहीं खुला, या 🔔 चालू नहीं है।', 'Ringing… their phone may not have the app opened from their own link, or 🔔 is off.'); } }, 2000);
   VC.polling = setInterval(async () => {
     let p; try { p = await vcCall({ action: 'poll', call_id: VC.id }); } catch (e) { return; }
     const c = p && p.call; if (!c || !VC.pc) return;
@@ -2452,6 +2459,7 @@ $('#e-switch').addEventListener('click', () => { store.set('gs_role', 'family');
 let ELDER = null;
 async function loadElder() {
   const d = new Date(); $('#e-date').textContent = d.toLocaleDateString(LANG === 'en' ? 'en-IN' : 'hi-IN', { weekday: 'long', day: 'numeric', month: 'long' });
+  try { $('#e-date').textContent += ' · ' + T('📱 यह फ़ोन: ', '📱 This phone: ') + ((ELDER && ELDER.family && (ELDER.family.address_as || ELDER.family.elder_name)) || ''); } catch (e) {}
   try {
     const j = await (await fetch(API.status + '?code=' + encodeURIComponent(store.get('gs_code')))).json();
     if (!j.ok) { $('#e-name').textContent = '—'; return; }
