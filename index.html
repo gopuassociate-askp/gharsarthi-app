@@ -466,6 +466,7 @@
     </div>
     <p class="muted" id="e-date" style="margin:0 0 10px;text-align:center"></p>
     <div id="e-new" class="card hidden"></div>
+    <div id="e-likes" class="card hidden"></div>
     <div class="tiles">
       <button class="tile big" data-go="talk" type="button"><span class="ic">🗣️</span><span data-en="Talk to Sneha">स्नेहा से बात</span><small data-en="Speak; she listens">बोलिए, वह सुनेगी</small></button>
       <button class="tile" id="t-people" type="button"><span class="ic">📞</span><span data-en="Call my people">अपनों से बात</span><small data-en="Video, voice, phone">वीडियो · आवाज़ · फ़ोन</small></button>
@@ -1195,6 +1196,7 @@ function show(view) {
   if (view === 'pay') payInit();
   if (view === 'radio') radioOpen();
   if (view === 'tv') tvOpen(); else { try { tvStop(); } catch (e) {} }
+  if (view === 'elder') { try { likesRow(); } catch (e) {} }
   if (view === 'chat') chatOpen(); else { try { clearInterval(CHAT.timer); } catch (e) {} }
   if (view === 'people') { peopleLoad(); $('#people-title').textContent = store.get('gs_role') === 'elder' ? T('मेरे लोग', 'My people') : T('उनके लोग', 'Their people'); }
   if (['home', 'elder', 'care'].includes(view)) setTimeout(pushCard, 50);
@@ -2003,6 +2005,7 @@ function vcOpen(name, video = true) { try { talkClose(); } catch (e) {} $('#vc-n
   $('#vc-cam').classList.toggle('hidden', !video); $('#vc-flip').classList.toggle('hidden', !video); $('#vc').classList.remove('hidden'); $('#vc-mute').classList.remove('off'); $('#vc-cam').classList.remove('off'); }
 async function vcStart(party, name, video = true) {
   if (VC.pc) return;
+  if (store.get('gs_role') === 'elder') likeIt('call', party + (video ? ':v' : ':a'), name, { open: { what: 'call', who: name, video } });
   vcOpen(name, video); vcState(video ? 'कैमरा चालू हो रहा है…' : 'माइक चालू हो रहा है…', video ? 'Starting the camera…' : 'Starting the microphone…');
   try { const fresh = await vcCall({ action: 'parties' }); if (fresh && fresh.ice) ICE = fresh.ice; } catch (e) {}
   try { await vcMedia(video); } catch (e) { vcState('कैमरा या माइक की अनुमति चाहिए', 'Camera or microphone permission is needed'); setTimeout(vcHangup, 2500); return; }
@@ -2227,6 +2230,7 @@ function radioStop() { try { RAD.hls && RAD.hls.destroy(); } catch (e) {} RAD.hl
   RAD.cur = null; $('#radio-now').classList.add('hidden'); document.querySelectorAll('#v-radio .on').forEach((x) => x.classList.remove('on')); }
 async function radioPlay(st, btn) {
   radioStop(); try { talkClose(); } catch (e) {} try { songStop(); } catch (e) {}
+  likeIt('radio', st.n, st.n, { open: { what: 'radio', name: st.n } });
   RAD.cur = st; $('#radio-name').textContent = '📻 ' + st.n; $('#radio-state').textContent = T('जुड़ रहा है…', 'Connecting…'); $('#radio-now').classList.remove('hidden'); if (btn) btn.classList.add('on');
   const a = RAD.audio || (RAD.audio = new Audio()); a.preload = 'none';
   a.onplaying = () => { if (RAD.cur === st) $('#radio-state').textContent = T('चल रहा है 🎶', 'Playing 🎶'); };
@@ -2255,7 +2259,30 @@ function radioOpen() {
 }
 $('#radio-stop').addEventListener('click', radioStop);
 
+// ---- What the elder likes: remembered on this phone; shown on the home screen and told to Sneha ----
+const likesGet = () => { try { return JSON.parse(localStorage.getItem('gs_likes') || '{}') || {}; } catch (e) { return {}; } };
+function likeIt(kind, key, name, extra) {
+  if (!key || !name) return;
+  const l = likesGet(), k = kind + ':' + key, x = l[k] || { kind, key, name, n: 0 };
+  Object.assign(x, extra || {}, { name, n: x.n + 1, at: Date.now() }); l[k] = x;
+  const keep = Object.values(l).sort((a, b) => b.at - a.at).slice(0, 40); const out = {}; keep.forEach((v) => { out[v.kind + ':' + v.key] = v; });
+  try { localStorage.setItem('gs_likes', JSON.stringify(out)); } catch (e) {}
+}
+// most liked first; recent use counts a little more
+const likesTop = (kind, n) => Object.values(likesGet()).filter((x) => !kind || x.kind === kind).map((x) => ({ ...x, score: x.n + Math.max(0, 5 - (Date.now() - x.at) / 864e5) }))
+  .sort((a, b) => b.score - a.score).slice(0, n || 4);
+const LIKE_IC = { tv: '📺', radio: '📻', songs: '🎶', call: '📞' };
+const likesForSneha = () => likesTop('', 5).map((x) => `${x.name.split(' / ')[0].split(' (')[0]} (${{ tv: 'टीवी', radio: 'रेडियो', songs: 'गाने', call: 'कॉल' }[x.kind]})`);
+function likesRow() {
+  const box = $('#e-likes'); if (!box) return;
+  const top = likesTop('', 4); box.classList.toggle('hidden', !top.length); if (!top.length) return;
+  box.innerHTML = '<h3 style="margin:0 0 6px;font-size:17px">⭐ ' + T('आपकी पसंद', 'Your favourites') + '</h3><div class="radio-grid">' +
+    top.map((x, i) => `<button type="button" data-like="${i}">${LIKE_IC[x.kind] || '▶'} ${esc(x.name.split(' / ')[0].split(' (')[0])}</button>`).join('') + '</div>';
+  box.querySelectorAll('[data-like]').forEach((b) => { b.onclick = () => talkOpen(top[+b.dataset.like].open || {}); });
+}
+
 // ---- TV: one category at a time (news with the family's own state first, cricket, shows, bhajan, old serials) ----
+let TVCUR = 'news';
 const TV_CATS = [['news', '📰', 'ख़बरें', 'News'], ['cricket', '🏏', 'क्रिकेट', 'Cricket'], ['shows', '😄', 'धारावाहिक', 'Shows'], ['movies', '🎬', 'पुरानी फ़िल्में', 'Old films'], ['bhakti', '🙏', 'भजन', 'Bhajan'], ['old', '📼', 'पुराने धारावाहिक', 'Old serials']];
 const famState = () => { try { return String((ELDER && ELDER.family && ELDER.family.state) || (JSON.parse(store.get('gs_last') || '{}').family || {}).state || '').toLowerCase(); } catch (e) { return ''; } };
 function tvChannels(cat) {
@@ -2273,6 +2300,7 @@ function tvChannels(cat) {
 const tvSrc = (c, live) => c.list ? `https://www.youtube.com/embed/videoseries?list=${encodeURIComponent(c.list)}&autoplay=1&playsinline=1&rel=0` : live ? `https://www.youtube.com/embed/live_stream?channel=${encodeURIComponent(c.id)}&autoplay=1&playsinline=1&rel=0`
   : `https://www.youtube.com/embed/videoseries?list=UU${encodeURIComponent(c.id.slice(2))}&autoplay=1&playsinline=1&rel=0`;
 function tvPlay(c, b, live) {
+  likeIt('tv', c.list || c.id, c.n, { open: { what: 'tv', cat: TVCUR, name: c.n } });
   radioStop(); document.querySelectorAll('#tv-list .on').forEach((x) => x.classList.remove('on')); if (b) b.classList.add('on');
   const p = $('#tv-player');
   p.innerHTML = `<iframe src="${tvSrc(c, live)}" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen title="${esc(c.n)}"></iframe>` +
@@ -2282,6 +2310,7 @@ function tvPlay(c, b, live) {
   p.classList.remove('hidden'); p.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 function tvCat(cat) {
+  TVCUR = cat;
   try { localStorage.setItem('gs_tvcat', cat); } catch (e) {}
   document.querySelectorAll('#tv-cats button').forEach((x) => x.classList.toggle('on', x.dataset.cat === cat));
   tvStop(); const g = $('#tv-list'); g.innerHTML = '';
@@ -2301,7 +2330,7 @@ document.querySelectorAll('[data-back]').forEach((b) => b.addEventListener('clic
 
 // ---- Two doors (elder / family), the elder's simple home, and the family circle ----
 API.circle = API_BASE + '/app-circle';
-const SONGS = {"_note":"Songs Sneha suggests (real, well-loved; she always names one exactly). Any other song the elder asks for is played too.","सुबह / भक्ति":["ऐ मालिक तेरे बंदे हम - लता मंगेशकर","इतनी शक्ति हमें देना दाता - लता मंगेशकर","ओम जय जगदीश हरे - अनुराधा पौडवाल","तू प्यार का सागर है - मन्ना डे","अच्युतम केशवम - विक्रम हज़रा"],"ख़ुशी":["ये दोस्ती हम नहीं तोड़ेंगे - किशोर कुमार","मेरे सपनों की रानी - किशोर कुमार","आज कल तेरे मेरे प्यार के चर्चे - मोहम्मद रफ़ी","चल चल चल मेरे साथी - किशोर कुमार","ज़िंदगी एक सफ़र है सुहाना - किशोर कुमार"],"पुरानी यादें / सुकून":["लग जा गले - लता मंगेशकर","कहीं दूर जब दिन ढल जाए - मुकेश","अभी न जाओ छोड़ कर - मोहम्मद रफ़ी","चौदहवीं का चाँद हो - मोहम्मद रफ़ी","तेरे मेरे मिलन की ये रैना - लता मंगेशकर"],"उदासी में हौसला":["रुक जाना नहीं तू कहीं हार के - किशोर कुमार","आने वाला पल जाने वाला है - किशोर कुमार","ज़िंदगी कैसी है पहेली - मन्ना डे","कभी कभी मेरे दिल में - मुकेश"],"देशभक्ति / त्योहार":["ऐ मेरे वतन के लोगो - लता मंगेशकर","मेरे देश की धरती - महेंद्र कपूर","आज मौसम बड़ा बेईमान है - मोहम्मद रफ़ी"]};
+const SONGS = {"_note":"Songs Sneha suggests (real, well-loved; she always names one exactly). Any other song the elder asks for is played too.","सुबह / भक्ति":["ऐ मालिक तेरे बंदे हम - लता मंगेशकर","इतनी शक्ति हमें देना दाता - लता मंगेशकर","ओम जय जगदीश हरे - अनुराधा पौडवाल","तू प्यार का सागर है - मन्ना डे","अच्युतम केशवम - विक्रम हज़रा"],"ख़ुशी":["ये दोस्ती हम नहीं तोड़ेंगे - किशोर कुमार","मेरे सपनों की रानी - किशोर कुमार","आज कल तेरे मेरे प्यार के चर्चे - मोहम्मद रफ़ी","चल चल चल मेरे साथी - किशोर कुमार","ज़िंदगी एक सफ़र है सुहाना - किशोर कुमार"],"पुरानी यादें / सुकून":["लग जा गले - लता मंगेशकर","कहीं दूर जब दिन ढल जाए - मुकेश","अभी न जाओ छोड़ कर - मोहम्मद रफ़ी","चौदहवीं का चाँद हो - मोहम्मद रफ़ी","तेरे मेरे मिलन की ये रैना - लता मंगेशकर"],"सुनहरा दौर (1940–60)":["जब दिल ही टूट गया - के. एल. सहगल","ग़म दिए मुस्तक़िल - के. एल. सहगल","वो पास रहें या दूर रहें - सुरैया","तू मेरा चाँद मैं तेरी चाँदनी - सुरैया","आवाज़ दे कहाँ है - नूरजहाँ","मेरे पिया गए रंगून - शमशाद बेगम","आएगा आने वाला - लता मंगेशकर","आओ बच्चो तुम्हें दिखाएँ - कवि प्रदीप","देख तेरे संसार की हालत - कवि प्रदीप","ये ज़िंदगी उसी की है - लता मंगेशकर","मन डोले मेरा तन डोले - लता मंगेशकर","जो वादा किया वो निभाना पड़ेगा - मोहम्मद रफ़ी"],"उदासी में हौसला":["रुक जाना नहीं तू कहीं हार के - किशोर कुमार","आने वाला पल जाने वाला है - किशोर कुमार","ज़िंदगी कैसी है पहेली - मन्ना डे","कभी कभी मेरे दिल में - मुकेश"],"देशभक्ति / त्योहार":["ऐ मेरे वतन के लोगो - लता मंगेशकर","मेरे देश की धरती - महेंद्र कपूर","आज मौसम बड़ा बेईमान है - मोहम्मद रफ़ी"]};
 const PLAN_HI = { active: 'ऐप में स्नेहा: बात, गाने-भजन, देखभाल-मंडली, ज़रूरी ख़बरें', plus: 'साथी + स्नेहा रोज़ फ़ोन करती है (लगभग 2 मिनट)', care: 'प्लस + खाने और दवाई की याद वाली कॉल, ज़रूरी ख़बर सबसे पहले' };
 const circleCall = async (body) => (await fetch(API.circle, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(body) })).json();
 const songOptions = () => Object.entries(SONGS).filter(([k]) => !k.startsWith('_')).map(([mood, list]) =>
@@ -2359,15 +2388,18 @@ function elderAskSneha(text) { show('talk'); setTimeout(() => talkSend(null, tex
 $('#t-songs').addEventListener('click', () => {
   // non-stop old songs (Saregama's own collections), own language first; then single songs Sneha plays
   const sg = RADIO.songs || {}, lang = String(TALK.lang || 'hi-IN').slice(0, 2);
-  const lists = (lang !== 'hi' && sg[lang] ? sg[lang] : []).concat(sg.hi || []);
+  const all = (lang !== 'hi' && sg[lang] ? sg[lang] : []).concat(sg.hi || []);
+  const fav = likesTop('songs', 1)[0]; const lists = fav ? all.filter((x) => x.name === fav.name || x.n === fav.name).concat(all.filter((x) => x.n !== fav.name)) : all;
   elderPanel('<h2>🎶 ' + T('लगातार पुराने गाने', 'Old songs, non-stop') + '</h2><div id="e-song-player" class="tv-player hidden"></div><div class="radio-grid">' +
     lists.map((x, i) => `<button type="button" data-list="${i}">▶ ${esc(x.n)}</button>`).join('') + '</div>' +
     '<p class="muted" style="font-size:14px">' + T('एक के बाद एक गाने चलते रहेंगे। कोई ख़ास गाना? स्नेहा से कहिए, जैसे "लग जा गले सुनाओ" – वह फ़िल्म, गायक, संगीत और गीतकार भी बताएगी।', 'Songs play one after another. A particular song? Ask Sneha, e.g. "play Lag Jaa Gale" – she also tells you the film, singer, music and lyricist.') + '</p>' +
+    `<label class="check" style="margin:8px 0"><input type="checkbox" id="e-intro" ${store.get('gs_intro') === 'off' ? '' : 'checked'}> ${T('गाने से पहले स्नेहा छोटा परिचय दे (फ़िल्म, आवाज़, धुन, बोल)', 'Sneha introduces each song first (film, voice, music, lyrics)')}</label>` +
     '<h2 style="margin-top:16px">🎵 ' + T('कौन-सा गाना सुनेंगे?', 'Which song?') + '</h2>' + Object.entries(SONGS).filter(([k]) => !k.startsWith('_')).map(([mood, list]) =>
     `<p style="margin:12px 0 4px"><b>${esc(mood)}</b></p>` + list.map((x) => `<button class="btn secondary" type="button" data-song="${esc(x)}" style="margin:6px 0;text-align:left">▶ ${esc(x)}</button>`).join('')).join('') +
     `<p class="muted" style="margin-top:12px">${T('कोई और गाना? स्नेहा से बोलकर माँगिए।', 'Another song? Just ask Sneha.')}</p>`);
   $('#e-panel').querySelectorAll('[data-song]').forEach((b) => { b.onclick = () => elderAskSneha(b.dataset.song.split(' - ')[0] + ' सुनाओ'); });
-  $('#e-panel').querySelectorAll('[data-list]').forEach((b) => { b.onclick = () => { const x = lists[+b.dataset.list]; radioStop();
+  $('#e-intro').onchange = (e) => store.set('gs_intro', e.target.checked ? 'on' : 'off');
+  $('#e-panel').querySelectorAll('[data-list]').forEach((b) => { b.onclick = () => { const x = lists[+b.dataset.list]; radioStop(); likeIt('songs', x.list, x.n, { open: { what: 'songs', name: x.n } });
     $('#e-panel').querySelectorAll('[data-list]').forEach((o) => o.classList.toggle('on', o === b));
     const pl = $('#e-song-player'); pl.innerHTML = `<iframe src="https://www.youtube.com/embed/videoseries?list=${encodeURIComponent(x.list)}&autoplay=1&playsinline=1&rel=0" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen title="${esc(x.n)}"></iframe>`;
     pl.classList.remove('hidden'); pl.scrollIntoView({ behavior: 'smooth', block: 'start' }); }; });
@@ -2879,7 +2911,7 @@ async function talkSend(blob, typed) {
   const b64 = blob ? await new Promise((ok) => { const r = new FileReader(); r.onload = () => ok(String(r.result).split(',')[1]); r.readAsDataURL(blob); }) : '';
   try {
     const j = await (await fetch(API.talk, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({ code: store.get('gs_code'), audio: b64, mime: blob ? blob.type : '', text: typed || undefined, history: TALK.history, mood: TALK.mood, cam: !!TALK.cam, cam_first: !!TALK.cam && !TALK.camSent, image: talkStill(), photo_ok: store.get('gs_photo_ok') === 'yes', who: whoNow }) })).json();
+      body: JSON.stringify({ likes: likesForSneha(), intro: store.get('gs_intro') !== 'off', code: store.get('gs_code'), audio: b64, mime: blob ? blob.type : '', text: typed || undefined, history: TALK.history, mood: TALK.mood, cam: !!TALK.cam, cam_first: !!TALK.cam && !TALK.camSent, image: talkStill(), photo_ok: store.get('gs_photo_ok') === 'yes', who: whoNow }) })).json();
     if (TALK.cam) TALK.camSent = true;
     if (!j.ok) {
       talkState(j.why === 'limit' ? 'आज बहुत बात हो गई, थोड़ी देर बाद फिर बात करेंगे 💛' : 'माफ़ कीजिए, अभी बात नहीं हो पाई। फिर कोशिश करें।',
@@ -2897,7 +2929,8 @@ async function talkSend(blob, typed) {
     // her voice comes in up to two pieces, made at the same time on the server: play them one after another
     await talkPlayReply(j);
     if (!(TALK.rec && TALK.rec.state === 'recording')) talkState('बटन दबाकर बोलिए', 'Press the button and speak');
-    if (j.play && !TALK.cut) { SONG.facts = j.song_facts || null; songPlay(j.play, j.play_id); }
+    if (j.open && !TALK.cut) talkOpen(j.open);
+    else if (j.play && !TALK.cut) { SONG.facts = j.song_facts || null; songPlay(j.play, j.play_id); }
     else if (!j.urgent && !j.end && !TALK.cut && TALK.open) setTimeout(() => { if (!TALK.busy && TALK.open && !TALK.speaking) talkListen({ auto: 0 }); }, 300);
   } catch (e) { talkState('इंटरनेट नहीं; थोड़ी देर बाद कोशिश करें', 'No internet; try again shortly'); }
   finally { TALK.busy = false; $('#talk-mic').disabled = false; }
@@ -3012,6 +3045,32 @@ async function songPlay(q, id) {
   } catch (e) { talkState('गाना नहीं चल पाया; इंटरनेट देखिए', 'The song could not play; check the internet'); }
 }
 const SONG = { player: null, api: null };
+// Sneha heard a command ("टीवी पर क्रिकेट लगाओ", "बेटे को वीडियो कॉल करो"): open it; without details, use what the elder likes most
+const songNorm = (t) => String(t || '').toLowerCase().replace(/[।॥]/g, ' ').replace(/[़ँ]/g, '').replace(/ं/g, 'न').replace(/[^ऀ-ॿa-z0-9 ]/g, ' ').replace(/\s+/g, ' ').trim();
+const stem = (w) => songNorm(w).replace(/[ाेीोौू]$/, '');
+async function talkOpen(o) {
+  if (o.what === 'tv') {
+    const fav = likesTop('tv', 20).find((x) => x.open && (!o.cat || x.open.cat === o.cat));
+    const cat = o.cat || (fav && fav.open.cat) || TVCUR || 'news';
+    show('tv'); tvCat(cat);
+    const list = tvChannels(cat), name = o.name || (fav && fav.open.cat === cat ? fav.open.name : '');
+    const c = (name && list.find((x) => x.n === name)) || (o.name ? null : list[0]);
+    if (c) { const b = [...document.querySelectorAll('#tv-list button')].find((x) => x.textContent.includes(c.n)); tvPlay(c, b, !!c.live); }
+  } else if (o.what === 'radio') {
+    show('radio'); const sts = RADIO.stations || [];
+    const fav = likesTop('radio', 1)[0];
+    const st = sts.find((x) => x.n === o.name) || (fav && sts.find((x) => x.n === fav.name)) || sts.find((x) => x.n === 'Vividh Bharati');
+    if (st) radioPlay(st, null);
+  } else if (o.what === 'call') {
+    show('elder');
+    let ps = []; try { const r = await vcCall({ action: 'parties' }); ps = (r && r.parties) || []; if (r && r.ice) ICE = r.ice; } catch (e) {}
+    const w = stem(o.who || '');
+    const p = w && ps.find((x) => [x.name, x.relation].some((v) => v && songNorm(v).split(' ').some((t) => t.length > 1 && (stem(t) === w || stem(t).startsWith(w) || w.startsWith(stem(t))))));
+    if (p) vcStart(p.party, p.name, !!o.video); else $('#t-people').click();
+  } else if (o.what === 'songs') { show('elder'); $('#t-songs').click(); setTimeout(() => { const b = $('#e-panel [data-list]'); if (b) b.click(); }, 200); }
+  else if (o.what === 'chat') show('chat');
+  else if (o.what === 'msgs') { show('elder'); $('#t-msgs').click(); }
+}
 function songApi() {
   if (window.YT && YT.Player) return Promise.resolve();
   if (!SONG.api) SONG.api = new Promise((ok) => { window.onYouTubeIframeAPIReady = ok; const sc = document.createElement('script'); sc.src = 'https://www.youtube.com/iframe_api'; document.head.appendChild(sc); });
