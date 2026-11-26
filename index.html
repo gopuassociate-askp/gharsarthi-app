@@ -157,6 +157,9 @@
   .vc-row b { flex: 1; font-size: 18px; } .vc-row .btn { width: 64px; margin: 0; padding: 12px 0; font-size: 22px; }
   .vc.audio #vc-remote { visibility: hidden; } .vc.audio::before { content: ''; position: absolute; left: 50%; top: 38%; width: 150px; height: 150px; margin: -75px 0 0 -75px; border-radius: 50%; background: url(sneha.jpg) center/cover; opacity: .9; border: 4px solid #f59e0b; }
   .vc { position: fixed; inset: 0; z-index: 60; background: #111; }
+  .vc-av { position: absolute; left: 50%; top: 38%; transform: translate(-50%, -50%); text-align: center; pointer-events: none; }
+  .vc.live:not(.audio) .vc-av { display: none; } .vc.audio #vc-local { display: none; } .vc.audio { background: linear-gradient(180deg, #14532d, #052e16); }
+  .vc.audio::before { display: none !important; }
   .vc #vc-remote { width: 100%; height: 100%; object-fit: cover; background: #222; }
   .vc #vc-local { position: absolute; right: 12px; top: 64px; width: 28%; max-width: 150px; border-radius: 14px; border: 2px solid #fff; transform: scaleX(-1); background: #000; }
   .vc-top { position: absolute; top: 0; left: 0; right: 0; padding: 14px 16px; color: #fff; background: linear-gradient(rgba(0,0,0,.6), transparent); font-size: 20px; }
@@ -1037,6 +1040,7 @@
 <div id="vc" class="vc hidden" role="dialog" aria-label="वीडियो कॉल / Video call">
   <video id="vc-remote" autoplay playsinline></video>
   <video id="vc-local" autoplay playsinline muted></video>
+  <span id="vc-av" class="vc-av"></span>
   <div class="vc-top"><b id="vc-name">—</b><span id="vc-state"></span></div>
   <div class="vc-bar">
     <button type="button" id="vc-mute"><b>🎤</b><span data-en="Mute">आवाज़ बंद</span></button>
@@ -2044,7 +2048,8 @@ const ICE_POLICY = new URLSearchParams(location.search).get('relay') === '1' ? '
 // ---- Inside the SadaSneha Android app: native call alerts (ring like a phone call) and earpiece/speaker ----
 const NATIVE = (() => { try { return !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform() && window.Capacitor.Plugins.SnehaNative); } catch (e) { return false; } })();
 const SN = NATIVE ? window.Capacitor.Plugins.SnehaNative : null;
-async function vcSpeaker(on) { if (!SN) return; try { const r = await SN.setSpeaker({ on }); VC.spk = !!(r && r.speaker); } catch (e) { VC.spk = on; }
+async function vcSpeaker(on) {
+  if (SN && $('#vc').classList.contains('audio')) vcState(on ? '🔊 स्पीकर पर' : '📞 फ़ोन कान से लगाइए, या 🔊 स्पीकर दबाइए', on ? '🔊 On speaker' : '📞 Hold the phone to your ear, or press 🔊 Speaker'); if (!SN) return; try { const r = await SN.setSpeaker({ on }); VC.spk = !!(r && r.speaker); } catch (e) { VC.spk = on; }
   const b = $('#vc-spk'); if (b) { b.querySelector('b').textContent = VC.spk ? '🔊' : '👂'; b.querySelector('span').textContent = VC.spk ? T('स्पीकर', 'Speaker') : T('कान से', 'Earpiece'); b.classList.toggle('on', VC.spk); } }
 // this phone's own id: calls know which phone rang and which picked up (two phones of one person can call each other)
 const DEV = (() => { try { let d = localStorage.getItem('gs_dev'); if (!/^[a-z0-9]{8,24}$/.test(d || '')) { d = Math.random().toString(36).slice(2, 10) + Date.now().toString(36); localStorage.setItem('gs_dev', d); } return d; } catch (e) { return ''; } })();
@@ -2079,15 +2084,19 @@ function vcPeer() {
   VC.local.getTracks().forEach((t) => pc.addTrack(t, VC.local));
   pc.ontrack = (e) => { $('#vc-remote').srcObject = e.streams[0]; };
   pc.onconnectionstatechange = () => {
-    if (pc.connectionState === 'connected') { vcTone(false); vcState('जुड़ गए ✓', 'Connected ✓'); setTimeout(() => { if (VC.pc === pc) $('#vc-state').textContent = ''; }, 2500); }
+    if (pc.connectionState === 'connected') { vcTone(false); vcState('जुड़ गए ✓', 'Connected ✓'); setTimeout(() => { if (VC.pc !== pc) return; if (SN && $('#vc').classList.contains('audio')) vcSpeaker(!!VC.spk); else $('#vc-state').textContent = ''; }, 2500); }
     if (pc.connectionState === 'failed') { vcState('नेटवर्क की वजह से नहीं जुड़ पाए। Wi-Fi या दूसरे नेटवर्क से फिर कोशिश करें।', 'Could not connect over this network. Try again on Wi-Fi or another network.'); }
     if (pc.connectionState === 'disconnected') { vcState('नेटवर्क कमज़ोर है…', 'Weak network…'); setTimeout(() => { if (VC.pc === pc && ['disconnected', 'failed', 'closed'].includes(pc.connectionState)) { vcState('कॉल कट गई', 'The call dropped'); setTimeout(() => vcHangup(), 1500); } }, 12000); }
   };
   VC.pc = pc; return pc;
 }
 function vcOpen(name, video = true) {
-  if (SN) { $('#vc-spk').classList.remove('hidden'); vcSpeaker(!!video); }   // like a phone: video on the speaker, voice at the ear try { talkClose(); } catch (e) {} $('#vc-name').textContent = (video ? '📹 ' : '📞 ') + name; $('#vc').classList.toggle('audio', !video);
-  $('#vc-cam').classList.toggle('hidden', !video); $('#vc-flip').classList.toggle('hidden', !video); $('#vc').classList.remove('hidden'); $('#vc-mute').classList.remove('off'); $('#vc-cam').classList.remove('off'); }
+  // until the other side's picture arrives (and in voice calls): their big letter, not a black screen
+  $('#vc-av').innerHTML = avatar(String(name || '').replace(/^[📹📞]\s*/, ''), 'big'); $('#vc').classList.remove('live');
+  try { talkClose(); } catch (e) {} $('#vc-name').textContent = (video ? '📹 ' : '📞 ') + name; $('#vc').classList.toggle('audio', !video);
+  $('#vc-cam').classList.toggle('hidden', !video); $('#vc-flip').classList.toggle('hidden', !video); $('#vc').classList.remove('hidden'); $('#vc-mute').classList.remove('off'); $('#vc-cam').classList.remove('off');
+  if (SN) { $('#vc-spk').classList.remove('hidden'); vcSpeaker(!!video); }   // like a phone: video on the speaker, voice at the ear
+}
 async function vcStart(party, name, video = true) {
   if (VC.pc) return;
   if (store.get('gs_role') === 'elder') likeIt('call', party + (video ? ':v' : ':a'), name, { open: { what: 'call', who: name, video } });
@@ -2138,6 +2147,7 @@ function vcHangup(already) {
   $('#vc').classList.add('hidden'); $('#vc-ring').classList.add('hidden');
 }
 $('#vc-end').addEventListener('click', () => vcHangup());
+$('#vc-remote').addEventListener('playing', () => $('#vc').classList.add('live'));
 $('#vc-mute').addEventListener('click', () => { const t = VC.local && VC.local.getAudioTracks()[0]; if (t) { t.enabled = !t.enabled; $('#vc-mute').classList.toggle('off', !t.enabled); } });
 $('#vc-cam').addEventListener('click', () => { const t = VC.local && VC.local.getVideoTracks()[0]; if (t) { t.enabled = !t.enabled; $('#vc-cam').classList.toggle('off', !t.enabled); } });
 $('#vc-flip').addEventListener('click', async () => {
