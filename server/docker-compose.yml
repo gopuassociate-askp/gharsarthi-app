@@ -43,6 +43,7 @@ services:
       NODE_FUNCTION_ALLOW_BUILTIN: "crypto"   # web push needs encryption in Code nodes (only the crypto module)
     volumes:
       - n8ndata:/home/node/.n8n
+      - chatfiles:/home/node/.n8n-files   # family chat photos, voice notes and files (kept on this server)
 
   caddy:
     image: caddy:2-alpine
@@ -59,4 +60,5 @@ services:
 volumes:
   pgdata:
   n8ndata:
+  chatfiles:
   caddydata:
