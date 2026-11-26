@@ -2084,8 +2084,8 @@ async function vcAnswer() {
   if (!r.ok) { vcState('कॉल कट गई', 'The call was cancelled'); setTimeout(vcHangup, 2000); return; }
   VC.polling = setInterval(async () => {   // notice when the other side hangs up
     let p; try { p = await vcCall({ action: 'poll', call_id: VC.id }); } catch (e) { return; }
-    if (p && p.call && ['ended', 'cancelled'].includes(p.call.status)) { vcState('कॉल ख़त्म', 'Call ended'); setTimeout(() => vcHangup(true), 1500); }
-  }, 3000);
+    if (p && p.call && ['ended', 'cancelled'].includes(p.call.status)) { vcState('कॉल ख़त्म', 'Call ended'); setTimeout(() => vcHangup(true), 1000); }
+  }, 2000);
 }
 function vcHangup(already) {
   if (VC.id && !already) vcCall({ action: 'end', call_id: VC.id }).catch(() => {});
