@@ -96,7 +96,7 @@
   .talk-face video { position: absolute; right: 8px; bottom: 8px; width: 28%; border-radius: 12px; border: 2px solid #fff; transform: scaleX(-1); }
   .talk-ai { position: absolute; left: 8px; top: 8px; background: rgba(255,255,255,.85); color: #9a3412; font-size: 12px; padding: 2px 8px; border-radius: 99px; }
   .talk-mood { position: absolute; left: 8px; bottom: 8px; background: rgba(255,255,255,.9); color: #7c2d12; font-size: 13px; padding: 3px 10px; border-radius: 99px; }
-  #talk-cam.pulse { animation: campulse 1.2s ease-in-out 6; border-color: #ea580c; }
+  #talk-cam.pulse, #tb-cam.pulse { animation: campulse 1.2s ease-in-out 6; border-color: #ea580c; }
   @keyframes campulse { 50% { transform: scale(1.08); box-shadow: 0 0 0 6px rgba(234,88,12,.25); } }
   .linkbtn { background: none; border: 0; padding: 0; color: #c2410c; text-decoration: underline; font: inherit; cursor: pointer; }
   .rs-big { font-size: 30px; font-weight: 800; color: var(--brand); margin: 10px 0; }
@@ -835,11 +835,10 @@
         <video id="talk-self" class="hidden" playsinline muted></video>
         <span class="talk-ai">स्नेहा – आपकी AI सहायिका</span><span id="talk-cam-on" class="talk-cam hidden">● कैमरा चालू</span><span id="talk-mood" class="talk-mood hidden"></span>
         <div id="face-notes" class="face-notes hidden" aria-hidden="true"><span>♪</span><span>♫</span><span>♩</span><span>♬</span><span>♪</span><p>🎵 गाना ढूँढ रही हूँ…</p></div></div>
-      <p class="muted" style="font-size:11px;margin:4px 0 0">v62</p>
-      <div id="talk-sym" class="talk-sym idle" aria-live="polite"><span class="ico">🎤</span><span class="lbl">बटन दबाइए</span></div>
+      <div id="talk-sym" class="talk-sym idle" aria-live="polite"><span class="ico">👇</span><span class="lbl">बटन दबाइए</span></div>
       <p id="talk-state" class="talk-state hidden"><span data-en="Press the button and speak">बटन दबाकर बोलिए</span></p>
       <button class="talk-mic" id="talk-mic" type="button" aria-label="बोलें / Speak">🎤</button>
-      <div class="talk-row">
+      <div class="talk-row hidden" aria-hidden="true"><!-- the bottom bar has Camera and End: one of each on screen -->
         <button class="btn secondary" id="talk-cam" type="button">📷 <span data-en="Camera on">कैमरा चालू करें</span></button>
         <button class="btn secondary" type="button" id="talk-end" onclick="show(store.get('gs_role') === 'elder' ? 'elder' : 'home')">✖ <span data-en="End">बंद करें</span></button>
       </div>
@@ -1015,7 +1014,7 @@
   </div>
 </div>
 <div id="talk-bar" class="talk-bar hidden" role="toolbar" aria-label="बातचीत के बटन / Talk controls">
-  <button type="button" id="tb-mic"><b>🎤</b><span data-en="Speak">बोलें</span></button>
+  <button type="button" id="tb-mic" class="hidden"><b>🎤</b><span data-en="Speak">बोलें</span></button>
   <button type="button" id="tb-stop"><b>⏹</b><span data-en="Stop">रोकें</span></button>
   <button type="button" id="tb-cam"><b>📷</b><span data-en="Camera">कैमरा</span></button>
   <button type="button" id="tb-song"><b>🎵</b><span data-en="Song off">गाना बंद</span></button>
@@ -2319,7 +2318,7 @@ function likesRow() {
   const top = likesTop('', 4); box.classList.toggle('hidden', !top.length); if (!top.length) return;
   box.innerHTML = '<h3 style="margin:0 0 6px;font-size:17px">⭐ ' + T('आपकी पसंद', 'Your favourites') + '</h3><div class="radio-grid">' +
     top.map((x, i) => `<button type="button" data-like="${i}">${LIKE_IC[x.kind] || '▶'} ${esc(x.name.split(' / ')[0].split(' (')[0])}</button>`).join('') + '</div>';
-  box.querySelectorAll('[data-like]').forEach((b) => { b.onclick = () => talkOpen(top[+b.dataset.like].open || {}); });
+  box.querySelectorAll('[data-like]').forEach((b) => { b.onclick = () => cmdOpen(top[+b.dataset.like].open || {}); });
 }
 
 // ---- TV: one category at a time (news with the family's own state first, cricket, shows, bhajan, old serials) ----
@@ -2659,7 +2658,7 @@ function talkState(hi, en) {
   if (/सोच रही/.test(h)) return talkSym('⏳', 'think', T('रुकिए…', 'Wait…'));
   if (/बोल रही/.test(h)) return talkSym('🗣️', 'speak', T('अब सुनिए', 'Listen now'));
   if (/गाना/.test(h) && !/नहीं/.test(h)) return talkSym('🎵', 'song', T('गाना सुनिए', 'Enjoy the song'));
-  if (/^बटन दबाकर बोलिए$|पूरा हुआ|रुक गई/.test(h)) return talkSym('🎤', 'idle', T('बटन दबाइए', 'Press the button'));
+  if (/^बटन दबाकर बोलिए$|पूरा हुआ|रुक गई/.test(h)) return talkSym('👇', 'idle', T('बटन दबाइए', 'Press the button'));
   talkSym('⚠️', 'warn', T(hi, en));   // a real message: show it in words
 }
 function talkCcShow() { $('#talk-cc').textContent = CC() ? T('📝 लिखा हुआ छिपाएँ', '📝 Hide captions') : T('📝 बातें लिखी हुई भी दिखें', '📝 Show captions too');
@@ -2973,12 +2972,12 @@ async function talkSend(blob, typed) {
     TALK.replyIn = true;
     await hmm;
     TALK.busy = false; $('#talk-mic').disabled = false; TALK.cut = false;
-    if (j.ask_cam && !TALK.cam) $('#talk-cam').classList.add('pulse');
+    if (j.ask_cam && !TALK.cam) { $('#talk-cam').classList.add('pulse'); $('#tb-cam').classList.add('pulse'); }
     if (j.play) { $('#song-box').classList.remove('hidden'); $('#song-title').textContent = '🎵 ' + j.play; $('#song-notes').classList.remove('hidden'); $('#face-notes').classList.remove('hidden'); }
     // her voice comes in up to two pieces, made at the same time on the server: play them one after another
     await talkPlayReply(j);
     if (!(TALK.rec && TALK.rec.state === 'recording')) talkState('बटन दबाकर बोलिए', 'Press the button and speak');
-    if (j.open && !TALK.cut) talkOpen(j.open);
+    if (j.open && !TALK.cut) cmdOpen(j.open);
     else if (j.play && !TALK.cut) { SONG.facts = j.song_facts || null; songPlay(j.play, j.play_id); }
     else if (!j.urgent && !j.end && !TALK.cut && TALK.open) setTimeout(() => { if (!TALK.busy && TALK.open && !TALK.speaking) talkListen({ auto: 0 }); }, 300);
   } catch (e) { talkState('इंटरनेट नहीं; थोड़ी देर बाद कोशिश करें', 'No internet; try again shortly'); }
@@ -3097,7 +3096,7 @@ const SONG = { player: null, api: null };
 // Sneha heard a command ("टीवी पर क्रिकेट लगाओ", "बेटे को वीडियो कॉल करो"): open it; without details, use what the elder likes most
 const songNorm = (t) => String(t || '').toLowerCase().replace(/[।॥]/g, ' ').replace(/[़ँ]/g, '').replace(/ं/g, 'न').replace(/[^ऀ-ॿa-z0-9 ]/g, ' ').replace(/\s+/g, ' ').trim();
 const stem = (w) => songNorm(w).replace(/[ाेीोौू]$/, '');
-async function talkOpen(o) {
+async function cmdOpen(o) {
   if (o.what === 'tv') {
     const fav = likesTop('tv', 20).find((x) => x.open && (!o.cat || x.open.cat === o.cat));
     const cat = o.cat || (fav && fav.open.cat) || TVCUR || 'news';
