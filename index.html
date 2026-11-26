@@ -543,6 +543,10 @@
       <div class="pp-kinds" id="pp-kinds"></div>
       <input id="pp-rel" maxlength="30" placeholder="दोस्त, पड़ोसी, डॉक्टर…">
       <label for="pp-phone"><span data-en="Phone number (mobile or landline with 0)">फ़ोन नंबर (मोबाइल, या 0 के साथ लैंडलाइन)</span></label><input id="pp-phone" inputmode="tel" maxlength="15" placeholder="98XXXXXXXX / 0761XXXXXXX">
+      <div id="pp-med" class="hidden">
+        <label for="pp-email"><span data-en="Doctor's email (optional)">डॉक्टर का ईमेल (अगर हो)</span></label><input id="pp-email" type="email" maxlength="80" placeholder="doctor@example.com">
+        <label class="check"><input type="checkbox" id="pp-notify"> <span data-en="In an emergency, also email this doctor (what was said, age, health notes). The elder agrees.">ज़रूरी हालत (आपात) में इन्हें भी ईमेल से बताएँ: क्या कहा, उम्र, सेहत की जानकारी। वरिष्ठजन इससे सहमत हैं।</span></label>
+      </div>
       <button class="btn primary" type="button" id="pp-add"><span data-en="Save">सेव करें</span></button><p id="pp-msg" class="muted"></p></div>
   </section>
 
@@ -2227,17 +2231,19 @@ const KIND_WORDS = { doctor: /(डॉक्टर|डाक्टर|वैद�
   auto: /(ऑटो|आटो|रिक्शा|टैक्सी|ड्राइवर|auto|taxi|driver)/i, chemist: /(दवाई|दवा|केमिस्ट|मेडिकल|chemist|medical)/i, shop: /(किराना|दूध|सब्ज़ी|सब्जी|दुकान|grocery|milk|shop)/i,
   neighbour: /(पड़ोसी|पडोसी|neighbour)/i, friend: /(दोस्त|मित्र|friend)/i };
 const kindOf = (c) => (PP_KINDS.find(([k]) => KIND_WORDS[k].test(c.relation || '') || (k !== 'friend' && KIND_WORDS[k].test(c.name || ''))) || [''])[0];
+const ppMed = () => { const m = /(डॉक्टर|डाक्टर|अस्पताल|doctor|hospital|clinic)/i.test($('#pp-rel').value); $('#pp-med').classList.toggle('hidden', !m); };
+$('#pp-rel').addEventListener('input', ppMed);
 async function contactsGet() { try { const j = await chatCall({ action: 'contacts' }); return (j && j.contacts) || []; } catch (e) { return []; } }
 (() => { const box = $('#pp-kinds'); if (!box) return;
   box.innerHTML = PP_KINDS.map(([k, ic, hi, en]) => `<button type="button" data-k="${k}">${ic} ${T(hi, en)}</button>`).join('');
-  box.querySelectorAll('[data-k]').forEach((b) => { b.onclick = () => { const k = PP_KINDS.find((x) => x[0] === b.dataset.k); $('#pp-rel').value = k[2]; box.querySelectorAll('button').forEach((o) => o.classList.toggle('on', o === b)); }; }); })();
+  box.querySelectorAll('[data-k]').forEach((b) => { b.onclick = () => { const k = PP_KINDS.find((x) => x[0] === b.dataset.k); $('#pp-rel').value = k[2]; ppMed(); box.querySelectorAll('button').forEach((o) => o.classList.toggle('on', o === b)); }; }); })();
 async function peopleLoad() {
   const box = $('#people-list'); box.innerHTML = '<p class="muted">…</p>';
   try {
     const j = await chatCall({ action: 'contacts' });
     const order = PP_KINDS.map((k) => k[0]);
     const cs = ((j && j.contacts) || []).map((c) => ({ ...c, kind: kindOf(c) })).sort((a, b) => (order.indexOf(a.kind) + 1 || 99) - (order.indexOf(b.kind) + 1 || 99));
-    box.innerHTML = cs.length ? cs.map((c) => `<div class="pp-row"><b>${((PP_KINDS.find((k) => k[0] === c.kind) || [])[1] || '👤')} ${esc(c.name)}${c.relation ? ' <small class="muted">(' + esc(c.relation) + ')</small>' : ''}</b>` +
+    box.innerHTML = cs.length ? cs.map((c) => `<div class="pp-row"><b>${((PP_KINDS.find((k) => k[0] === c.kind) || [])[1] || '👤')} ${esc(c.name)}${c.relation ? ' <small class="muted">(' + esc(c.relation) + ')</small>' : ''}${c.notify ? ' <small title="' + T('आपात में ईमेल जाएगा', 'Emailed in an emergency') + '">✉️🚨</small>' : ''}</b>` +
       `<a class="tel" href="tel:${esc(c.phone)}" aria-label="फ़ोन">📞</a><a class="wa" href="https://wa.me/${esc(c.phone.replace('+', ''))}" target="_blank" rel="noopener" aria-label="WhatsApp">🟢</a>` +
       `<button class="rm" type="button" data-rm="${esc(c.contact_id)}" aria-label="हटाएँ">✕</button></div>`).join('')
       : '<p class="muted">' + T('अभी कोई नहीं। नीचे से अपने दोस्तों को जोड़िए।', 'Nobody yet. Add friends below.') + '</p>';
@@ -2248,9 +2254,11 @@ $('#pp-add').addEventListener('click', async () => {
   const name = $('#pp-name').value.trim(), phone = $('#pp-phone').value.replace(/[^\d+]/g, '');
   if (!name) return ($('#pp-msg').textContent = T('नाम लिखिए', 'Write the name'));
   if (!/^\+?\d{10,13}$/.test(phone)) return ($('#pp-msg').textContent = T('पूरा नंबर लिखिए (मोबाइल 10 अंक, लैंडलाइन 0 के साथ)', 'Write the full number (mobile 10 digits, landline with 0)'));
-  const j = await chatCall({ action: 'contact_add', name, relation: $('#pp-rel').value.trim(), phone });
+  const email = $('#pp-email').value.trim(), notify = $('#pp-notify').checked && !$('#pp-med').classList.contains('hidden');
+  if (notify && !/^[^@\s]+@[^@\s]+\.[a-z]{2,}$/i.test(email)) return ($('#pp-msg').textContent = T('ईमेल ठीक से लिखिए', 'Write the email correctly'));
+  const j = await chatCall({ action: 'contact_add', name, relation: $('#pp-rel').value.trim(), phone, email, notify, consent: notify });
   $('#pp-msg').textContent = j.ok ? T('✓ सेव हो गया', '✓ Saved') : j.why === 'full' ? T('30 लोग पूरे हो गए', 'The list is full (30)') : T('सेव नहीं हुआ', 'Could not save');
-  if (j.ok) { $('#pp-name').value = ''; $('#pp-rel').value = ''; $('#pp-phone').value = ''; document.querySelectorAll('#pp-kinds .on').forEach((o) => o.classList.remove('on')); peopleLoad(); }
+  if (j.ok) { $('#pp-name').value = ''; $('#pp-rel').value = ''; $('#pp-phone').value = ''; $('#pp-email').value = ''; $('#pp-notify').checked = false; ppMed(); document.querySelectorAll('#pp-kinds .on').forEach((o) => o.classList.remove('on')); peopleLoad(); }
 });
 $('#people-back').addEventListener('click', () => show(store.get('gs_role') === 'elder' ? 'elder' : 'home'));
 
