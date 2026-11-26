@@ -204,6 +204,8 @@
   .song-facts { display: flex; flex-wrap: wrap; gap: 4px 14px; justify-content: center; margin-top: 6px; font-size: 16px; font-weight: 500; }
   .tab-off { display: none !important; }
   .acct-links .btn { margin: 6px 0; }
+  .pp-kinds { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0 8px; } .pp-kinds button { border: 2px solid #fdba74; background: #fff7ed; color: #7c2d12; border-radius: 999px; padding: 6px 12px; font: inherit; font-size: 15px; cursor: pointer; } .pp-kinds button.on { background: #c2410c; color: #fff; border-color: #c2410c; }
+  .btn.dial { display: block; text-align: center; text-decoration: none; background: #15803d; color: #fff; font-size: 24px; padding: 18px; border-radius: 18px; }
   .tile.sos { background: #dc2626; color: #fff; grid-column: 1 / -1; min-height: 90px; }
   .door { display: block; width: 100%; border: 0; border-radius: 24px; padding: 22px 16px; margin: 12px 0; font: inherit; font-size: 21px; font-weight: 800; text-align: left; cursor: pointer; }
   .door small { display: block; font-size: 15px; font-weight: 500; margin-top: 4px; opacity: .85; }
@@ -533,12 +535,14 @@
   <section id="v-people" class="view hidden">
     <div class="card"><button class="linkbtn homebtn" type="button" id="people-back">🏠 <span data-en="Home">घर</span></button>
       <h2>📒 <span id="people-title" data-en="My people">मेरे लोग</span></h2>
-      <p class="muted" style="margin:0"><span data-en="Friends and others to call. Tap 📞 to phone or 🟢 for WhatsApp.">दोस्त और दूसरे लोग। 📞 दबाकर फ़ोन करें, 🟢 दबाकर WhatsApp।</span></p>
+      <p class="muted" style="margin:0"><span data-en="Friends, doctor, hospital, auto… Tap 📞 to phone or 🟢 for WhatsApp. You can also tell Sneha: “call the doctor”.">दोस्त, डॉक्टर, अस्पताल, ऑटो… 📞 दबाकर फ़ोन, 🟢 दबाकर WhatsApp। स्नेहा से भी कह सकते हैं: "डॉक्टर को फ़ोन लगाओ"।</span></p>
       <div id="people-list" style="margin-top:10px"></div></div>
     <div class="card"><h3 style="margin:0 0 6px">➕ <span data-en="Add someone">किसी को जोड़ें</span></h3>
       <label for="pp-name"><span data-en="Name">नाम</span></label><input id="pp-name" maxlength="40" placeholder="जैसे: वर्मा जी">
-      <label for="pp-rel"><span data-en="Who are they?">कौन हैं?</span></label><input id="pp-rel" maxlength="30" placeholder="दोस्त, पड़ोसी, डॉक्टर…">
-      <label for="pp-phone"><span data-en="Mobile number">मोबाइल नंबर</span></label><input id="pp-phone" inputmode="tel" maxlength="15" placeholder="98XXXXXXXX">
+      <label for="pp-rel"><span data-en="Who are they?">कौन हैं?</span></label>
+      <div class="pp-kinds" id="pp-kinds"></div>
+      <input id="pp-rel" maxlength="30" placeholder="दोस्त, पड़ोसी, डॉक्टर…">
+      <label for="pp-phone"><span data-en="Phone number (mobile or landline with 0)">फ़ोन नंबर (मोबाइल, या 0 के साथ लैंडलाइन)</span></label><input id="pp-phone" inputmode="tel" maxlength="15" placeholder="98XXXXXXXX / 0761XXXXXXX">
       <button class="btn primary" type="button" id="pp-add"><span data-en="Save">सेव करें</span></button><p id="pp-msg" class="muted"></p></div>
   </section>
 
@@ -2216,12 +2220,24 @@ $('#chat-mic').addEventListener('click', async () => {
 $('#chat-back').addEventListener('click', () => show(store.get('gs_role') === 'elder' ? 'elder' : store.get('gs_code') ? 'home' : 'care'));
 
 // ---- "मेरे लोग": the elder's own phone book (friends beyond family), kept for the family ----
+// kinds of people the elder may need: one tap fills "who are they"; Sneha finds them by these words
+const PP_KINDS = [['doctor', '🩺', 'डॉक्टर', 'Doctor'], ['hospital', '🏥', 'अस्पताल', 'Hospital'], ['ambulance', '🚑', 'एम्बुलेंस', 'Ambulance'], ['auto', '🛺', 'ऑटो / टैक्सी', 'Auto / taxi'],
+  ['chemist', '💊', 'दवाई की दुकान', 'Chemist'], ['shop', '🛒', 'किराना / दूध / सब्ज़ी', 'Grocery / milk'], ['neighbour', '🏠', 'पड़ोसी', 'Neighbour'], ['friend', '🤝', 'दोस्त', 'Friend']];
+const KIND_WORDS = { doctor: /(डॉक्टर|डाक्टर|वैद्य|doctor|dr)/i, hospital: /(अस्पताल|हॉस्पिटल|hospital|clinic|क्लिनिक)/i, ambulance: /(एम्बुलेंस|एंबुलेंस|ambulance)/i,
+  auto: /(ऑटो|आटो|रिक्शा|टैक्सी|ड्राइवर|auto|taxi|driver)/i, chemist: /(दवाई|दवा|केमिस्ट|मेडिकल|chemist|medical)/i, shop: /(किराना|दूध|सब्ज़ी|सब्जी|दुकान|grocery|milk|shop)/i,
+  neighbour: /(पड़ोसी|पडोसी|neighbour)/i, friend: /(दोस्त|मित्र|friend)/i };
+const kindOf = (c) => (PP_KINDS.find(([k]) => KIND_WORDS[k].test(c.relation || '') || (k !== 'friend' && KIND_WORDS[k].test(c.name || ''))) || [''])[0];
+async function contactsGet() { try { const j = await chatCall({ action: 'contacts' }); return (j && j.contacts) || []; } catch (e) { return []; } }
+(() => { const box = $('#pp-kinds'); if (!box) return;
+  box.innerHTML = PP_KINDS.map(([k, ic, hi, en]) => `<button type="button" data-k="${k}">${ic} ${T(hi, en)}</button>`).join('');
+  box.querySelectorAll('[data-k]').forEach((b) => { b.onclick = () => { const k = PP_KINDS.find((x) => x[0] === b.dataset.k); $('#pp-rel').value = k[2]; box.querySelectorAll('button').forEach((o) => o.classList.toggle('on', o === b)); }; }); })();
 async function peopleLoad() {
   const box = $('#people-list'); box.innerHTML = '<p class="muted">…</p>';
   try {
     const j = await chatCall({ action: 'contacts' });
-    const cs = (j && j.contacts) || [];
-    box.innerHTML = cs.length ? cs.map((c) => `<div class="pp-row"><b>${esc(c.name)}${c.relation ? ' <small class="muted">(' + esc(c.relation) + ')</small>' : ''}</b>` +
+    const order = PP_KINDS.map((k) => k[0]);
+    const cs = ((j && j.contacts) || []).map((c) => ({ ...c, kind: kindOf(c) })).sort((a, b) => (order.indexOf(a.kind) + 1 || 99) - (order.indexOf(b.kind) + 1 || 99));
+    box.innerHTML = cs.length ? cs.map((c) => `<div class="pp-row"><b>${((PP_KINDS.find((k) => k[0] === c.kind) || [])[1] || '👤')} ${esc(c.name)}${c.relation ? ' <small class="muted">(' + esc(c.relation) + ')</small>' : ''}</b>` +
       `<a class="tel" href="tel:${esc(c.phone)}" aria-label="फ़ोन">📞</a><a class="wa" href="https://wa.me/${esc(c.phone.replace('+', ''))}" target="_blank" rel="noopener" aria-label="WhatsApp">🟢</a>` +
       `<button class="rm" type="button" data-rm="${esc(c.contact_id)}" aria-label="हटाएँ">✕</button></div>`).join('')
       : '<p class="muted">' + T('अभी कोई नहीं। नीचे से अपने दोस्तों को जोड़िए।', 'Nobody yet. Add friends below.') + '</p>';
@@ -2231,10 +2247,10 @@ async function peopleLoad() {
 $('#pp-add').addEventListener('click', async () => {
   const name = $('#pp-name').value.trim(), phone = $('#pp-phone').value.replace(/[^\d+]/g, '');
   if (!name) return ($('#pp-msg').textContent = T('नाम लिखिए', 'Write the name'));
-  if (!/^\+?\d{10,13}$/.test(phone)) return ($('#pp-msg').textContent = T('10 अंक का मोबाइल नंबर लिखिए', 'Write a 10-digit mobile number'));
+  if (!/^\+?\d{10,13}$/.test(phone)) return ($('#pp-msg').textContent = T('पूरा नंबर लिखिए (मोबाइल 10 अंक, लैंडलाइन 0 के साथ)', 'Write the full number (mobile 10 digits, landline with 0)'));
   const j = await chatCall({ action: 'contact_add', name, relation: $('#pp-rel').value.trim(), phone });
   $('#pp-msg').textContent = j.ok ? T('✓ सेव हो गया', '✓ Saved') : j.why === 'full' ? T('30 लोग पूरे हो गए', 'The list is full (30)') : T('सेव नहीं हुआ', 'Could not save');
-  if (j.ok) { $('#pp-name').value = ''; $('#pp-rel').value = ''; $('#pp-phone').value = ''; peopleLoad(); }
+  if (j.ok) { $('#pp-name').value = ''; $('#pp-rel').value = ''; $('#pp-phone').value = ''; document.querySelectorAll('#pp-kinds .on').forEach((o) => o.classList.remove('on')); peopleLoad(); }
 });
 $('#people-back').addEventListener('click', () => show(store.get('gs_role') === 'elder' ? 'elder' : 'home'));
 
@@ -2441,6 +2457,13 @@ $('#t-msgs').addEventListener('click', () => {
     } catch (e) { $('#e-send-msg').textContent = T('इंटरनेट नहीं', 'Offline'); }
   };
 });
+// after the help button: the saved doctor, hospital and ambulance as big call buttons
+async function emergencyNums() {
+  const cs = (await contactsGet()).filter((c) => ['doctor', 'hospital', 'ambulance'].includes(kindOf(c)));
+  if (!cs.length || $('#e-panel').classList.contains('hidden')) return;
+  $('#e-panel').insertAdjacentHTML('beforeend', '<p style="margin:14px 0 4px"><b>' + T('आपके ज़रूरी नंबर', 'Your important numbers') + '</b></p>' +
+    cs.map((c) => `<a class="btn secondary" style="margin:6px 0;text-decoration:none;text-align:center" href="tel:${esc(c.phone)}">${((PP_KINDS.find((k) => k[0] === kindOf(c)) || [])[1] || '📞')} ${esc(c.name)}</a>`).join(''));
+}
 $('#t-help').addEventListener('click', async () => {
   if (!window.confirm(T('क्या घर वालों को अभी बताएँ कि आपको मदद चाहिए? स्नेहा उन्हें तुरंत फ़ोन करेगी। बहुत ज़रूरी हो तो 108 पर भी फ़ोन करें।', 'Tell your family now that you need help? Sneha will phone them at once. In a serious emergency also call 108.'))) return;
   elderPanel('<h2>🚨 ' + T('भेज रहे हैं…', 'Sending…') + '</h2>');
@@ -2450,6 +2473,7 @@ $('#t-help').addEventListener('click', async () => {
     elderPanel(j.ok ? '<h2>✓ ' + T('घर वालों को बता दिया', 'Your family has been told') + '</h2><p>' + T('स्नेहा उन्हें फ़ोन कर रही है। आराम से बैठिए, मैं आपके साथ हूँ। बहुत ज़रूरी हो तो 108 पर फ़ोन कीजिए।', 'Sneha is phoning them. Sit down and rest. In a serious emergency call 108.') + '</p><a class="btn warm" href="tel:108" style="text-decoration:none;text-align:center">📞 108</a>'
       : '<h2>' + T('नहीं भेज पाए', 'Could not send') + '</h2><a class="btn warm" href="tel:108" style="text-decoration:none;text-align:center">📞 108</a>');
   } catch (e) { elderPanel('<h2>' + T('इंटरनेट नहीं', 'Offline') + '</h2><a class="btn warm" href="tel:108" style="text-decoration:none;text-align:center">📞 108</a>'); }
+  emergencyNums();
 });
 // who can see my news (the elder may remove anyone)
 async function elderCircle() {
@@ -3083,7 +3107,17 @@ async function talkOpen(o) {
     let ps = []; try { const r = await vcCall({ action: 'parties' }); ps = (r && r.parties) || []; if (r && r.ice) ICE = r.ice; } catch (e) {}
     const w = stem(o.who || '');
     const p = w && ps.find((x) => [x.name, x.relation].some((v) => v && songNorm(v).split(' ').some((t) => t.length > 1 && (stem(t) === w || stem(t).startsWith(w) || w.startsWith(stem(t))))));
-    if (p) vcStart(p.party, p.name, !!o.video); else $('#t-people').click();
+    if (p && !o.kind) { vcStart(p.party, p.name, !!o.video); return; }
+    // a doctor, auto, hospital, ambulance or anyone in "my people": the phone dials; the elder talks to them directly
+    const cs = await contactsGet();
+    const c = o.kind ? cs.find((x) => kindOf(x) === o.kind) : w && cs.find((x) => [x.name, x.relation].some((v) => v && songNorm(v).split(' ').some((t) => t.length > 1 && (stem(t) === w || stem(t).startsWith(w)))));
+    const famPhone = !c && w && ((ELDER && ELDER.family.calls) || []).find((x) => [x.name, x.relation].some((v) => v && songNorm(v).split(' ').some((t) => t.length > 1 && (stem(t) === w || stem(t).startsWith(w)))));
+    const num = c ? { name: c.name, phone: c.phone } : famPhone ? { name: famPhone.name, phone: famPhone.phone } : o.kind === 'ambulance' ? { name: T('एम्बुलेंस 108', 'Ambulance 108'), phone: '108' } : p ? null : null;
+    if (p) { vcStart(p.party, p.name, !!o.video); return; }
+    if (!num) { elderPanel('<h2>📞 ' + T('यह नंबर सेव नहीं है', 'This number is not saved') + '</h2><p>' + T('घर वाले "मेरे लोग" में डॉक्टर, ऑटो, अस्पताल जैसे नंबर जोड़ दें, फिर स्नेहा से कहिए।', 'Ask your family to add numbers such as doctor, auto or hospital under "My people", then ask Sneha.') + '</p>' +
+      `<button class="btn secondary" type="button" onclick="show('people')">📒 ${T('मेरे लोग', 'My people')}</button>`); return; }
+    elderPanel(`<h2>📞 ${esc(num.name)}</h2><a class="btn dial" href="tel:${esc(num.phone)}">📞 ${T('फ़ोन करें', 'Call now')}</a><p class="muted">${esc(num.phone)} · ${T('हरा बटन दबाइए; आप सीधे उनसे बात करेंगे।', 'Press the green button; you talk to them directly.')}</p>`);
+    try { location.href = 'tel:' + num.phone; } catch (e) {}
   } else if (o.what === 'songs') { show('elder'); $('#t-songs').click(); setTimeout(() => { const b = $('#e-panel [data-list]'); if (b) b.click(); }, 200); }
   else if (o.what === 'chat') show('chat');
   else if (o.what === 'msgs') { show('elder'); $('#t-msgs').click(); }
