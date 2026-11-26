@@ -202,6 +202,8 @@
   body:has(#v-chat:not(.hidden)) .install-bar, body:has(#v-talk:not(.hidden)) .install-bar, body:has(#vc:not(.hidden)) .install-bar { display: none; }
   .feat { list-style: none; padding: 0; margin: 12px 0; } .feat li { display: flex; gap: 10px; align-items: flex-start; margin: 8px 0; font-size: 17px; } .feat li > span:first-child { font-size: 22px; }
   .song-facts { display: flex; flex-wrap: wrap; gap: 4px 14px; justify-content: center; margin-top: 6px; font-size: 16px; font-weight: 500; }
+  .tab-off { display: none !important; }
+  .acct-links .btn { margin: 6px 0; }
   .tile.sos { background: #dc2626; color: #fff; grid-column: 1 / -1; min-height: 90px; }
   .door { display: block; width: 100%; border: 0; border-radius: 24px; padding: 22px 16px; margin: 12px 0; font: inherit; font-size: 21px; font-weight: 800; text-align: left; cursor: pointer; }
   .door small { display: block; font-size: 15px; font-weight: 500; margin-top: 4px; opacity: .85; }
@@ -656,7 +658,7 @@
     </div>
 
 
-    <div class="card" id="msg-card">
+    <div data-tab="talk" class="card" id="msg-card">
       <h2>💌 <span id="msg-title"><span data-en="Message for your loved one">अपनों का संदेश</span></span></h2>
       <p class="muted"><span data-en="Speak or type a message here. Sneha will read it out lovingly in her next call.">यहाँ बोलकर या लिखकर संदेश भेजिए। स्नेहा अगली कॉल में इसे प्यार से पढ़कर सुनाएगी।</span><br>Speak or type a message; Sneha reads it out in her next call.</p>
       <label for="msg-from">आपका नाम / Your name</label>
@@ -669,10 +671,10 @@
       <div id="msg-list"></div>
     </div>
 
-    <div class="card"><div style="display:flex;gap:8px"><button class="btn primary" type="button" data-go="chat" style="flex:1">💬 <span data-en="Family chat">परिवार की बातचीत</span></button>
+    <div data-tab="talk" class="card"><div style="display:flex;gap:8px"><button class="btn primary" type="button" data-go="chat" style="flex:1">💬 <span data-en="Family chat">परिवार की बातचीत</span></button>
       <button class="btn secondary" type="button" data-go="people" style="flex:1">📒 <span data-en="Their contacts">उनके लोग</span></button></div></div>
-    <div class="card" id="vc-card"><div class="push-card" style="margin-bottom:8px"></div><h2>📹 <span data-en="Free voice &amp; video calls">मुफ़्त आवाज़ और वीडियो कॉल</span></h2><p class="muted" style="margin:0 0 8px"><span data-en="Video goes straight between the phones; nothing is recorded.">वीडियो सीधे फ़ोन से फ़ोन जाता है; कुछ रिकॉर्ड नहीं होता।</span></p><div class="vc-list"></div></div>
-    <div class="card" id="circle-card">
+    <div data-tab="talk" class="card" id="vc-card"><div class="push-card" style="margin-bottom:8px"></div><h2>📹 <span data-en="Free voice &amp; video calls">मुफ़्त आवाज़ और वीडियो कॉल</span></h2><p class="muted" style="margin:0 0 8px"><span data-en="Video goes straight between the phones; nothing is recorded.">वीडियो सीधे फ़ोन से फ़ोन जाता है; कुछ रिकॉर्ड नहीं होता।</span></p><div class="vc-list"></div></div>
+    <div data-tab="family" class="card" id="circle-card">
       <h2>👥 <span data-en="Family & caretakers">परिवार और देखभाल करने वाले</span></h2>
       <p class="muted"><span data-en="Add people who should know how they are. Family see daily news and messages; a caretaker or neighbour sees only today's status and alerts. Nobody sees payments.">उन्हें जोड़िए जिन्हें हाल पता होना चाहिए। परिवार: रोज़ की ख़बर और संदेश। देखभाल करने वाले / पड़ोसी: सिर्फ़ आज का हाल और ज़रूरी ख़बर। भुगतान कोई नहीं देखता।</span></p>
       <div id="circle-list"></div>
@@ -690,7 +692,7 @@
       <button class="btn secondary" id="elder-link" type="button"><span data-en="Share the link for their phone">उनके फ़ोन का लिंक भेजें</span></button>
     </div>
 
-    <div class="card" id="song-send-card"></div>
+    <div data-tab="talk" class="card" id="song-send-card"></div>
 
     <div class="card" id="up-card">
       <h2>📮 परिवार को संदेश / Message to family</h2>
@@ -735,7 +737,7 @@
       <p class="muted"><span data-en="Weather is always shown. Cricket scores are coming soon.">मौसम हमेशा दिखता है। क्रिकेट स्कोर जल्द आएगा।</span></p>
     </div>
 
-    <div class="card" id="invite-card">
+    <div data-tab="family" class="card" id="invite-card">
       <h2>👨‍👩‍👧 <span data-en="Add your family">परिवार को जोड़ें</span></h2>
       <p class="muted"><span data-en="Send this app to brothers, sisters and grandchildren. One tap opens it, already logged in. Share it only with family.">भाई-बहनों और बच्चों को यह ऐप भेजिए। एक बार दबाते ही खुल जाएगा, कोड डालने की ज़रूरत नहीं। सिर्फ़ परिवार के साथ साझा करें।</span></p>
       <button class="btn primary" id="invite-wa" type="button">💬 <span data-en="Send on WhatsApp">WhatsApp पर भेजें</span></button>
@@ -743,7 +745,7 @@
       <div id="invite-msg" class="err"></div>
     </div>
 
-    <div class="card" id="occ-card">
+    <div data-tab="family" class="card" id="occ-card">
       <h2>🎉 ख़ास दिन / Special days</h2>
       <p class="muted"><span data-en="Birthdays, wedding anniversary, children's and grandchildren's birthdays, days of remembrance. Sneha greets lovingly on the day (on a remembrance day she only remembers), and you get a reminder the day before.">जन्मदिन, शादी की सालगिरह, बच्चों-पोतों के जन्मदिन, पुण्यतिथि। स्नेहा उस दिन प्यार से बधाई देगी (पुण्यतिथि पर बस याद करेगी), और एक दिन पहले आपको याद दिलाया जाएगा।</span><br>Sneha greets on the day; you get a reminder the day before.</p>
       <div id="occ-list"></div>
@@ -779,7 +781,7 @@
       <p class="q" id="thought">—</p>
     </div>
 
-    <div class="card">
+    <div data-tab="account" class="card">
       <h2>आपकी सेवा / Your service</h2>
       <div class="row"><span>प्लान / Plan</span><b id="h-plan">—</b></div>
       <div class="row"><span>कब से / Since</span><b id="h-since">—</b></div>
@@ -788,7 +790,14 @@
       <div class="row"><span>आपका कोड / Your code</span><b id="h-code">—</b></div>
     </div>
     <p id="h-updated" class="muted" style="text-align:center"></p>
-  </section>
+      <div data-tab="family" class="card"><button class="btn secondary" type="button" data-go="meds">💊 <span data-en="Medicines and times">दवाइयाँ और समय</span></button></div>
+    <div data-tab="account" class="card acct-links">
+      <button class="btn secondary" type="button" data-go="pay">💳 <span data-en="Plan and payments">प्लान और भुगतान</span></button>
+      <button class="btn secondary" type="button" data-go="sneha">🙋 <span data-en="About Sneha">स्नेहा के बारे में</span></button>
+      <button class="btn secondary" type="button" data-go="help">🆘 <span data-en="Help and emergency numbers">मदद और आपात नंबर</span></button>
+      <a class="btn secondary" href="privacy.html" style="text-decoration:none;text-align:center">🔒 <span data-en="Privacy">गोपनीयता</span></a>
+    </div>
+</section>
 
   <!-- Payments -->
   <section id="v-pay" class="view hidden">
@@ -1005,11 +1014,10 @@
   <button type="button" id="tb-end"><b>✖</b><span data-en="End">बंद करें</span></button>
 </div>
 <nav id="tabs" class="hidden">
-  <button data-go="home" class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11 12 4l9 7v9H3z"/></svg><span data-en="Home">सेवा</span></button>
-  <button data-go="pay"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="M3 10h18"/></svg><span data-en="Payments">भुगतान</span></button>
-  <button data-go="meds"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="9" width="18" height="7" rx="3.5"/><path d="M12 9v7"/></svg><span data-en="Medicines">दवाई</span></button>
-  <button data-go="sneha"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2"/></svg><span data-en="Sneha">स्नेहा</span></button>
-  <button data-go="help"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v6M12 16v.5"/></svg><span data-en="Help">मदद</span></button>
+  <button data-go="home" data-tab="today" class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><span data-en="Today">आज</span></button>
+  <button data-go="home" data-tab="talk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 5h16v11H9l-5 4z"/></svg><span data-en="Talk">बात</span></button>
+  <button data-go="home" data-tab="family"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8" cy="8" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M2 20c0-3.5 2.7-6 6-6s6 2.5 6 6M14 20c0-2.6 1.4-4.6 3.5-4.6S21 17.4 21 20"/></svg><span data-en="Family">परिवार</span></button>
+  <button data-go="home" data-tab="account"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"/></svg><span data-en="Account">खाता</span></button>
 </nav>
 
 <script>
@@ -1183,12 +1191,21 @@ const store = {
   del: (k) => { if (window.__PREVIEW) { delete (window.__MEM || {})[k]; return; } try { localStorage.removeItem(k); } catch (e) {} },
 };
 
+// the family's page in four tabs: आज (today), बात (talk), परिवार (family), खाता (account)
+let HOMETAB = 'today';
+function homeTab(t) {
+  HOMETAB = t;
+  document.querySelectorAll('#v-home > .card, #v-home > details').forEach((c) => c.classList.toggle('tab-off', (c.dataset.tab || 'today') !== t));
+  document.querySelectorAll('nav button').forEach((b) => b.classList.toggle('on', b.dataset.tab === t));
+}
 function show(view) {
   document.querySelectorAll('.view').forEach((v) => v.classList.add('hidden'));
   $('#v-' + view).classList.remove('hidden');
   const tabbed = ['home', 'pay', 'meds', 'sneha', 'help'].includes(view);
   $('#tabs').classList.toggle('hidden', !tabbed);
-  document.querySelectorAll('nav button').forEach((b) => b.classList.toggle('on', b.dataset.go === view));
+  const navTab = view === 'home' ? HOMETAB : { pay: 'account', sneha: 'account', help: 'account', meds: 'family' }[view];
+  document.querySelectorAll('nav button').forEach((b) => b.classList.toggle('on', b.dataset.tab === navTab));
+  if (view === 'home') homeTab(HOMETAB);
   window.scrollTo(0, 0);
   if (view === 'home') { loadStatus(); circleList(); if (!$('#song-send-card').innerHTML) songCard($('#song-send-card'), { needFrom: true, body: () => ({ code: store.get('gs_code') }) }); }
   $('#talk-bar').classList.toggle('hidden', view !== 'talk');
@@ -1224,7 +1241,7 @@ function busy(btn, on, text) {
 }
 document.addEventListener('click', (e) => {
   const b = e.target.closest('[data-go]');
-  if (b) { e.preventDefault(); show(b.dataset.go); }
+  if (b) { e.preventDefault(); if (b.dataset.tab) { HOMETAB = b.dataset.tab; } show(b.dataset.go); }
 });
 
 // ---- sign-up form, built from the same field list as the n8n form ----
