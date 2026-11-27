@@ -96,6 +96,7 @@
   .talk-face video { position: absolute; right: 8px; bottom: 8px; width: 28%; border-radius: 12px; border: 2px solid #fff; transform: scaleX(-1); }
   .talk-ai { position: absolute; left: 8px; top: 8px; background: rgba(255,255,255,.85); color: #9a3412; font-size: 12px; padding: 2px 8px; border-radius: 99px; }
   .talk-mood { position: absolute; left: 8px; bottom: 8px; background: rgba(255,255,255,.9); color: #7c2d12; font-size: 13px; padding: 3px 10px; border-radius: 99px; }
+  .btn.pulse { animation: campulse 1.2s ease-in-out 4; }
   #talk-cam.pulse, #tb-cam.pulse { animation: campulse 1.2s ease-in-out 6; border-color: #ea580c; }
   @keyframes campulse { 50% { transform: scale(1.08); box-shadow: 0 0 0 6px rgba(234,88,12,.25); } }
   .linkbtn { background: none; border: 0; padding: 0; color: #c2410c; text-decoration: underline; font: inherit; cursor: pointer; }
@@ -240,6 +241,8 @@
   body.has-back .install-bar { bottom: 78px; }
   .talk-bar #tb-back, nav #nav-back { flex: 0 0 64px; }
   .toast { position: fixed; left: 50%; bottom: 96px; transform: translateX(-50%); z-index: 90; background: #431407; color: #fff; padding: 12px 18px; border-radius: 14px; font-size: 18px; box-shadow: 0 6px 20px rgba(0,0,0,.25); max-width: 90vw; text-align: center; }
+  .trip-banner { display: block; width: 100%; margin: 10px 0 0; padding: 12px 14px; border: 2px solid #fb923c; border-radius: 16px; background: #fff7ed; color: #7c2d12; font: inherit; font-size: 18px; font-weight: 800; text-align: left; cursor: pointer; }
+  .trip-banner.hidden { display: none; }
   .install-bar { position: fixed; left: 8px; right: 8px; bottom: 8px; z-index: 40; display: flex; gap: 8px; align-items: center; background: #fff7ed; border: 2px solid #fb923c; border-radius: 18px; padding: 10px 12px; box-shadow: 0 6px 20px rgba(0,0,0,.18); color: #7c2d12; }
   .install-bar > span { flex: 1; font-size: 16px; } .install-bar small { display: block; font-size: 13px; }
   .install-bar .btn { width: auto; margin: 0; padding: 10px 16px; } .install-x { border: 0; background: none; font-size: 22px; color: #7c2d12; cursor: pointer; }
@@ -532,6 +535,7 @@
       <button class="tile" id="t-songs" type="button"><span class="ic">🎵</span><span data-en="Songs & bhajans">गाने और भजन</span><small data-en="Sneha plays them">स्नेहा सुनाएगी</small></button>
       <button class="tile" data-go="chat" type="button"><span class="ic">💬</span><span data-en="Family chat">परिवार की बातचीत</span><small data-en="Photos, voice notes">फ़ोटो · आवाज़ संदेश</small></button>
       <button class="tile" id="t-msgs" type="button"><span class="ic">💌</span><span data-en="Messages">संदेश</span><small data-en="From and to family">घर वालों के संदेश</small></button>
+      <button class="tile" data-go="trip" type="button"><span class="ic">🧳</span><span data-en="Travelling">सफ़र</span><small data-en="Family sees where you reached">घर वाले देखें कहाँ पहुँचे</small></button>
       <button class="tile sos" id="t-help" type="button">🚨 <span data-en="Help – tell my family now">मदद – घर वालों को अभी बताएँ</span></button>
     </div>
     <div id="e-panel" class="card hidden" style="margin-top:12px"></div>
@@ -541,6 +545,36 @@
     </details>
     <div class="card push-card" style="margin-top:12px"></div>
     <p style="text-align:center"><button class="linkbtn" id="e-switch" type="button"><span data-en="Open the family app on this phone">इस फ़ोन पर परिवार वाला ऐप खोलें</span></button></p>
+  </section>
+
+  <!-- सफ़र साथी: the elder starts a trip; the family sees where they have reached -->
+  <section id="v-trip" class="view hidden">
+    <div class="card"><button class="linkbtn homebtn" type="button" data-back>🏠 <span data-en="Home">घर</span></button>
+      <h2>🧳 <span data-en="Travel companion">सफ़र साथी</span></h2>
+      <div id="trip-elder" class="hidden">
+        <div id="trip-new">
+          <p style="margin:0 0 8px"><span data-en="Going somewhere? Your family will see where you have reached and when you will arrive, so they can come to pick you up.">सफ़र पर जा रहे हैं? घर वाले देख पाएँगे कि आप कहाँ तक पहुँचे और कब पहुँचेंगे, ताकि लेने आ सकें।</span></p>
+          <label for="trip-dest" style="font-weight:800"><span data-en="Where are you going?">कहाँ जा रहे हैं?</span></label>
+          <input id="trip-dest" type="text" maxlength="40" autocomplete="off" placeholder="जैसे: नागपुर / e.g. Nagpur" style="font-size:20px">
+          <button class="btn primary" id="trip-go" type="button" style="width:100%;margin-top:10px">✅ <span data-en="Yes, start the trip and show my family">हाँ, सफ़र शुरू करें – घर वालों को दिखाएँ</span></button>
+          <p class="muted" style="font-size:14px"><span data-en="Only for this trip. Your phone shows a notice the whole time; it stops by itself when you arrive, or after 24 hours. The places are deleted a day later.">सिर्फ़ इस सफ़र के लिए। पूरे समय फ़ोन पर सूचना दिखेगी; पहुँचते ही या 24 घंटे बाद अपने-आप बंद। जगहें एक दिन बाद मिट जाती हैं।</span></p>
+        </div>
+        <div id="trip-on" class="hidden">
+          <p style="font-size:20px;margin:6px 0"><b id="trip-on-text"></b></p>
+          <p class="muted" id="trip-on-sub"></p>
+          <button class="btn primary" id="trip-arrived" type="button" style="width:100%">🏁 <span data-en="I have arrived – end the trip">पहुँच गया – सफ़र ख़त्म करें</span></button>
+        </div>
+        <p id="trip-msg" class="muted"></p>
+      </div>
+      <div id="trip-family" class="hidden">
+        <p id="trip-fam-title" style="font-size:20px;font-weight:800;margin:4px 0"></p>
+        <div id="trip-map" style="height:320px;border-radius:14px;margin:8px 0;background:#f5ebe0"></div>
+        <div id="trip-fam-facts" style="font-size:18px"></div>
+        <div style="display:flex;gap:8px;margin-top:10px"><button class="btn primary" id="trip-call" type="button" style="flex:1">📞 <span data-en="Call">कॉल करें</span></button>
+          <button class="btn secondary" id="trip-refresh" type="button" style="flex:1">🔄 <span data-en="Refresh">ताज़ा करें</span></button></div>
+        <p class="muted" style="font-size:13px"><span data-en="Updates about every 5 minutes. Map © OpenStreetMap contributors.">लगभग हर 5 मिनट में नई जगह। नक़्शा © OpenStreetMap contributors.</span></p>
+      </div>
+    </div>
   </section>
 
   <!-- Radio: Akashvani live inside the app -->
@@ -632,6 +666,7 @@
 
   <!-- A family-circle member's view -->
   <section id="v-care" class="view hidden">
+    <button type="button" class="trip-banner hidden" data-go="trip"></button>
     <div class="card sn-head"><img src="sneha.jpg" alt="स्नेहा / Sneha" width="76" height="76" class="sn-mini"><div><h2 style="margin:4px 0" id="c-title">—</h2>
       <p class="muted" id="c-sub" style="margin:0"></p><p style="margin:4px 0 0;font-size:14px"><span data-en="Sneha keeps you posted 💛">स्नेहा आपको ख़बर देती रहेगी 💛</span></p></div></div>
     <div id="c-friend" class="hidden">
@@ -707,6 +742,7 @@
       <p id="next-call">—</p>
       <span id="h-status" class="pill wait">—</span>
       <p id="h-status-text" style="font-size:15px;margin-top:6px"></p>
+      <button type="button" class="trip-banner hidden" data-go="trip"></button>
     </div>
 
     <div class="card sn-head"><img src="sneha.jpg" alt="स्नेहा / Sneha" width="76" height="76" class="sn-mini"><div style="flex:1"><p style="margin:0 0 8px"><b><span data-en="Sneha is here for your family 💛">स्नेहा आपके परिवार के साथ है 💛</span></b></p><button class="btn primary talk-open" data-go="talk" type="button">📹 <span data-en="Talk to Sneha">स्नेहा से बात करें</span></button></div></div>
@@ -1324,8 +1360,10 @@ function show(view) {
   document.documentElement.classList.toggle('snap', view === 'role');
   if (view === 'pay') payInit();
   if (view === 'radio') radioOpen();
+  if (view === 'trip') tripOpen(); else { try { clearInterval(TRIP.timer); } catch (e) {} }
+  if (view === 'home' || view === 'care') setTimeout(() => { try { tripBanner(); } catch (e) {} }, 300);
   if (view === 'tv') tvOpen(); else { try { tvStop(); } catch (e) {} }
-  if (view === 'elder') { try { likesRow(); } catch (e) {} }
+  if (view === 'elder') { try { likesRow(); } catch (e) {} try { tripWebWatch(); } catch (e) {} }
   if (view === 'chat') chatOpen(); else { try { clearInterval(CHAT.timer); } catch (e) {} }
   if (view === 'people') { peopleLoad(); $('#people-title').textContent = store.get('gs_role') === 'elder' ? T('मेरे लोग', 'My people') : T('उनके लोग', 'Their people'); }
   if (['home', 'elder', 'care'].includes(view)) setTimeout(pushCard, 50);
@@ -2353,6 +2391,112 @@ $('#t-people').addEventListener('click', () => {
 
 // ---- Phone notifications: calls ring even when the app is closed (web push; Android Chrome, iPhone from the home screen) ----
 API.push = API_BASE + '/app-push';
+API.trip = API_BASE + '/app-trip';
+// ---- सफ़र साथी ----
+const TRIP = { timer: null, watch: null, lastSent: 0, map: null, layer: null };
+let CARE_ELDER = '';
+const elderNameNow = () => CARE_ELDER || ($('#h-elder').textContent || '').replace('—', '').trim() || T('वे', 'They');
+const tripCall = async (body) => { const a = vcAuth(); if (!a) return { ok: false }; return (await fetch(API.trip, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ ...a, ...body }) })).json(); };
+const hhmmOf = (iso) => { const d = new Date(Date.parse(iso) + 5.5 * 3600e3), h = d.getUTCHours(), m = String(d.getUTCMinutes()).padStart(2, '0');
+  const part = h < 4 ? 'रात' : h < 12 ? 'सुबह' : h < 16 ? 'दोपहर' : h < 20 ? 'शाम' : 'रात';
+  return LANG === 'en' ? `${((h + 11) % 12) + 1}:${m} ${h < 12 ? 'am' : 'pm'}` : `${part} ${((h + 11) % 12) + 1}:${m} बजे`; };
+async function tripOpen() {
+  const elder = store.get('gs_role') === 'elder';
+  $('#trip-elder').classList.toggle('hidden', !elder); $('#trip-family').classList.toggle('hidden', elder);
+  clearInterval(TRIP.timer);
+  if (elder) { tripElderShow(); return; }
+  await tripFamilyShow(); TRIP.timer = setInterval(() => { if (!$('#v-trip').classList.contains('hidden')) tripFamilyShow(); else clearInterval(TRIP.timer); }, 60000);
+}
+// the elder's side
+async function tripElderShow() {
+  let on = false, id = store.get('gs_trip') || '';
+  if (NATIVE && SN.tripState) { try { const r = await SN.tripState(); on = !!r.on; id = r.trip_id || id; } catch (e) {} } else on = !!id;
+  $('#trip-new').classList.toggle('hidden', on); $('#trip-on').classList.toggle('hidden', !on);
+  if (on) { $('#trip-on-text').textContent = T(`🧳 सफ़र चालू: ${store.get('gs_trip_dest') || ''}`, `🧳 Trip on: ${store.get('gs_trip_dest') || ''}`);
+    $('#trip-on-sub').textContent = NATIVE ? T('घर वाले देख पा रहे हैं कि आप कहाँ तक पहुँचे। फ़ोन बंद करके रख सकते हैं।', 'Your family can see where you have reached. You may lock the phone.')
+      : T('घर वाले देख पा रहे हैं। यह पेज खुला रखिए (Android ऐप में फ़ोन बंद होने पर भी चलता है)।', 'Your family can see it. Keep this page open (the Android app works even when locked).'); }
+}
+async function tripPlace(pos) { try { const p = await placeName(pos); return p ? p.city : ''; } catch (e) { return ''; } }
+async function tripBattery() { try { const b = navigator.getBattery ? await navigator.getBattery() : null; return b ? Math.round(b.level * 100) : undefined; } catch (e) { return undefined; } }
+$('#trip-go').addEventListener('click', async () => {
+  const dest = $('#trip-dest').value.trim(); const msg = $('#trip-msg');
+  if (!dest) { msg.textContent = T('कहाँ जा रहे हैं, यह लिखिए', 'Please write where you are going'); $('#trip-dest').focus(); return; }
+  msg.textContent = T('शुरू कर रही हूँ…', 'Starting…');
+  const pos = await locPosition();
+  if (!pos) { msg.textContent = T('फ़ोन ने जगह नहीं बताई। फ़ोन की सेटिंग में "लोकेशन" चालू करके फिर दबाइए।', 'The phone did not share its location. Turn on Location and try again.'); return; }
+  let d = null; try { const g = await (await fetch('https://geocoding-api.open-meteo.com/v1/search?count=1&language=hi&format=json&countryCode=IN&name=' + encodeURIComponent(dest))).json(); d = (g.results || [])[0] || null; } catch (e) {}
+  const r = await tripCall({ action: 'start', dest, dest_lat: d && d.latitude, dest_lon: d && d.longitude, lat: pos.lat, lon: pos.lon, acc: Math.round(pos.acc || 0), place: await tripPlace(pos), battery: await tripBattery() }).catch(() => ({ ok: false }));
+  if (!r.ok) { msg.textContent = T('अभी शुरू नहीं हो पाया, थोड़ी देर में फिर दबाइए', 'Could not start; please try again'); return; }
+  store.set('gs_trip', r.trip_id); store.set('gs_trip_dest', dest);
+  if (NATIVE && SN.tripStart) { try { await SN.tripStart({ trip_id: r.trip_id, dest, auth: vcAuth() }); } catch (e) {} } else tripWebWatch();
+  msg.textContent = T(`शुभ यात्रा! 🙏 ${d ? '' : '(जगह का नक़्शा नहीं मिला, पर घर वाले आपकी जगह देख पाएँगे)'}`, `Have a good journey! 🙏`);
+  tripElderShow();
+});
+// without the Android app: positions only while this page is open
+function tripWebWatch() {
+  if (NATIVE || !navigator.geolocation || !store.get('gs_trip') || TRIP.watch != null) return;
+  TRIP.watch = navigator.geolocation.watchPosition(async (p) => {
+    if (Date.now() - TRIP.lastSent < 4.5 * 60000) return; TRIP.lastSent = Date.now();
+    const pos = { lat: p.coords.latitude, lon: p.coords.longitude, acc: p.coords.accuracy };
+    const r = await tripCall({ action: 'point', trip_id: store.get('gs_trip'), lat: pos.lat, lon: pos.lon, acc: Math.round(pos.acc || 0), place: await tripPlace(pos), battery: await tripBattery() }).catch(() => null);
+    if (r && r.ended) tripEndLocal(r.arrived);
+  }, () => {}, { enableHighAccuracy: false, maximumAge: 120000, timeout: 30000 });
+}
+function tripEndLocal(arrived) {
+  if (TRIP.watch != null) { try { navigator.geolocation.clearWatch(TRIP.watch); } catch (e) {} TRIP.watch = null; }
+  if (NATIVE && SN.tripStop) SN.tripStop().catch(() => {});
+  store.del('gs_trip'); if (arrived) toast(T('आप पहुँच गए! घर वालों को बता दिया 🙏', 'You have arrived! Your family knows 🙏'), 3500);
+  if (!$('#v-trip').classList.contains('hidden')) tripElderShow();
+}
+$('#trip-arrived').addEventListener('click', async () => { await tripCall({ action: 'stop', trip_id: store.get('gs_trip') }).catch(() => {}); tripEndLocal(false); $('#trip-msg').textContent = T('सफ़र ख़त्म। घर वालों को बता दिया।', 'Trip ended. Your family has been told.'); });
+// the family's side: where they are on a map, how far, when they will arrive
+function leaflet() {
+  if (window.L) return Promise.resolve(window.L);
+  return new Promise((res, rej) => {
+    const c = document.createElement('link'); c.rel = 'stylesheet'; c.href = 'vendor/leaflet/leaflet.css'; document.head.append(c);
+    const sc = document.createElement('script'); sc.src = 'vendor/leaflet/leaflet.js'; sc.onload = () => res(window.L); sc.onerror = rej; document.head.append(sc);
+  });
+}
+async function tripFamilyShow() {
+  const r = await tripCall({ action: 'get' }).catch(() => null);
+  const t = r && r.trip, who = elderNameNow();
+  const facts = $('#trip-fam-facts');
+  if (!t) { $('#trip-fam-title').textContent = T('अभी कोई सफ़र नहीं चल रहा', 'No trip right now'); facts.innerHTML = `<p class="muted">${T('जब वे ऐप में "सफ़र" शुरू करेंगे, यहाँ उनकी जगह दिखेगी, और पहुँचने से पहले आपको सूचना मिलेगी।', 'When they start a trip in the app, you will see it here and get a note before they arrive.')}</p>`; $('#trip-map').classList.add('hidden'); return t; }
+  $('#trip-fam-title').textContent = (t.status === 'on' ? '🧳 ' : '🏁 ') + T(`${t.dest} का सफ़र${t.status === 'on' ? '' : ' – पूरा'}`, `Trip to ${t.dest}${t.status === 'on' ? '' : ' – done'}`);
+  const rows = [];
+  if (t.last) rows.push(`📍 ${T('अभी', 'Now')}: <b>${esc(t.last.place || T('रास्ते में', 'on the way'))}</b> · ${t.last.mins_ago <= 1 ? T('अभी-अभी', 'just now') : T(`${t.last.mins_ago} मिनट पहले`, `${t.last.mins_ago} min ago`)}${t.status === 'on' && t.last.mins_ago > 30 ? ` <span style="color:#b91c1c">${T('(फ़ोन से देर से ख़बर – शायद नेटवर्क नहीं)', '(no news for a while – maybe no network)')}</span>` : ''}`);
+  if (t.status === 'on' && t.km_left != null) rows.push(`🛣️ ${T(`लगभग ${t.km_left} किमी बाक़ी`, `About ${t.km_left} km to go`)}${t.eta_at ? ` · ${T('पहुँचेंगे लगभग', 'arriving about')} <b>${hhmmOf(t.eta_at)}</b>` : ''}`);
+  if (t.status !== 'on' && t.ended_at) rows.push(`🏁 ${T('ख़त्म', 'Ended')} ${hhmmOf(t.ended_at)}`);
+  if (t.battery != null) rows.push(`🔋 ${T('बैटरी', 'Battery')} ${t.battery}%${t.battery <= 15 ? ' ⚠️' : ''}`);
+  facts.innerHTML = rows.map((x) => `<p style="margin:4px 0">${x}</p>`).join('');
+  const box = $('#trip-map'); box.classList.toggle('hidden', !t.path.length);
+  if (t.path.length) {
+    try {
+      const L = await leaflet();
+      if (!TRIP.map) { TRIP.map = L.map(box, { zoomControl: true, attributionControl: true }); L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 17, attribution: '© OpenStreetMap' }).addTo(TRIP.map); }
+      if (TRIP.layer) TRIP.layer.remove();
+      const g = L.layerGroup().addTo(TRIP.map), pts = t.path.map((p) => [p[0], p[1]]);
+      L.polyline(pts, { color: '#c2410c', weight: 5 }).addTo(g);
+      L.circleMarker(pts[pts.length - 1], { radius: 10, color: '#fff', weight: 3, fillColor: '#c2410c', fillOpacity: 1 }).addTo(g).bindTooltip(t.last && t.last.place || who, { permanent: true, direction: 'top' });
+      if (t.dest_pt) L.marker([t.dest_pt.lat, t.dest_pt.lon]).addTo(g).bindTooltip('🏁 ' + t.dest);
+      TRIP.layer = g;
+      const all = t.dest_pt && t.status === 'on' ? pts.concat([[t.dest_pt.lat, t.dest_pt.lon]]) : pts;
+      TRIP.map.fitBounds(L.latLngBounds(all).pad(0.2)); setTimeout(() => TRIP.map.invalidateSize(), 200);
+    } catch (e) { box.classList.add('hidden'); }
+  }
+  return t;
+}
+// a banner on the family's first screen while a trip is on
+async function tripBanner() {
+  if (store.get('gs_role') === 'elder') return;
+  const r = await tripCall({ action: 'get' }).catch(() => null), t = r && r.trip;
+  document.querySelectorAll('.trip-banner').forEach((b) => {
+    b.classList.toggle('hidden', !(t && t.status === 'on'));
+    if (t && t.status === 'on') b.textContent = `🧳 ${T(`सफ़र पर: ${t.dest}`, `Travelling to ${t.dest}`)}${t.last && t.last.place ? ' · ' + T('अभी', 'now') + ' ' + t.last.place : ''}${t.eta_at ? ' · ~' + hhmmOf(t.eta_at) : ''} – ${T('नक़्शा देखें ›', 'see the map ›')}`;
+  });
+}
+$('#trip-refresh').addEventListener('click', () => tripFamilyShow());
+$('#trip-call').addEventListener('click', () => vcStart('elder', elderNameNow(), false));
 const pushOK = () => NATIVE || ('serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window);
 function pushB64(s) { const p = '='.repeat((4 - s.length % 4) % 4); const b = atob((s + p).replace(/-/g, '+').replace(/_/g, '/')); return Uint8Array.from(b, (c) => c.charCodeAt(0)); }
 async function pushOn(quiet) {
@@ -2919,7 +3063,7 @@ async function loadCare() {
   try {
     const j = await circleCall({ action: 'care', key: store.get('gs_member') });
     if (!j.ok) { if (j.why === 'key') { store.del('gs_member'); show('role'); } return; }
-    const who = j.family.address_as || j.family.elder_name;
+    const who = j.family.address_as || j.family.elder_name; CARE_ELDER = who;
     const friend = j.level === 'friend';
     $('#c-friend').classList.toggle('hidden', !friend); $('#c-carepart').classList.toggle('hidden', friend);
     if (friend) { $('#c-title').textContent = T(`${who} से बात कीजिए`, `Talk to ${who}`); $('#c-sub').textContent = T(`आप: ${j.me.name}`, `You: ${j.me.name}`);
@@ -3466,6 +3610,10 @@ async function cmdOpen(o) {
     const list = tvChannels(cat), name = o.name || (fav && fav.open.cat === cat ? fav.open.name : '');
     const c = (name && list.find((x) => x.n === name)) || (o.name ? null : list[0]);
     if (c) { const b = [...document.querySelectorAll('#tv-list button')].find((x) => x.textContent.includes(c.n)); tvPlay(c, b, !!c.live); }
+  } else if (o.what === 'trip') {
+    if (o.end && !store.get('gs_trip')) return;   // "पहुँच गया" with no trip on: nothing to open
+    show('trip'); if (o.dest && $('#trip-dest')) $('#trip-dest').value = o.dest;
+    setTimeout(() => { const b = o.end ? $('#trip-arrived') : $('#trip-go'); if (b && b.offsetParent) { b.scrollIntoView({ behavior: 'smooth', block: 'center' }); b.classList.add('pulse'); setTimeout(() => b.classList.remove('pulse'), 4000); } }, 400);
   } else if (o.what === 'radio') {
     show('radio'); const sts = RADIO.stations || [];
     // a named station; "वही रेडियो": the last one; "रेडियो लगाओ": their favourite, else their state's Akashvani, else Vividh Bharati
@@ -3508,7 +3656,7 @@ if (/^M[A-Za-z0-9]{10}$/.test(params.get('ref') || '')) store.set('gs_ref', para
 if (params.get('code')) { store.set('gs_code', params.get('code').toUpperCase()); try { history.replaceState(null, '', location.pathname); } catch (e) {} }
 // ?elder=CODE: the link the family sends to the elder's own phone
 if (/^GS-[A-Z0-9]{8}$/.test(String(params.get('elder') || '').toUpperCase())) { store.set('gs_code', params.get('elder').toUpperCase()); store.set('gs_role', 'elder'); history.replaceState(null, '', location.pathname); }
-show(params.get('ack') ? 'seen' : params.get('join') ? 'join' : params.get('chat') && (store.get('gs_code') || store.get('gs_member')) ? 'chat'
+show(params.get('ack') ? 'seen' : params.get('join') ? 'join' : params.get('trip') && (store.get('gs_code') || store.get('gs_member')) ? 'trip' : params.get('chat') && (store.get('gs_code') || store.get('gs_member')) ? 'chat'
   : store.get('gs_code') ? (location.hash === '#talk' ? 'talk' : store.get('gs_role') === 'elder' ? 'elder' : 'home')
   : store.get('gs_member') ? 'care'
   : params.get('view') === 'signup' ? 'signup' : store.get('gs_role') === 'family' ? 'welcome' : 'role');
