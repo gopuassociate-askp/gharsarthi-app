@@ -1155,6 +1155,58 @@ const API_BASE = 'https://app.sadasneha.in/webhook';
 const API = { signup: API_BASE + '/app-signup', status: API_BASE + '/app-status', meds: API_BASE + '/app-medicines', message: API_BASE + '/app-message',
   medAdd: API_BASE + '/app-medicine-add', medRemove: API_BASE + '/app-medicine-remove', seen: API_BASE + '/app-seen',
   occAdd: API_BASE + '/app-occasion-add', occRemove: API_BASE + '/app-occasion-remove' };
+// ---- crash and usage reports: which screens and features are used, how long Sneha takes, every error.
+// Never the content of talks, messages, names or numbers; sent in small batches about once a minute.
+const ULOG = { agg: {}, list: [], t: null, off: false };
+function ulogOff() { try { const c = localStorage.getItem('gs_code') || ''; return ULOG.off || window.__PREVIEW || c === 'GS-DEMO' || c === 'GS-FOUNDER' || /^(localhost|127\.)/.test(location.hostname); } catch (e) { return true; } }
+function ulog(kind, name, ms, detail) {
+  try {
+    if (ulogOff() || !name) return;
+    name = String(name).slice(0, 60);
+    if (kind === 'view' || kind === 'tap' || kind === 'step') { const k = kind + '|' + name; ULOG.agg[k] = (ULOG.agg[k] || 0) + 1; }
+    else if (ULOG.list.length < 40) ULOG.list.push([kind, name, 1, ms == null ? null : Math.round(ms), detail ? String(detail).slice(0, 500) : '']);
+    clearTimeout(ULOG.t); ULOG.t = setTimeout(ulogFlush, 60000);
+  } catch (e) {}
+}
+function ulogFlush() {
+  try {
+    const ev = Object.entries(ULOG.agg).map(([k, n]) => { const [kind, name] = k.split('|'); return [kind, name, n]; }).concat(ULOG.list);
+    ULOG.agg = {}; ULOG.list = [];
+    if (!ev.length || ulogOff()) return;
+    let app = 'web';
+    try { if (window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()) app = 'android ' + (localStorage.getItem('gs_appver') || ''); } catch (e) {}
+    const role = localStorage.getItem('gs_member') ? 'member' : localStorage.getItem('gs_role') === 'elder' ? 'elder' : localStorage.getItem('gs_code') ? 'family' : 'visitor';
+    const body = JSON.stringify({ code: localStorage.getItem('gs_code') || '', role, app: app.trim(), ev: ev.slice(0, 60) });
+    const url = API_BASE + '/app-log';
+    if (!(navigator.sendBeacon && navigator.sendBeacon(url, new Blob([body], { type: 'text/plain;charset=utf-8' })))) fetch(url, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body, keepalive: true }).catch(() => {});
+  } catch (e) {}
+}
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') ulogFlush(); });
+window.addEventListener('error', (e) => { if (e && e.message) ulog('error', 'js', null, `${e.message} @${String(e.filename || '').split('/').pop()}:${e.lineno}:${e.colno}`); });
+window.addEventListener('unhandledrejection', (e) => { const r = e && e.reason; ulog('error', 'promise', null, String((r && (r.stack || r.message)) || r).slice(0, 300)); });
+window.addEventListener('load', () => { try { ulog('time', 'page-load', performance.now()); } catch (e) {} });
+// our own server: failures and slow answers (the address only, never what was sent)
+(function () {
+  const f0 = window.fetch;
+  window.fetch = async function (url, opt) {
+    const u = String((url && url.url) || url || ''); const ours = u.startsWith(API_BASE) && !u.endsWith('/app-log');
+    const t0 = performance.now();
+    try {
+      const r = await f0.apply(this, arguments);
+      if (ours) { const path = u.slice(API_BASE.length).split('?')[0]; if (!r.ok) ulog('error', 'api' + path, null, 'HTTP ' + r.status); else if (path === '/app-talk') ulog('time', 'sneha-reply', performance.now() - t0); }
+      return r;
+    } catch (e) { if (ours) ulog('error', 'api' + u.slice(API_BASE.length).split('?')[0], null, 'network: ' + (e && e.message)); throw e; }
+  };
+})();
+// features: wrap the few functions every feature goes through
+setTimeout(() => {
+  const wrap = (fname, label) => { const f = window[fname]; if (typeof f !== 'function') return; window[fname] = function () { try { ulog('tap', label(...arguments)); } catch (e) {} return f.apply(this, arguments); }; };
+  wrap('likeIt', (kind) => 'play:' + kind);
+  wrap('cmdOpen', (o) => 'voice:' + ((o && o.what) || '?'));
+  wrap('vcStart', (party, name, video) => 'call:' + (video === false ? 'voice' : 'video'));
+  wrap('talkSend', (blob, typed) => typed ? 'talk:typed' : 'talk:spoken');
+}, 0);
+
 // ---- Demo family (?demo=1): the whole family app with sample data, for the founder to review.
 // Nothing reaches n8n: calls to the family endpoints are answered here, in this browser only.
 const DEMO_CODE = 'GS-DEMO';
@@ -1343,6 +1395,7 @@ function homeTab(t) {
   document.querySelectorAll('nav button').forEach((b) => b.classList.toggle('on', b.dataset.tab === t));
 }
 function show(view) {
+  ulog('view', view);
   if (FS) fsClose(true);
   if (!NAV.skip) { try { const cur = history.state && history.state.view; if (!cur) { history.replaceState({ view: ROOTS.includes(view) ? view : homeView(), guard: true }, ''); history.pushState({ view }, ''); } else if (cur !== view && ['elder', 'home', 'care'].includes(view) && ['welcome', 'role', 'login', 'elogin', 'signup', 'done', 'join'].includes(cur)) history.replaceState({ view }, ''); else if (cur !== view) history.pushState({ view }, ''); } catch (e) {} }
   document.querySelectorAll('.view').forEach((v) => v.classList.add('hidden'));
@@ -2212,7 +2265,7 @@ const ICE_POLICY = new URLSearchParams(location.search).get('relay') === '1' ? '
 // ---- Inside the SadaSneha Android app: native call alerts (ring like a phone call) and earpiece/speaker ----
 const NATIVE = (() => { try { return !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform() && window.Capacitor.Plugins.SnehaNative); } catch (e) { return false; } })();
 const SN = NATIVE ? window.Capacitor.Plugins.SnehaNative : null;
-if (NATIVE) { document.documentElement.classList.add('native'); try { const f = document.querySelector('#f-plans span'); if (f) { f.dataset.en = 'Start SadaSneha for my parents'; f.textContent = T('अपने माता-पिता के लिए सदा स्नेहा शुरू करें', 'Start SadaSneha for my parents'); } } catch (e) {} }
+if (NATIVE) { try { SN.info().then((i) => { try { localStorage.setItem('gs_appver', (i && i.version) || ''); } catch (e) {} }).catch(() => {}); } catch (e) {} document.documentElement.classList.add('native'); try { const f = document.querySelector('#f-plans span'); if (f) { f.dataset.en = 'Start SadaSneha for my parents'; f.textContent = T('अपने माता-पिता के लिए सदा स्नेहा शुरू करें', 'Start SadaSneha for my parents'); } } catch (e) {} }
 async function vcSpeaker(on) {
   if (SN && $('#vc').classList.contains('audio')) vcState(on ? '🔊 स्पीकर पर' : '📞 फ़ोन कान से लगाइए, या 🔊 स्पीकर दबाइए', on ? '🔊 On speaker' : '📞 Hold the phone to your ear, or press 🔊 Speaker'); if (!SN) return; try { const r = await SN.setSpeaker({ on }); VC.spk = !!(r && r.speaker); } catch (e) { VC.spk = on; }
   const b = $('#vc-spk'); if (b) { b.querySelector('b').textContent = VC.spk ? '🔊' : '👂'; b.querySelector('span').textContent = VC.spk ? T('स्पीकर', 'Speaker') : T('कान से', 'Earpiece'); b.classList.toggle('on', VC.spk); } }

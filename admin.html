@@ -69,7 +69,18 @@
     <div class="card">
       <div class="stats" id="stats"></div>
       <p style="margin:12px 0 0;display:flex;gap:8px;flex-wrap:wrap"><a class="btn" style="text-decoration:none" href="./?preview=1" target="_blank" rel="noopener">👀 Preview: new visitor journey</a><a class="btn" style="text-decoration:none;background:#7c3aed" href="./?demo=1" target="_blank" rel="noopener">🧪 Demo: an active family</a><a class="btn" style="text-decoration:none;background:#1e3a8a" href="./?demo=founder#talk" target="_blank" rel="noopener">👔 Talk to Sneha (as her boss)</a></p>
-      <div class="tabs"><button data-tab="ops" class="on">Families &amp; calls</button><button data-tab="acc">Accounts</button></div>
+      <div class="tabs"><button data-tab="ops" class="on">Families &amp; calls</button><button data-tab="acc">Accounts</button><button data-tab="use">Usage &amp; errors</button></div>
+    </div>
+    <div id="t-use" class="hidden">
+      <div class="card"><h2>Usage and errors</h2>
+        <p class="muted">From the phones: screens opened, features used, how long Sneha takes, and every error. No names, numbers or what anyone said; families appear only as scrambled ids.</p>
+        <p style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" data-days="1">Today</button><button class="btn" data-days="7">7 days</button><button class="btn" data-days="30">30 days</button></p>
+        <div class="stats" id="use-stats"></div></div>
+      <div class="card"><h2>Errors and crashes</h2><div class="tbl"><table><thead><tr><th>Where</th><th>What</th><th>Times</th><th>Families</th><th>Last</th><th>App</th></tr></thead><tbody id="use-errors"></tbody></table></div></div>
+      <div class="card"><h2>Each day</h2><div class="tbl"><table><thead><tr><th>Day</th><th>Families</th><th>Elders</th><th>Events</th></tr></thead><tbody id="use-daily"></tbody></table></div></div>
+      <div class="card"><h2>Screens opened</h2><div id="use-screens"></div></div>
+      <div class="card"><h2>Features used</h2><div id="use-features"></div></div>
+      <div class="card"><h2>How long things take</h2><div class="tbl"><table><thead><tr><th>What</th><th>Times</th><th>Usual</th><th>Slowest 10%</th></tr></thead><tbody id="use-times"></tbody></table></div></div>
     </div>
     <div id="t-acc" class="hidden">
       <div class="card"><h2>This financial year <span class="muted" id="acc-fy"></span></h2><div class="stats" id="acc-stats"></div><p class="muted" id="acc-gst"></p></div>
@@ -210,9 +221,28 @@ const rs = (x) => '₹' + Number(x || 0).toLocaleString('en-IN', { maximumFracti
 const istToday = () => new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Kolkata' }).format(new Date());
 document.querySelectorAll('.tabs button').forEach((b) => b.addEventListener('click', () => {
   document.querySelectorAll('.tabs button').forEach((x) => x.classList.toggle('on', x === b));
-  $('#t-ops').classList.toggle('hidden', b.dataset.tab !== 'ops'); $('#t-acc').classList.toggle('hidden', b.dataset.tab !== 'acc');
+  $('#t-ops').classList.toggle('hidden', b.dataset.tab !== 'ops'); $('#t-acc').classList.toggle('hidden', b.dataset.tab !== 'acc'); $('#t-use').classList.toggle('hidden', b.dataset.tab !== 'use');
   if (b.dataset.tab === 'acc') loadAccounts();
+  if (b.dataset.tab === 'use') loadUsage(7);
 }));
+// ---- usage and errors ----
+const NAMES = { radio: 'Radio', tv: 'TV', talk: 'Talk to Sneha', elder: 'Elder home', home: 'Family home', chat: 'Family chat', people: 'Calls / people', trip: 'Travel companion', meds: 'Medicines',
+  'play:radio': 'Played radio', 'play:tv': 'Played TV', 'play:song': 'Played a song', 'talk:spoken': 'Spoke to Sneha', 'talk:typed': 'Typed to Sneha', 'call:video': 'Video call made', 'call:voice': 'Voice call made',
+  'sneha-reply': "Sneha's reply", 'page-load': 'App opening' };
+const nm = (x) => NAMES[x] || x;
+const bars = (list) => { const max = Math.max(1, ...list.map((x) => x.count)); return list.map((x) => `<div style="display:flex;gap:8px;align-items:center;margin:3px 0"><span style="width:160px;flex:none">${esc(nm(x.name))}</span><span style="height:12px;border-radius:6px;background:#ea580c;width:${Math.round(x.count / max * 100)}%;min-width:3px"></span><b>${x.count}</b></div>`).join('') || '<p class="muted">Nothing yet</p>'; };
+const secs = (ms) => ms == null ? '—' : (ms / 1000).toFixed(1) + ' s';
+async function loadUsage(days) {
+  try {
+    const u = await api('admin-usage?days=' + days);
+    $('#use-stats').innerHTML = `<div class="stat"><b>${u.active_families}</b><span>active families</span></div><div class="stat"><b>${u.errors.reduce((a, e) => a + e.count, 0)}</b><span>errors</span></div><div class="stat"><b>${(u.apps || []).map((a) => esc(a.name)).join(', ') || '—'}</b><span>app versions</span></div>`;
+    $('#use-errors').innerHTML = u.errors.map((e) => `<tr><td>${e.kind === 'crash' ? '💥 ' : ''}${esc(e.name)}</td><td style="max-width:360px;word-break:break-word">${esc(e.detail)}</td><td>${e.count}</td><td>${e.families}</td><td>${ist(e.last)}</td><td>${esc(e.apps)}</td></tr>`).join('') || '<tr><td colspan="6" class="muted">No errors 🎉</td></tr>';
+    $('#use-daily').innerHTML = u.daily.slice().reverse().map((d) => `<tr><td>${d.day}</td><td>${d.families}</td><td>${d.elders}</td><td>${d.events}</td></tr>`).join('') || '<tr><td colspan="4" class="muted">Nothing yet</td></tr>';
+    $('#use-screens').innerHTML = bars(u.screens); $('#use-features').innerHTML = bars(u.features);
+    $('#use-times').innerHTML = u.timings.map((t) => `<tr><td>${esc(nm(t.name))}</td><td>${t.n}</td><td>${secs(t.median_ms)}</td><td>${secs(t.p90_ms)}</td></tr>`).join('') || '<tr><td colspan="4" class="muted">Nothing yet</td></tr>';
+  } catch (e) { if (e.auth) location.reload(); }
+}
+document.querySelectorAll('[data-days]').forEach((b) => b.addEventListener('click', () => loadUsage(Number(b.dataset.days))));
 async function loadAccounts() {
   try { ACC = await api('admin-accounts'); renderAccounts(); }
   catch (e) { if (e.auth) logout(); }
