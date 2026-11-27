@@ -997,6 +997,12 @@
       <div id="talk-sym" class="talk-sym idle" aria-live="polite"><span class="sym"><svg class="ico" aria-hidden="true"><use href="#i-pointer"/></svg></span><span class="lbl">बटन दबाइए</span></div>
       <p id="talk-state" class="talk-state hidden"><span data-en="Press the button and speak">बटन दबाकर बोलिए</span></p>
       <button class="talk-mic" id="talk-mic" type="button" aria-label="बोलें / Speak"><svg class="ico big" aria-hidden="true"><use href="#i-mic"/></svg></button>
+      <div id="wake-box" class="card hidden" style="margin:10px 0;text-align:left;box-shadow:none;border:2px solid #fed7aa">
+        <p style="margin:0 0 6px"><b><span data-en="Call Sneha without touching: just say “स्नेहा”">हाथ लगाए बिना: बस "स्नेहा" बोलिए</span></b></p>
+        <p class="muted" style="font-size:14px;margin:0 0 8px"><span data-en="The phone itself listens only for her name; nothing is sent anywhere until she opens. A notice stays on the phone while it is on. Best while the phone is charging (it uses some battery). The first time it downloads about 40 MB.">फ़ोन ख़ुद सिर्फ़ उनका नाम सुनता है; स्नेहा के खुलने तक कुछ भी कहीं नहीं जाता। चालू रहने तक फ़ोन पर सूचना दिखेगी। फ़ोन चार्ज होते समय सबसे अच्छा (थोड़ी बैटरी लगती है)। पहली बार लगभग 40 MB डाउनलोड होगा।</span></p>
+        <div style="display:flex;flex-direction:column;gap:8px"><button class="btn primary" type="button" data-wake="charging"><span data-en="On – while charging">चालू – चार्ज होते समय</span></button>
+          <button class="btn secondary" type="button" data-wake="always"><span data-en="On – always">चालू – हमेशा</span></button>
+          <button class="btn secondary" type="button" data-wake="off"><span data-en="Off">बंद</span></button></div></div>
       <div id="loc-ask" class="card hidden" style="margin:10px 0;text-align:left;box-shadow:none;border:2px solid #fed7aa">
         <p style="margin:0 0 6px"><b>📍 <span data-en="Shall Sneha know whether you are at home or out?">स्नेहा जान सके कि आप घर पर हैं या बाहर?</span></b></p>
         <p class="muted" style="font-size:14px;margin:0 0 8px"><span data-en="The phone tells Sneha only the town's name (to talk about its weather). Your location is not saved anywhere and not shown to the family; only in an emergency do they get the town's name.">फ़ोन स्नेहा को सिर्फ़ शहर का नाम बताएगा, ताकि वह वहाँ के मौसम की बात कर सके। आपकी जगह कहीं सेव नहीं होती, घर वालों को भी नहीं दिखती; सिर्फ़ किसी ज़रूरी हालत में उन्हें शहर का नाम जाता है।</span></p>
@@ -1026,7 +1032,7 @@
       <button type="button" class="linkbtn" id="talk-report" style="font-size:14px">🚩 <span data-en="Sneha's reply felt wrong? Tell us">स्नेहा का जवाब ठीक नहीं लगा? बताइए</span></button>
       <div id="talk-log" class="talk-log hidden"></div>
       <p class="muted" style="font-size:14px"><span data-en="Nothing is recorded or saved. With the camera on, Sneha sees a small picture only to understand your mood.">कुछ भी रिकॉर्ड या सेव नहीं होता। कैमरा चालू हो तो स्नेहा सिर्फ़ आपका मन समझने के लिए एक छोटी तस्वीर देखती है।</span>
-        <br><button type="button" class="linkbtn" id="talk-photo"></button> · <button type="button" class="linkbtn" id="talk-loc"></button> · <a href="privacy.html" target="_blank" rel="noopener"><span data-en="Privacy">गोपनीयता</span></a></p>
+        <br><button type="button" class="linkbtn" id="talk-photo"></button> · <button type="button" class="linkbtn" id="talk-loc"></button> · <button type="button" class="linkbtn hidden" id="talk-wake"></button><span id="talk-wake-dot" class="hidden"> · </span><a href="privacy.html" target="_blank" rel="noopener"><span data-en="Privacy">गोपनीयता</span></a></p>
     </div>
   </section>
 
@@ -3426,7 +3432,7 @@ $('#talk-cc').addEventListener('click', () => { store.set('gs_cc', CC() ? 'off' 
 setTimeout(talkCcShow, 0);
 function talkLog(cls, text) { const d = document.createElement('div'); d.className = cls; d.textContent = text; $('#talk-log').prepend(d); }
 async function talkOpen() {
-  locAskShow(); talkWeather();
+  locAskShow(); talkWeather(); try { wakeShow(); } catch (e) {}
   const F = await talkLoadFace(); TALK.nextBlink = performance.now() + 1500; talkDraw(F);
   talkState('बटन दबाकर बोलिए', 'Press the button and speak');
 }
@@ -3773,6 +3779,22 @@ $('#talk-report').addEventListener('click', async () => {
   try { await fetch(API.talk, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ code: store.get('gs_code'), report: { reply: h[i].t, heard: (h[i - 1] && h[i - 1].r === 'u' ? h[i - 1].t : ''), why } }) }); } catch (e) {}
   toast(T('धन्यवाद! हमारी टीम इसे देखेगी 🙏', 'Thank you! Our team will look at it 🙏'), 3000);
 });
+// hands-free "स्नेहा" (the Android app only)
+async function wakeShow() {
+  const can = NATIVE && SN && SN.wakeState && store.get('gs_role') === 'elder';
+  $('#talk-wake').classList.toggle('hidden', !can); $('#talk-wake-dot').classList.toggle('hidden', !can);
+  if (!can) return;
+  let w = { on: false }; try { w = await SN.wakeState(); } catch (e) {}
+  $('#talk-wake').textContent = w.on ? T(`🎤 "स्नेहा" बोलकर बुलाना: चालू${w.always ? ' (हमेशा)' : ' (चार्ज होते समय)'}${w.state === 'loading' ? ' – तैयार हो रही है' : ''} (बदलें)`, `🎤 Say “Sneha” to call her: on${w.always ? ' (always)' : ' (while charging)'} (change)`)
+    : T('🎤 "स्नेहा" बोलकर बुलाना: बंद (बदलें)', '🎤 Say “Sneha” to call her: off (change)');
+}
+$('#talk-wake').addEventListener('click', () => { const b = $('#wake-box'); b.classList.toggle('hidden'); if (!b.classList.contains('hidden')) b.scrollIntoView({ behavior: 'smooth', block: 'center' }); });
+document.querySelectorAll('[data-wake]').forEach((b) => b.addEventListener('click', async () => {
+  const m = b.dataset.wake;
+  try { await SN.wakeSet({ on: m !== 'off', always: m === 'always' }); } catch (e) {}
+  $('#wake-box').classList.add('hidden'); toast(m === 'off' ? T('ठीक है, बंद कर दिया', 'Turned off') : T('ठीक है! अब "स्नेहा" बोलकर बुलाइए', 'Done! Now just say “Sneha”'), 3000);
+  setTimeout(wakeShow, 800);
+}));
 const LOC_ASK_HTML = $('#loc-ask').innerHTML;
 $('#talk-loc').addEventListener('click', () => {
   if (store.get('gs_loc') === 'yes') { if (window.confirm(T('स्नेहा को घर पर या बाहर बताना बंद करें?', 'Stop telling Sneha whether you are home or out?'))) { store.set('gs_loc', 'no'); store.del('gs_home_ll'); TALK_LOC = null; locAskShow(); } }
@@ -3929,8 +3951,13 @@ if (/^M[A-Za-z0-9]{10}$/.test(params.get('ref') || '')) store.set('gs_ref', para
 if (params.get('code')) { store.set('gs_code', params.get('code').toUpperCase()); try { history.replaceState(null, '', location.pathname); } catch (e) {} }
 // ?elder=CODE: the link the family sends to the elder's own phone
 if (/^GS-[A-Z0-9]{8}$/.test(String(params.get('elder') || '').toUpperCase())) { store.set('gs_code', params.get('elder').toUpperCase()); store.set('gs_role', 'elder'); history.replaceState(null, '', location.pathname); }
+if (params.get('wake') === '1' && store.get('gs_code')) {
+  try { history.replaceState(history.state, '', location.pathname); } catch (e) {}
+  setTimeout(() => { try { if (TALK.open) talkListen(); } catch (e) {} }, 1800);
+  ulog('tap', 'wake-word');
+}
 show(params.get('ack') ? 'seen' : params.get('join') ? 'join' : params.get('trip') && (store.get('gs_code') || store.get('gs_member')) ? 'trip' : params.get('chat') && (store.get('gs_code') || store.get('gs_member')) ? 'chat'
-  : store.get('gs_code') ? (location.hash === '#talk' ? 'talk' : store.get('gs_role') === 'elder' ? 'elder' : 'home')
+  : store.get('gs_code') ? (location.hash === '#talk' || params.get('talk') === '1' ? 'talk' : store.get('gs_role') === 'elder' ? 'elder' : 'home')
   : store.get('gs_member') ? 'care'
   : params.get('view') === 'signup' ? 'signup' : store.get('gs_role') === 'family' ? 'welcome' : 'role');
 </script>
