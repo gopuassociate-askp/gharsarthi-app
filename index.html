@@ -3340,7 +3340,7 @@ function helpWatch(t0) {
     st.innerHTML = [
       [true, T('घर वालों को फ़ोन और सूचना भेज दी', 'Family phoned and notified')],
       [mins >= 5, T('कोई नहीं उठाया तो पड़ोसी / दोस्त को भी फ़ोन (अगर जोड़े हैं)', 'If nobody answers: neighbour / friend phoned too (if added)')],
-      [mins >= 10, T('फिर भी नहीं, तो सदा स्नेहा टीम को ख़बर', 'Still nobody: the SadaSneha team is told')],
+      [mins >= 15, T('फिर भी नहीं, तो सदा स्नेहा टीम को ख़बर', 'Still nobody: the SadaSneha team is told')],
     ].map(([done, t]) => `<li class="${done ? 'done' : ''}">${done ? ico('check') : '…'} ${t}</li>`).join('') +
       (mins >= 3 ? `<li class="warn">${T('अगर तबीयत बहुत ख़राब है, तो इंतज़ार मत कीजिए: 108 दबाइए', 'If you feel very unwell, do not wait: press 108')}</li>` : '');
     return true;
