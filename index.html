@@ -543,6 +543,8 @@
       <div id="radio-fav" class="radio-grid"></div>
       <input id="radio-q" type="search" placeholder="🔍 शहर या स्टेशन खोजें… / Search a city or station…" style="margin-top:12px">
       <div id="radio-all"></div>
+      <details class="msg-fold" id="radio-private"><summary><b>🎙️ <span data-en="Private FM (opens their own app)">प्राइवेट FM (उनके अपने ऐप में खुलेगा)</span></b><small data-en="Radio Mirchi, Red FM, Big FM, Radio City">रेडियो मिर्ची, रेड FM, बिग FM, रेडियो सिटी</small></summary><div class="radio-list" id="radio-private-list"></div>
+        <p class="muted" style="font-size:13px;padding:0 10px"><span data-en="These channels allow listening only in their own apps. The first time, install their app from the Play Store.">ये चैनल सिर्फ़ अपने ऐप में सुनने देते हैं। पहली बार उनका ऐप Play Store से लगा लीजिए।</span></p></details>
       <details class="msg-fold" id="radio-fm"><summary><b>📻 <span data-en="All FM stations">सभी FM स्टेशन</span></b><small data-en="FM Gold, FM Rainbow and city FM, all of India">FM गोल्ड, FM रेनबो और शहरों के FM – पूरे भारत के</small></summary><div class="radio-list" id="radio-fm-list"></div></details>
       <details class="msg-fold" id="radio-every"><summary><b>🇮🇳 <span data-en="Every Akashvani station">आकाशवाणी के सभी स्टेशन</span> (<span id="radio-n"></span>)</b><small data-en="Sorted by name">नाम के क्रम में</small></summary><div class="radio-list" id="radio-every-list"></div></details>
       <p class="muted" style="font-size:13px"><span data-en="Live streams of Prasar Bharati (All India Radio).">प्रसार भारती (आकाशवाणी) की लाइव प्रसारण।</span></p>
@@ -2482,7 +2484,11 @@ function radioOpen() {
   const row = (st) => { const b = document.createElement('button'); b.type = 'button'; b.className = 'radio-row'; b.textContent = '📻 ' + st.n; b.onclick = () => radioPlay(st, b); return b; };
   const byName = sts.slice().sort((a, b) => a.n.localeCompare(b.n));
   $('#radio-fm-list').replaceChildren(...byName.filter((x) => /\bFM\b|Rainbow|Gold|Vividh|VBS/i.test(x.n)).map(row));
-  $('#radio-every-list').replaceChildren(...byName.map(row)); $('#radio-n').textContent = sts.length;
+  $('#radio-every-list').replaceChildren(...byName.map(row));
+  // private FM: their own app (they do not allow their stream inside other apps); Play Store search finds the official app
+  const PRIVATE_FM = [['रेडियो मिर्ची 98.3 / Radio Mirchi', 'Radio Mirchi'], ['रेड FM 93.5 / Red FM', 'Red FM 93.5'], ['बिग FM 92.7 / Big FM', 'Big FM 92.7'], ['रेडियो सिटी 91.1 / Radio City', 'Radio City India']];
+  $('#radio-private-list').replaceChildren(...PRIVATE_FM.map(([n, q]) => { const a = document.createElement('a'); a.className = 'radio-row'; a.style.textDecoration = 'none'; a.style.color = 'inherit';
+    a.href = 'https://play.google.com/store/search?q=' + encodeURIComponent(q) + '&c=apps'; a.target = '_blank'; a.rel = 'noopener'; a.textContent = '🎙️ ' + n + '  ↗'; return a; })); $('#radio-n').textContent = sts.length;
 }
 $('#radio-stop').addEventListener('click', radioStop);
 
