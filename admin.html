@@ -69,7 +69,21 @@
     <div class="card">
       <div class="stats" id="stats"></div>
       <p style="margin:12px 0 0;display:flex;gap:8px;flex-wrap:wrap"><a class="btn" style="text-decoration:none" href="./?preview=1" target="_blank" rel="noopener">👀 Preview: new visitor journey</a><a class="btn" style="text-decoration:none;background:#7c3aed" href="./?demo=1" target="_blank" rel="noopener">🧪 Demo: an active family</a><a class="btn" style="text-decoration:none;background:#1e3a8a" href="./?demo=founder#talk" target="_blank" rel="noopener">👔 Talk to Sneha (as her boss)</a></p>
-      <div class="tabs"><button data-tab="ops" class="on">Families &amp; calls</button><button data-tab="acc">Accounts</button><button data-tab="use">Usage &amp; errors</button></div>
+      <div class="tabs"><button data-tab="ops" class="on">Families &amp; calls</button><button data-tab="acc">Accounts</button><button data-tab="use">Usage &amp; errors</button><button data-tab="ev">Events</button></div>
+    </div>
+    <div id="t-ev" class="hidden">
+      <div class="card"><h2>Add a community event</h2>
+        <p class="muted">Every SadaSneha elder sees it under “मिलन और खेल” and Sneha mentions it on the day. Use a YouTube Live (or video) link so it plays inside the app; other links open outside.</p>
+        <label>Title (Hindi) <input id="ev-title" maxlength="60" placeholder="भजन संध्या"></label>
+        <label>Kind <select id="ev-kind"><option value="bhajan">भजन संध्या</option><option value="yoga">योग</option><option value="satsang">सत्संग</option><option value="story">कहानी</option><option value="antakshari">अंताक्षरी</option><option value="health">सेहत की बात</option><option value="other">अन्य</option></select></label>
+        <label>Starts (India time) <input id="ev-at" type="datetime-local"></label>
+        <label><input id="ev-weekly" type="checkbox" checked> Every week at this time</label>
+        <label>Minutes <input id="ev-min" type="number" value="60" min="10" max="240"></label>
+        <label>Link <input id="ev-link" placeholder="https://www.youtube.com/live/…"></label>
+        <label>Host (optional) <input id="ev-host" maxlength="40" placeholder="पंडित जी / योग गुरु"></label>
+        <label>Note (optional) <input id="ev-note" maxlength="160" placeholder="आराम से बैठकर सुनिए"></label>
+        <button class="btn" id="ev-add">Add event</button> <span class="muted" id="ev-msg"></span></div>
+      <div class="card"><h2>Next 14 days</h2><div class="tbl"><table><thead><tr><th>When</th><th>Event</th><th>Link</th><th></th></tr></thead><tbody id="ev-list"></tbody></table></div></div>
     </div>
     <div id="t-use" class="hidden">
       <div class="card"><h2>Usage and errors</h2>
@@ -221,10 +235,31 @@ const rs = (x) => '₹' + Number(x || 0).toLocaleString('en-IN', { maximumFracti
 const istToday = () => new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Kolkata' }).format(new Date());
 document.querySelectorAll('.tabs button').forEach((b) => b.addEventListener('click', () => {
   document.querySelectorAll('.tabs button').forEach((x) => x.classList.toggle('on', x === b));
-  $('#t-ops').classList.toggle('hidden', b.dataset.tab !== 'ops'); $('#t-acc').classList.toggle('hidden', b.dataset.tab !== 'acc'); $('#t-use').classList.toggle('hidden', b.dataset.tab !== 'use');
+  $('#t-ops').classList.toggle('hidden', b.dataset.tab !== 'ops'); $('#t-acc').classList.toggle('hidden', b.dataset.tab !== 'acc'); $('#t-use').classList.toggle('hidden', b.dataset.tab !== 'use'); $('#t-ev').classList.toggle('hidden', b.dataset.tab !== 'ev');
   if (b.dataset.tab === 'acc') loadAccounts();
   if (b.dataset.tab === 'use') loadUsage(7);
+  if (b.dataset.tab === 'ev') loadEvents();
 }));
+// ---- community events ----
+async function loadEvents() {
+  try {
+    const j = await (await fetch(API + 'app-events')).json();
+    const seen = new Set();
+    $('#ev-list').innerHTML = (j.events || []).map((e) => `<tr><td>${ist(e.at)}${e.live ? ' 🔴' : ''}</td><td><b>${esc(e.title)}</b><br><span class="muted">${esc(e.kind_hi)}${e.weekly ? ' · weekly' : ''}${e.host ? ' · ' + esc(e.host) : ''}</span></td><td>${e.yt ? 'YouTube ✓' : '<span class="muted">opens outside</span>'}</td><td>${seen.has(e.event_id) ? '' : (seen.add(e.event_id), `<button class="btn" data-evoff="${esc(e.event_id)}">Stop</button>`)}</td></tr>`).join('') || '<tr><td colspan="4" class="muted">No events yet</td></tr>';
+    document.querySelectorAll('[data-evoff]').forEach((b) => b.onclick = async () => { if (!confirm('Stop this event (and its weekly repeats)?')) return;
+      await api('admin-events', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'remove', event_id: b.dataset.evoff }) }); setTimeout(loadEvents, 800); });
+  } catch (e) {}
+}
+$('#ev-add').addEventListener('click', async () => {
+  const at = $('#ev-at').value; // India time, as typed
+  const body = { action: 'add', title: $('#ev-title').value.trim(), kind: $('#ev-kind').value, starts_at: at ? at + ':00+05:30' : '', repeat: $('#ev-weekly').checked ? 'weekly' : '',
+    minutes: +$('#ev-min').value, link: $('#ev-link').value.trim(), host: $('#ev-host').value.trim(), note: $('#ev-note').value.trim() };
+  try {
+    const r = await api('admin-events', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+    $('#ev-msg').textContent = r.ok ? 'Added ✓' : 'Missing: ' + (r.why || '?');
+    if (r.ok) { ['#ev-title', '#ev-link', '#ev-host', '#ev-note'].forEach((k) => { $(k).value = ''; }); setTimeout(loadEvents, 800); }
+  } catch (e) { if (e.auth) location.reload(); $('#ev-msg').textContent = 'Could not save'; }
+});
 // ---- usage and errors ----
 const NAMES = { radio: 'Radio', tv: 'TV', talk: 'Talk to Sneha', elder: 'Elder home', home: 'Family home', chat: 'Family chat', people: 'Calls / people', trip: 'Travel companion', meds: 'Medicines',
   'play:radio': 'Played radio', 'play:tv': 'Played TV', 'play:song': 'Played a song', 'talk:spoken': 'Spoke to Sneha', 'talk:typed': 'Typed to Sneha', 'call:video': 'Video call made', 'call:voice': 'Voice call made',
