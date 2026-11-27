@@ -2729,13 +2729,15 @@ async function funOpen() {
     const when = (iso) => { const d = new Date(Date.parse(iso) + 5.5 * 3600e3), today = new Date(Date.now() + 5.5 * 3600e3).toISOString().slice(0, 10), day = d.toISOString().slice(0, 10);
       const tom = new Date(Date.now() + 5.5 * 3600e3 + 864e5).toISOString().slice(0, 10);
       return (day === today ? T('आज', 'Today') : day === tom ? T('कल', 'Tomorrow') : d.toLocaleDateString(LANG === 'en' ? 'en-IN' : 'hi-IN', { weekday: 'long', day: 'numeric', month: 'short', timeZone: 'UTC' })) + ', ' + hhmmOf(iso); };
-    box.innerHTML = ev.length ? ev.slice(0, 8).map((e, i) => `<div class="fun-ev${e.live ? ' live' : ''}"><span><b>${esc(e.title)}</b><small>${e.live ? `<span class="live-dot"></span> ${T('अभी चल रहा है', 'On now')}` : esc(when(e.at))}${e.host ? ' · ' + esc(e.host) : ''}${e.weekly ? ' · ' + T('हर हफ़्ते', 'every week') : ''}</small>${e.note ? `<small>${esc(e.note)}</small>` : ''}</span>` +
+    box.innerHTML = ev.length ? ev.slice(0, 8).map((e, i) => `<div class="fun-ev${e.live ? ' live' : ''}"><span><b>${esc(e.title)}</b><small>${e.live ? `<span class="live-dot"></span> ${T('अभी चल रहा है', 'On now')}` : esc(when(e.at))}${e.host ? ' · ' + esc(e.host) : ''}${e.weekly ? ' · ' + T('हर हफ़्ते', 'every week') : e.daily ? ' · ' + T('रोज़', 'every day') : ''}</small>${e.note ? `<small>${esc(e.note)}</small>` : ''}</span>` +
       `<button type="button" class="btn ${e.live ? 'primary' : 'secondary'}" data-ev="${i}">${e.live ? T('जुड़ें', 'Join') : T('देखें', 'Open')}</button></div>`).join('')
       : `<p class="muted">${T('अभी कोई कार्यक्रम तय नहीं है। जल्द ही भजन संध्या, योग और सत्संग आएँगे।', 'No events yet. Bhajan, yoga and satsang are coming soon.')}</p>`;
     box.querySelectorAll('[data-ev]').forEach((b) => { b.onclick = () => { const e = ev[+b.dataset.ev]; ulog('tap', 'event-join');
-      if (!e.yt) { window.open(e.link, '_blank', 'noopener'); return; }
-      const pl = $('#fun-player'); pl.innerHTML = `<iframe src="https://www.youtube.com/embed/${encodeURIComponent(e.yt)}?autoplay=1&playsinline=1&rel=0&enablejsapi=1" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen title="${esc(e.title)}"></iframe>`;
-      pl.classList.remove('hidden'); fsOpen(pl); }; });
+      const play = (src) => { const pl = $('#fun-player'); pl.innerHTML = `<iframe src="${src}" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen title="${esc(e.title)}"></iframe>`; pl.classList.remove('hidden'); fsOpen(pl); };
+      if (e.yt) return play(`https://www.youtube.com/embed/${encodeURIComponent(e.yt)}?autoplay=1&playsinline=1&rel=0&enablejsapi=1`);
+      if (e.ch) { (async () => { let r = null; try { r = await (await fetch(API.live, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ c: e.ch }) })).json(); } catch (x) {}
+        play(r && r.id ? `https://www.youtube.com/embed/${encodeURIComponent(r.id)}?autoplay=1&playsinline=1&rel=0&enablejsapi=1` : `https://www.youtube.com/embed/videoseries?list=UU${encodeURIComponent(e.ch.slice(2))}&autoplay=1&playsinline=1&rel=0&enablejsapi=1`); })(); return; }
+      window.open(e.link, '_blank', 'noopener'); }; });
   } catch (e) { box.innerHTML = `<p class="muted">${T('इंटरनेट नहीं', 'Offline')}</p>`; }
 }
 document.querySelectorAll('[data-play]').forEach((b) => b.addEventListener('click', () => { ulog('tap', 'game:' + b.textContent.trim().slice(0, 20)); elderAskSneha(b.dataset.play); }));

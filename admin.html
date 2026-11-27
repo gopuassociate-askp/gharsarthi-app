@@ -77,9 +77,9 @@
         <label>Title (Hindi) <input id="ev-title" maxlength="60" placeholder="भजन संध्या"></label>
         <label>Kind <select id="ev-kind"><option value="bhajan">भजन संध्या</option><option value="yoga">योग</option><option value="satsang">सत्संग</option><option value="story">कहानी</option><option value="antakshari">अंताक्षरी</option><option value="health">सेहत की बात</option><option value="other">अन्य</option></select></label>
         <label>Starts (India time) <input id="ev-at" type="datetime-local"></label>
-        <label><input id="ev-weekly" type="checkbox" checked> Every week at this time</label>
+        <label>Repeat <select id="ev-repeat"><option value="weekly">Every week at this time</option><option value="daily">Every day at this time</option><option value="">Once</option></select></label>
         <label>Minutes <input id="ev-min" type="number" value="60" min="10" max="240"></label>
-        <label>Link <input id="ev-link" placeholder="https://www.youtube.com/live/…"></label>
+        <label>Link <input id="ev-link" placeholder="https://www.youtube.com/live/… or https://www.youtube.com/channel/UC…/live"></label>
         <label>Host (optional) <input id="ev-host" maxlength="40" placeholder="पंडित जी / योग गुरु"></label>
         <label>Note (optional) <input id="ev-note" maxlength="160" placeholder="आराम से बैठकर सुनिए"></label>
         <button class="btn" id="ev-add">Add event</button> <span class="muted" id="ev-msg"></span></div>
@@ -245,14 +245,14 @@ async function loadEvents() {
   try {
     const j = await (await fetch(API + 'app-events')).json();
     const seen = new Set();
-    $('#ev-list').innerHTML = (j.events || []).map((e) => `<tr><td>${ist(e.at)}${e.live ? ' 🔴' : ''}</td><td><b>${esc(e.title)}</b><br><span class="muted">${esc(e.kind_hi)}${e.weekly ? ' · weekly' : ''}${e.host ? ' · ' + esc(e.host) : ''}</span></td><td>${e.yt ? 'YouTube ✓' : '<span class="muted">opens outside</span>'}</td><td>${seen.has(e.event_id) ? '' : (seen.add(e.event_id), `<button class="btn" data-evoff="${esc(e.event_id)}">Stop</button>`)}</td></tr>`).join('') || '<tr><td colspan="4" class="muted">No events yet</td></tr>';
+    $('#ev-list').innerHTML = (j.events || []).map((e) => `<tr><td>${ist(e.at)}${e.live ? ' 🔴' : ''}</td><td><b>${esc(e.title)}</b><br><span class="muted">${esc(e.kind_hi)}${e.weekly ? ' · weekly' : e.daily ? ' · daily' : ''}${e.host ? ' · ' + esc(e.host) : ''}</span></td><td>${e.yt || e.ch ? 'YouTube ✓' : '<span class="muted">opens outside</span>'}</td><td>${seen.has(e.event_id) ? '' : (seen.add(e.event_id), `<button class="btn" data-evoff="${esc(e.event_id)}">Stop</button>`)}</td></tr>`).join('') || '<tr><td colspan="4" class="muted">No events yet</td></tr>';
     document.querySelectorAll('[data-evoff]').forEach((b) => b.onclick = async () => { if (!confirm('Stop this event (and its weekly repeats)?')) return;
       await api('admin-events', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'remove', event_id: b.dataset.evoff }) }); setTimeout(loadEvents, 800); });
   } catch (e) {}
 }
 $('#ev-add').addEventListener('click', async () => {
   const at = $('#ev-at').value; // India time, as typed
-  const body = { action: 'add', title: $('#ev-title').value.trim(), kind: $('#ev-kind').value, starts_at: at ? at + ':00+05:30' : '', repeat: $('#ev-weekly').checked ? 'weekly' : '',
+  const body = { action: 'add', title: $('#ev-title').value.trim(), kind: $('#ev-kind').value, starts_at: at ? at + ':00+05:30' : '', repeat: $('#ev-repeat').value,
     minutes: +$('#ev-min').value, link: $('#ev-link').value.trim(), host: $('#ev-host').value.trim(), note: $('#ev-note').value.trim() };
   try {
     const r = await api('admin-events', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
