@@ -425,6 +425,11 @@
   .hl-row { display: flex; gap: 10px; align-items: flex-end; } .hl-row label { flex: 1; display: flex; flex-direction: column; font-weight: 700; } .hl-row input { font-size: 22px; width: 100%; } .hl-row > b { font-size: 26px; padding-bottom: 10px; }
   .hl-read { padding: 8px 0; border-bottom: 1px solid var(--line); } .hl-read.important b { color: #b91c1c; } .hl-read.general b { color: #9a3412; }
   .hl-spark { width: 100%; height: 60px; background: #fffaf5; border-radius: 10px; margin-bottom: 8px; }
+  .pp-sos { width: 100%; font-size: 15px; margin: 4px 0 0; }
+  .pp-row { flex-wrap: wrap; }
+  .help-steps { list-style: none; padding: 0; margin: 10px 0; } .help-steps li { padding: 8px 0; border-bottom: 1px solid var(--line); color: var(--muted); }
+  .help-steps li.done { color: #15803d; font-weight: 700; } .help-steps li.warn { color: #b91c1c; font-weight: 800; border: 0; }
+  .help-seen { background: #dcfce7; color: #14532d; padding: 12px; border-radius: 14px; font-size: 19px; }
   /* one way back and one way home: the bar at the bottom (and the phone's own back key) */
   .homebtn, #chat-back { display: none !important; }
   .backbar { gap: 10px; }
@@ -732,6 +737,7 @@
         <label for="pp-email"><span data-en="Doctor's email (optional)">डॉक्टर का ईमेल (अगर हो)</span></label><input id="pp-email" type="email" maxlength="80" placeholder="doctor@example.com">
         <label class="check"><input type="checkbox" id="pp-notify"> <span data-en="In an emergency, also email this doctor (what was said, age, health notes). The elder agrees.">ज़रूरी हालत (आपात) में इन्हें भी ईमेल से बताएँ: क्या कहा, उम्र, सेहत की जानकारी। वरिष्ठजन इससे सहमत हैं।</span></label>
       </div>
+      <label class="check"><input type="checkbox" id="pp-sos"> <span data-en="In an emergency, phone them too if the family does not answer (a neighbour or friend nearby)">मुसीबत में इन्हें भी फ़ोन करें, अगर घर वाले न उठाएँ (पास रहने वाले पड़ोसी या दोस्त)</span></label>
       <button class="btn primary" type="button" id="pp-add"><span data-en="Save">सेव करें</span></button><p id="pp-msg" class="muted"></p></div>
   </section>
 
@@ -3032,8 +3038,11 @@ async function peopleLoad() {
     const cs = ((j && j.contacts) || []).map((c) => ({ ...c, kind: kindOf(c) })).sort((a, b) => (order.indexOf(a.kind) + 1 || 99) - (order.indexOf(b.kind) + 1 || 99));
     box.innerHTML = cs.length ? cs.map((c) => `<div class="pp-row"><b>${((PP_KINDS.find((k) => k[0] === c.kind) || [])[1] || '👤')} ${esc(c.name)}${c.relation ? ' <small class="muted">(' + esc(c.relation) + ')</small>' : ''}${c.notify ? ' <small title="' + T('आपात में ईमेल जाएगा', 'Emailed in an emergency') + '">✉️🚨</small>' : ''}</b>` +
       `<a class="tel" href="tel:${esc(c.phone)}" aria-label="फ़ोन">📞</a><a class="wa" href="https://wa.me/${esc(c.phone.replace('+', ''))}" target="_blank" rel="noopener" aria-label="WhatsApp">🟢</a>` +
-      `<button class="rm" type="button" data-rm="${esc(c.contact_id)}" aria-label="हटाएँ">✕</button></div>`).join('')
+      `<button class="rm" type="button" data-rm="${esc(c.contact_id)}" aria-label="हटाएँ">✕</button>` +
+      `<label class="check pp-sos"><input type="checkbox" data-sos="${esc(c.contact_id)}" ${c.sos ? 'checked' : ''}> <span>${T('मुसीबत में इन्हें भी फ़ोन करें', 'Phone them too in an emergency')}</span></label></div>`).join('')
       : '<p class="muted">' + T('अभी कोई नहीं। नीचे से अपने दोस्तों को जोड़िए।', 'Nobody yet. Add friends below.') + '</p>';
+    box.querySelectorAll('[data-sos]').forEach((x) => { x.onchange = async () => { const r = await chatCall({ action: 'contact_sos', contact_id: x.dataset.sos, sos: x.checked }).catch(() => null);
+      toast(r && r.ok ? (x.checked ? T('ठीक है – मुसीबत में घर वालों के बाद इन्हें भी फ़ोन जाएगा', 'Done – they will be phoned after the family in an emergency') : T('हटा दिया', 'Removed')) : T('अभी नहीं हो पाया', 'Could not save'), 3500); }; });
     box.querySelectorAll('[data-rm]').forEach((b) => { b.onclick = async () => { if (!window.confirm(T('इन्हें सूची से हटाएँ?', 'Remove from the list?'))) return; await chatCall({ action: 'contact_remove', contact_id: b.dataset.rm }); peopleLoad(); }; });
   } catch (e) { box.innerHTML = '<p class="muted">' + T('इंटरनेट नहीं', 'Offline') + '</p>'; }
 }
@@ -3043,9 +3052,9 @@ $('#pp-add').addEventListener('click', async () => {
   if (!/^\+?\d{10,13}$/.test(phone)) return ($('#pp-msg').textContent = T('पूरा नंबर लिखिए (मोबाइल 10 अंक, लैंडलाइन 0 के साथ)', 'Write the full number (mobile 10 digits, landline with 0)'));
   const email = $('#pp-email').value.trim(), notify = $('#pp-notify').checked && !$('#pp-med').classList.contains('hidden');
   if (notify && !/^[^@\s]+@[^@\s]+\.[a-z]{2,}$/i.test(email)) return ($('#pp-msg').textContent = T('ईमेल ठीक से लिखिए', 'Write the email correctly'));
-  const j = await chatCall({ action: 'contact_add', name, relation: $('#pp-rel').value.trim(), phone, email, notify, consent: notify });
+  const j = await chatCall({ action: 'contact_add', name, relation: $('#pp-rel').value.trim(), phone, email, notify, consent: notify, sos: $('#pp-sos').checked });
   $('#pp-msg').textContent = j.ok ? T('✓ सेव हो गया', '✓ Saved') : j.why === 'full' ? T('30 लोग पूरे हो गए', 'The list is full (30)') : T('सेव नहीं हुआ', 'Could not save');
-  if (j.ok) { $('#pp-name').value = ''; $('#pp-rel').value = ''; $('#pp-phone').value = ''; $('#pp-email').value = ''; $('#pp-notify').checked = false; ppMed(); document.querySelectorAll('#pp-kinds .on').forEach((o) => o.classList.remove('on')); peopleLoad(); }
+  if (j.ok) { $('#pp-name').value = ''; $('#pp-rel').value = ''; $('#pp-phone').value = ''; $('#pp-email').value = ''; $('#pp-notify').checked = false; $('#pp-sos').checked = false; ppMed(); document.querySelectorAll('#pp-kinds .on').forEach((o) => o.classList.remove('on')); peopleLoad(); }
 });
 $('#people-back').addEventListener('click', () => show(store.get('gs_role') === 'elder' ? 'elder' : 'home'));
 
@@ -3321,6 +3330,32 @@ $('#t-msgs').addEventListener('click', () => {
   };
 });
 // after the help button: the saved doctor, hospital and ambulance as big call buttons
+// after "मदद": show each step of the chain, and offer 108 if nobody has answered after a few minutes
+let HELPW = null;
+function helpWatch(t0) {
+  clearInterval(HELPW);
+  const step = () => {
+    const mins = (Date.now() - t0) / 60000;
+    const st = $('#help-steps'); if (!st || $('#e-panel').classList.contains('hidden')) { clearInterval(HELPW); return false; }
+    st.innerHTML = [
+      [true, T('घर वालों को फ़ोन और सूचना भेज दी', 'Family phoned and notified')],
+      [mins >= 5, T('कोई नहीं उठाया तो पड़ोसी / दोस्त को भी फ़ोन (अगर जोड़े हैं)', 'If nobody answers: neighbour / friend phoned too (if added)')],
+      [mins >= 10, T('फिर भी नहीं, तो सदा स्नेहा टीम को ख़बर', 'Still nobody: the SadaSneha team is told')],
+    ].map(([done, t]) => `<li class="${done ? 'done' : ''}">${done ? ico('check') : '…'} ${t}</li>`).join('') +
+      (mins >= 3 ? `<li class="warn">${T('अगर तबीयत बहुत ख़राब है, तो इंतज़ार मत कीजिए: 108 दबाइए', 'If you feel very unwell, do not wait: press 108')}</li>` : '');
+    return true;
+  };
+  const check = async () => {
+    if (!step()) return;
+    try {
+      const j = await (await fetch(API.status + '?code=' + encodeURIComponent(store.get('gs_code')))).json();
+      const m = ((j && j.messages) || []).filter((x) => x.direction === 'to_family' && Date.parse(x.created_at) >= t0 - 60000).sort((a, b) => String(b.created_at).localeCompare(String(a.created_at)))[0];
+      if (m && m.ack_by) { clearInterval(HELPW); const s = $('#help-seen'); if (s) { s.innerHTML = `${ico('check')} <b>${esc(m.ack_by)}</b> ${T('ने देख लिया है – वे आपसे संपर्क कर रहे हैं।', 'has seen it – they are getting in touch.')}`; s.classList.remove('hidden'); }
+        try { navigator.vibrate && navigator.vibrate(300); } catch (e) {} }
+    } catch (e) {}
+  };
+  check(); HELPW = setInterval(check, 15000);
+}
 async function emergencyNums() {
   const cs = (await contactsGet()).filter((c) => ['doctor', 'hospital', 'ambulance'].includes(kindOf(c)));
   if (!cs.length || $('#e-panel').classList.contains('hidden')) return;
@@ -3332,9 +3367,10 @@ $('#t-help').addEventListener('click', async () => {
   elderPanel('<h2>🚨 ' + T('भेज रहे हैं…', 'Sending…') + '</h2>');
   try {
     const j = await (await fetch(API.message, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({ code: store.get('gs_code'), from_name: (ELDER && ELDER.family.address_as) || 'वरिष्ठजन', text: 'मुझे मदद चाहिए, अभी आइए (ऐप का मदद बटन)', direction: 'to_family', urgent: true }) })).json();
-    elderPanel(j.ok ? '<h2>✓ ' + T('घर वालों को बता दिया', 'Your family has been told') + '</h2><p>' + T('स्नेहा उन्हें फ़ोन कर रही है। आराम से बैठिए, मैं आपके साथ हूँ। बहुत ज़रूरी हो तो 108 पर फ़ोन कीजिए।', 'Sneha is phoning them. Sit down and rest. In a serious emergency call 108.') + '</p><a class="btn warm" href="tel:108" style="text-decoration:none;text-align:center">📞 108</a>'
+      body: JSON.stringify({ code: store.get('gs_code'), from_name: (ELDER && ELDER.family.address_as) || 'वरिष्ठजन', text: 'मुझे मदद चाहिए, अभी आइए (ऐप का मदद बटन)' + (TALK_LOC && TALK_LOC.at !== 'home' && (TALK_LOC.area || TALK_LOC.place) ? ` – फ़ोन के हिसाब से अभी: ${[TALK_LOC.area, TALK_LOC.place].filter(Boolean).join(', ')}` : ''), direction: 'to_family', urgent: true }) })).json();
+    elderPanel(j.ok ? '<h2>✓ ' + T('घर वालों को बता दिया', 'Your family has been told') + '</h2><p class="help-seen hidden" id="help-seen"></p><ol class="help-steps" id="help-steps"></ol><p>' + T('आराम से बैठिए, मैं आपके साथ हूँ।', 'Sit down and rest, I am with you.') + '</p><a class="btn danger" href="tel:108" style="text-decoration:none;text-align:center">' + ico('ambulance') + ' 108 ' + T('एम्बुलेंस', 'Ambulance') + '</a>'
       : '<h2>' + T('नहीं भेज पाए', 'Could not send') + '</h2><a class="btn warm" href="tel:108" style="text-decoration:none;text-align:center">📞 108</a>');
+    if (j.ok) helpWatch(Date.now());
   } catch (e) { elderPanel('<h2>' + T('इंटरनेट नहीं', 'Offline') + '</h2><a class="btn warm" href="tel:108" style="text-decoration:none;text-align:center">📞 108</a>'); }
   emergencyNums();
 });
