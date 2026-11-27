@@ -3191,14 +3191,14 @@ function tvChannels(cat) {
   return tv[cat] || [];   // cricket, old: the channel's newest videos, one after another
 }
 API.live = API_BASE + '/app-live';
-const tvSrc = (c, live) => c.list ? `https://www.youtube.com/embed/videoseries?list=${encodeURIComponent(c.list)}&autoplay=1&playsinline=1&rel=0` : live ? `https://www.youtube.com/embed/live_stream?channel=${encodeURIComponent(c.id)}&autoplay=1&playsinline=1&rel=0`
-  : `https://www.youtube.com/embed/videoseries?list=UU${encodeURIComponent(c.id.slice(2))}&autoplay=1&playsinline=1&rel=0`;
+const tvSrc = (c, live) => c.list ? `https://www.youtube.com/embed/videoseries?list=${encodeURIComponent(c.list)}&autoplay=1&playsinline=1&rel=0&enablejsapi=1` : live ? `https://www.youtube.com/embed/live_stream?channel=${encodeURIComponent(c.id)}&autoplay=1&playsinline=1&rel=0&enablejsapi=1`
+  : `https://www.youtube.com/embed/videoseries?list=UU${encodeURIComponent(c.id.slice(2))}&autoplay=1&playsinline=1&rel=0&enablejsapi=1`;
 // a live channel: our server finds the video it is live with now (YouTube's channel-live embed no longer works);
 // if nothing is live, the channel's newest programmes play instead
 async function tvPlay(c, b, live) {
   if (live && !c.list) {
     let r = null; try { r = await (await fetch(API.live, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ c: c.id }) })).json(); } catch (e) {}
-    if (r && r.id && r.live) return tvShow(c, b, true, `https://www.youtube.com/embed/${encodeURIComponent(r.id)}?autoplay=1&playsinline=1&rel=0`);
+    if (r && r.id && r.live) return tvShow(c, b, true, `https://www.youtube.com/embed/${encodeURIComponent(r.id)}?autoplay=1&playsinline=1&rel=0&enablejsapi=1`);
     return tvShow(c, b, false, tvSrc(c, false));
   }
   return tvShow(c, b, live, tvSrc(c, live));
@@ -3306,7 +3306,7 @@ $('#t-songs').addEventListener('click', () => {
   $('#e-intro').onchange = (e) => store.set('gs_intro', e.target.checked ? 'on' : 'off');
   $('#e-panel').querySelectorAll('[data-list]').forEach((b) => { b.onclick = () => { const x = lists[+b.dataset.list]; radioStop(); likeIt('songs', x.list, x.n, { open: { what: 'songs', name: x.n } });
     $('#e-panel').querySelectorAll('[data-list]').forEach((o) => o.classList.toggle('on', o === b));
-    const pl = $('#e-song-player'); pl.innerHTML = `<iframe src="https://www.youtube.com/embed/videoseries?list=${encodeURIComponent(x.list)}&autoplay=1&playsinline=1&rel=0" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen title="${esc(x.n)}"></iframe>`;
+    const pl = $('#e-song-player'); pl.innerHTML = `<iframe src="https://www.youtube.com/embed/videoseries?list=${encodeURIComponent(x.list)}&autoplay=1&playsinline=1&rel=0&enablejsapi=1" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen title="${esc(x.n)}"></iframe>`;
     pl.classList.remove('hidden'); fsOpen(pl); }; });
 });
 
@@ -3495,6 +3495,52 @@ $('#c-out').addEventListener('click', () => { if (window.confirm(T('इस फ�
 
 // ---- Talk to Sneha: her live face (base picture + mouth moved by her voice), one button to speak ----
 API.talk = API_BASE + '/app-talk';
+// ---- one voice at a time: while you talk to Sneha (or she talks, or thinks), or a call is on, every other sound —
+// her song, the non-stop songs, radio, TV, a film, a voice note — pauses; about 2.5 s after it is quiet again,
+// exactly what was paused carries on. (A new song Sneha starts replaces the old one.)
+const MEDIA = { paused: [], quietSince: 0, yt: new WeakMap() };
+window.addEventListener('message', (e) => {
+  if (!/youtube(-nocookie)?\.com$/.test(String(e.origin).replace(/^https?:\/\/(www\.)?/, ''))) return;
+  let d; try { d = typeof e.data === 'string' ? JSON.parse(e.data) : e.data; } catch (x) { return; }
+  if (!d || !d.info || typeof d.info.playerState !== 'number') return;
+  document.querySelectorAll('iframe').forEach((f) => { if (f.contentWindow === e.source) MEDIA.yt.set(f, d.info.playerState); });
+});
+function ytListen(f) { try { f.contentWindow.postMessage(JSON.stringify({ event: 'listening', id: 'sn' }), '*'); } catch (e) {} }
+const ytCmd = (f, func) => { try { f.contentWindow.postMessage(JSON.stringify({ event: 'command', func, args: [] }), '*'); } catch (e) {} };
+function mediaBusy() {
+  try {
+    const talking = TALK.open && (TALK.speaking || TALK.busy || (TALK.rec && TALK.rec.state === 'recording') || (TALK.audio && !TALK.audio.paused));
+    return !!(talking || (typeof VC !== 'undefined' && (VC.pc || VC.incoming)) || (typeof GV !== 'undefined' && GV.on));
+  } catch (e) { return false; }
+}
+function mediaPauseAll() {
+  // Sneha's own song (YouTube player in the talk screen)
+  try { if (SONG.player && SONG.player.getPlayerState && SONG.player.getPlayerState() === 1) { SONG.player.pauseVideo(); MEDIA.paused.push({ kind: 'song', p: SONG.player }); } } catch (e) {}
+  // the radio
+  try { if (RAD.audio && !RAD.audio.paused) { RAD.audio.pause(); MEDIA.paused.push({ kind: 'el', el: RAD.audio }); } } catch (e) {}
+  // TV, films, non-stop songs: YouTube in a frame (playing, or state unknown)
+  document.querySelectorAll('iframe[src*="youtube.com/embed"]').forEach((f) => { const st = MEDIA.yt.get(f); if (st === 1 || st === undefined || st === 3) { ytCmd(f, 'pauseVideo'); MEDIA.paused.push({ kind: 'yt', f }); } });
+  // any other sound on the page (a voice note), except Sneha's own voice and calls
+  document.querySelectorAll('audio, video').forEach((el) => { if (el === TALK.audio || el === RAD.audio || el.closest('#vc') || el.closest('#talk-self') || el.muted || el.paused) return; try { el.pause(); MEDIA.paused.push({ kind: 'el', el }); } catch (e) {} });
+}
+function mediaResumeAll() {
+  const list = MEDIA.paused; MEDIA.paused = [];
+  for (const m of list) {
+    try {
+      if (m.kind === 'song' && m.p === SONG.player) m.p.playVideo();
+      else if (m.kind === 'yt' && document.contains(m.f)) ytCmd(m.f, 'playVideo');
+      else if (m.kind === 'el' && document.contains(m.el) && (m.el !== RAD.audio || RAD.cur)) m.el.play().catch(() => {});
+    } catch (e) {}
+  }
+}
+setInterval(() => {
+  // YouTube frames: ask each new one to tell us when it plays or pauses
+  document.querySelectorAll('iframe[src*="enablejsapi=1"]').forEach((f) => { if (!f.dataset.ytl) { f.dataset.ytl = '1'; f.addEventListener('load', () => ytListen(f)); ytListen(f); } });
+  if (mediaBusy()) { MEDIA.quietSince = 0; mediaPauseAll(); return; }
+  if (!MEDIA.paused.length) return;
+  if (!MEDIA.quietSince) MEDIA.quietSince = Date.now();
+  if (Date.now() - MEDIA.quietSince > 2500) { MEDIA.quietSince = 0; mediaResumeAll(); }
+}, 300);
 const TALK = { face: null, ctx: null, ac: null, an: null, level: 0, blinkUntil: 0, nextBlink: 0, rec: null, chunks: [], history: [], busy: false, cam: null, mood: 'neutral', speaking: false };
 function talkLoadFace() {
   if (TALK.face) return TALK.face;
@@ -3703,8 +3749,7 @@ async function talkListen(opt) {
   talkBargeStop();
   if (TALK.speaking || (TALK.audio && !TALK.audio.paused)) { talkInterrupt(); }
   else if (TALK.busy) return;
-  songStop();
-  talkAudioCtx();
+  talkAudioCtx();   // other sound pauses by itself while we talk (MEDIA below), and comes back after
   if (TALK.rec && TALK.rec.state === 'recording') { TALK.tapStop = true; TALK.rec.stop(); return; }   // second tap: done speaking
   TALK.tapStop = false;
   if (PHONE_SR && !TALK.srOff) {
