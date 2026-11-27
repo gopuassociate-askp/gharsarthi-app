@@ -94,8 +94,8 @@
   .talk-face { position: relative; width: min(100%, 360px); margin: 0 auto; border-radius: 24px; overflow: hidden; box-shadow: 0 10px 30px rgba(234,88,12,.25); animation: breathe 4s ease-in-out infinite; }
   .talk-face canvas { width: 100%; height: auto; display: block; transform-origin: 50% 85%; }
   .talk-face video { position: absolute; right: 8px; bottom: 8px; width: 28%; border-radius: 12px; border: 2px solid #fff; transform: scaleX(-1); }
-  .talk-ai { position: absolute; left: 8px; top: 8px; background: rgba(255,255,255,.85); color: #9a3412; font-size: 12px; padding: 2px 8px; border-radius: 99px; }
-  .talk-mood { position: absolute; left: 8px; bottom: 8px; background: rgba(255,255,255,.9); color: #7c2d12; font-size: 13px; padding: 3px 10px; border-radius: 99px; }
+  .talk-ai { position: absolute; left: 8px; top: 8px; background: rgba(255,255,255,.85); color: #9a3412; font-size: 14px; padding: 2px 8px; border-radius: 99px; }
+  .talk-mood { position: absolute; left: 8px; bottom: 8px; background: rgba(255,255,255,.9); color: #7c2d12; font-size: 14px; padding: 3px 10px; border-radius: 99px; }
   .btn.pulse { animation: campulse 1.2s ease-in-out 4; }
   #talk-cam.pulse, #tb-cam.pulse { animation: campulse 1.2s ease-in-out 6; border-color: #ea580c; }
   @keyframes campulse { 50% { transform: scale(1.08); box-shadow: 0 0 0 6px rgba(234,88,12,.25); } }
@@ -120,17 +120,17 @@
   #v-chat.hidden { display: none; }
   .chat-head { display: flex; gap: 10px; align-items: center; padding: 8px 10px; background: #9a3412; color: #fff; border-radius: 0 0 14px 14px; }
   .ch-back { border: 0; background: none; color: #fff; font-size: 28px; padding: 0 4px; cursor: pointer; }
-  .ch-title { flex: 1; display: flex; flex-direction: column; min-width: 0; } .ch-title b { font-size: 19px; } .ch-title small { font-size: 13px; opacity: .85; }
+  .ch-title { flex: 1; display: flex; flex-direction: column; min-width: 0; } .ch-title b { font-size: 19px; } .ch-title small { font-size: 14px; opacity: .85; }
   .ch-ic { border: 0; background: none; font-size: 24px; padding: 6px; cursor: pointer; filter: brightness(1.6); }
   .chat-list { flex: 1; overflow-y: auto; padding: 10px 8px; display: flex; flex-direction: column; gap: 4px; background-color: #f5ebe0;
     background-image: radial-gradient(rgba(154,52,18,.07) 1.5px, transparent 1.5px), radial-gradient(rgba(154,52,18,.05) 1px, transparent 1px); background-size: 26px 26px, 13px 13px; background-position: 0 0, 6px 6px; }
-  .day-chip { align-self: center; background: #fff7ed; color: #7c2d12; font-size: 13px; font-weight: 700; padding: 4px 12px; border-radius: 10px; margin: 8px 0 4px; box-shadow: 0 1px 2px rgba(0,0,0,.08); }
+  .day-chip { align-self: center; background: #fff7ed; color: #7c2d12; font-size: 14px; font-weight: 700; padding: 4px 12px; border-radius: 10px; margin: 8px 0 4px; box-shadow: 0 1px 2px rgba(0,0,0,.08); }
   .bub { position: relative; max-width: 80%; padding: 6px 10px 4px; border-radius: 4px 12px 12px 12px; background: #fff; align-self: flex-start; font-size: 17px; word-wrap: break-word; box-shadow: 0 1px 1.5px rgba(0,0,0,.13); margin-left: 8px; }
   .bub::before { content: ''; position: absolute; top: 0; left: -8px; border: 8px solid transparent; border-top-color: #fff; border-right-color: #fff; border-width: 0 8px 10px 0; }
   .bub.me { align-self: flex-end; background: #ffe0bd; border-radius: 12px 4px 12px 12px; margin: 0 8px 0 0; }
   .bub.me::before { left: auto; right: -8px; border-width: 0 0 10px 8px; border-color: transparent; border-top-color: #ffe0bd; border-left-color: #ffe0bd; }
   .bub + .bub.same, .bub.same { margin-top: -1px; } .bub.same::before { display: none; }
-  .bub .who { font-size: 14px; font-weight: 800; } .bub .at { font-size: 11px; color: var(--muted); text-align: right; margin-top: 2px; } .bub .tick { color: #2563eb; margin-left: 3px; }
+  .bub .who { font-size: 14px; font-weight: 800; } .bub .at { font-size: 14px; color: var(--muted); text-align: right; margin-top: 2px; } .bub .tick { color: #2563eb; margin-left: 3px; }
   .bub img { max-width: 100%; border-radius: 10px; display: block; margin-top: 4px; } .bub audio { width: 220px; max-width: 100%; margin-top: 4px; }
   .bub.me .say { display: none; }
   .bub .say { border: 0; background: none; font-size: 18px; cursor: pointer; padding: 0 0 0 6px; }
@@ -166,7 +166,7 @@
   .vc-top { position: absolute; top: 0; left: 0; right: 0; padding: 14px 16px; color: #fff; background: linear-gradient(rgba(0,0,0,.6), transparent); font-size: 20px; }
   .vc-top span { display: block; font-size: 15px; opacity: .85; }
   .vc-bar { position: absolute; left: 0; right: 0; bottom: 0; display: flex; gap: 8px; justify-content: center; padding: 16px 12px calc(16px + env(safe-area-inset-bottom)); background: linear-gradient(transparent, rgba(0,0,0,.7)); }
-  .vc-bar button { width: 76px; border: 0; border-radius: 18px; padding: 8px 4px; background: rgba(255,255,255,.2); color: #fff; font: inherit; font-size: 13px; font-weight: 700; cursor: pointer; }
+  .vc-bar button { width: 76px; border: 0; border-radius: 18px; padding: 8px 4px; background: rgba(255,255,255,.2); color: #fff; font: inherit; font-size: 14px; font-weight: 700; cursor: pointer; }
   .vc-bar button b { display: block; font-size: 26px; } .vc-bar button.off { background: rgba(255,255,255,.6); color: #111; } .vc-bar button.end { background: #dc2626; }
   .vc-ring { position: fixed; inset: 0; z-index: 61; background: rgba(124,45,18,.94); color: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px; text-align: center; padding: 24px; }
   .vc-ring img { width: 90px; height: 90px; border-radius: 50%; border: 4px solid #f59e0b; animation: breathe 1.6s ease-in-out infinite; }
@@ -191,7 +191,7 @@
   .talk-sym.song .ico { animation: think 1s ease-in-out infinite; }
   .talk-sym.warn .ico { font-size: 34px; }
   .talk-bar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 30; display: flex; gap: 4px; padding: 8px 8px calc(8px + env(safe-area-inset-bottom)); background: #fff; border-top: 1px solid #fde3cf; box-shadow: 0 -6px 20px rgba(124,45,18,.12); }
-  .talk-bar button { flex: 1; border: 0; border-radius: 14px; background: #ffedd5; color: #7c2d12; font: inherit; font-size: 13px; font-weight: 700; padding: 6px 2px; min-height: 58px; cursor: pointer; }
+  .talk-bar button { flex: 1; border: 0; border-radius: 14px; background: #ffedd5; color: #7c2d12; font: inherit; font-size: 14px; font-weight: 700; padding: 6px 2px; min-height: 58px; cursor: pointer; }
   .talk-bar button b { display: block; font-size: 22px; line-height: 1.2; }
   .talk-bar #tb-mic { background: #ea580c; color: #fff; } .talk-bar #tb-end { background: #fee2e2; color: #991b1b; }
   #v-talk { padding-bottom: 90px; }
@@ -205,7 +205,7 @@
   .hero-pg { text-align: center; background: radial-gradient(circle at 50% 20%, #ffe7cc, var(--bg) 70%); }
   .hero-face { position: relative; width: 200px; margin: 0 auto 10px; }
   .hero-face img { width: 200px; height: 200px; border-radius: 50%; object-fit: cover; border: 5px solid var(--marigold); box-shadow: 0 14px 40px rgba(194,65,12,.25); animation: breathe 4s ease-in-out infinite; }
-  .hero-face .live { position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); background: #fff; border-radius: 999px; padding: 2px 12px; font-size: 13px; font-weight: 700; color: #15803d; white-space: nowrap; box-shadow: 0 2px 8px rgba(0,0,0,.12); }
+  .hero-face .live { position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); background: #fff; border-radius: 999px; padding: 2px 12px; font-size: 14px; font-weight: 700; color: #15803d; white-space: nowrap; box-shadow: 0 2px 8px rgba(0,0,0,.12); }
   .doors { text-align: left; }
   .next { display: inline-block; margin-top: 8px; font-size: 34px; color: var(--brand); text-decoration: none; animation: bob 1.8s ease-in-out infinite; }
   @keyframes bob { 50% { transform: translateY(6px); } }
@@ -246,7 +246,7 @@
   /* the Play Store app shows no prices or payment (Google Play's payments rule); families pay on the website */
   html.native .no-native { display: none !important; }
   .install-bar { position: fixed; left: 8px; right: 8px; bottom: 8px; z-index: 40; display: flex; gap: 8px; align-items: center; background: #fff7ed; border: 2px solid #fb923c; border-radius: 18px; padding: 10px 12px; box-shadow: 0 6px 20px rgba(0,0,0,.18); color: #7c2d12; }
-  .install-bar > span { flex: 1; font-size: 16px; } .install-bar small { display: block; font-size: 13px; }
+  .install-bar > span { flex: 1; font-size: 16px; } .install-bar small { display: block; font-size: 14px; }
   .install-bar .btn { width: auto; margin: 0; padding: 10px 16px; } .install-x { border: 0; background: none; font-size: 22px; color: #7c2d12; cursor: pointer; }
   .install-bar.hidden { display: none; }
   body:has(.install-bar:not(.hidden)) main, body:has(.install-bar:not(.hidden)) { padding-bottom: 96px; }
@@ -284,7 +284,7 @@
   @keyframes notefly { 0% { transform: translate(0, 50px) rotate(-10deg); opacity: 0; } 10% { opacity: 1; } 25% { transform: translate(110px, 15px) rotate(8deg); }
     50% { transform: translate(220px, 45px) rotate(-8deg); } 75% { transform: translate(330px, 12px) rotate(8deg); } 90% { opacity: 1; } 100% { transform: translate(460px, 40px) rotate(0); opacity: 0; } }
   @media (prefers-reduced-motion: reduce) { .notes span { animation-duration: 8s; } }
-  .talk-cam { position: absolute; right: 8px; top: 8px; background: rgba(220,38,38,.9); color: #fff; font-size: 12px; padding: 2px 8px; border-radius: 99px; }
+  .talk-cam { position: absolute; right: 8px; top: 8px; background: rgba(220,38,38,.9); color: #fff; font-size: 14px; padding: 2px 8px; border-radius: 99px; }
   @keyframes breathe { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.012); } }
   .talk-state { font-size: 20px; font-weight: 700; color: #9a3412; min-height: 1.6em; margin: 12px 0 8px; }
   .talk-mic { width: 110px; height: 110px; border-radius: 50%; border: 0; font-size: 46px; background: linear-gradient(160deg, #f97316, #c2410c); color: #fff; box-shadow: 0 8px 24px rgba(194,65,12,.4); cursor: pointer; }
@@ -370,9 +370,53 @@
   body[data-fest="eid"] .hero { background: linear-gradient(160deg, #064e3b, #0f766e); color: #ecfdf5; }
   body[data-fest="christmas"] .hero { background: linear-gradient(160deg, #7f1d1d, #166534); color: #fefce8; }
   body[data-fest="national"] .hero { background: linear-gradient(180deg, #fdba74, #ffffff 55%, #86efac); }
+
+  /* ---- International standard layer: Material Design 3 sizes, WCAG 2.2 AA contrast, one navigation pattern ---- */
+  .ico { width: 1.25em; height: 1.25em; vertical-align: -.22em; flex: none; }
+  .ico.big { width: 48px; height: 48px; vertical-align: middle; }
+  .tile .ic .ico { width: 40px; height: 40px; }
+  h2 > .ico { color: var(--brand); margin-right: 2px; }
+  .door .ico { width: 28px; height: 28px; margin-right: 6px; }
+  #tv-cats button span .ico { width: 30px; height: 30px; }
+  .talk-bar b .ico, .vc-bar b .ico { width: 26px; height: 26px; }
+  /* a top app bar of 56–64 dp; the tagline and the garland only on the first screens */
+  header { background: linear-gradient(120deg, #9a3412, #c2410c); padding: calc(8px + env(safe-area-inset-top)) 16px 8px; min-height: 56px; }
+  header svg { width: 36px; height: 36px; border-radius: 10px; }
+  header h1 { font-size: 20px; }
+  body.inner header p { display: none; }
+  .toran { height: 16px; background-size: 32px 16px; }
+  body.inner .toran { display: none; }
+  /* text on colour: at least 4.5 : 1 */
+  .btn.primary { background: linear-gradient(120deg, #9a3412, #c2410c); }
+  .door.elder { background: #c2410c; }
+  .talk-mic { background: linear-gradient(160deg, #c2410c, #9a3412); }
+  .linkbtn { color: #9a3412; }
+  .lang-btn { background: rgba(0,0,0,.2); border-color: rgba(255,255,255,.75); }
+  /* every touch target at least 48 × 48 dp */
+  button, .btn, a.btn, select, textarea, summary, input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=hidden]) { min-height: 48px; }
+  .lang-btn, .ch-back, .ch-ic, .install-x, .chat-bar button { min-width: 48px; min-height: 48px; }
+  .linkbtn { display: inline-flex; align-items: center; min-height: 48px; padding: 0 4px; }
+  input[type=checkbox], input[type=radio] { width: 24px; height: 24px; }
+  label:has(> input[type=checkbox]), label:has(> input[type=radio]) { min-height: 48px; }
+  .kicker { color: #9a3412 !important; }
+  .site a, footer a, .pg a:not(.btn):not(.next) { display: inline-flex; align-items: center; min-height: 48px; }
+  .next { min-width: 48px; min-height: 48px; display: inline-flex; align-items: center; justify-content: center; }
+  .step-prog { margin: 0 0 8px; font-size: 16px; } .step-bar { display: block; height: 6px; border-radius: 3px; background: var(--line); margin-top: 6px; overflow: hidden; } .step-bar span { display: block; height: 100%; background: var(--brand); }
+  .step-nav { display: flex; gap: 10px; margin: 12px 0; } .step-nav .btn { flex: 1; } .step-nav [hidden] { display: none; }
+  fieldset[hidden] { display: none; }
+  header > div { min-width: 0; flex: 1; } header h1, header p { overflow-wrap: anywhere; } .lang-btn { flex: none; white-space: nowrap; }
+  .chat-bar .ico { width: 24px; height: 24px; }
+  .talk-sym .sym .ico { width: 40px; height: 40px; }
+  .live-dot { display: inline-block; width: 12px; height: 12px; border-radius: 50%; background: #dc2626; box-shadow: 0 0 0 3px rgba(220,38,38,.2); vertical-align: 1px; }
+  .ch-ic .ico { width: 26px; height: 26px; }
+  /* one way back and one way home: the bar at the bottom (and the phone's own back key) */
+  .homebtn, #chat-back { display: none !important; }
+  .backbar { gap: 10px; }
+  .backbar .bb-home { flex: 0 0 auto; padding: 0 22px; }
 </style>
 </head>
 <body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="i-arrow-left" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19-7-7 7-7" /> <path d="M19 12H5" /></symbol><symbol id="i-audio-lines" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 10v3" /> <path d="M6 6v11" /> <path d="M10 3v18" /> <path d="M14 8v7" /> <path d="M18 5v13" /> <path d="M22 10v3" /></symbol><symbol id="i-book-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 7v14" /> <path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z" /></symbol><symbol id="i-camera" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z" /> <circle cx="12" cy="13" r="3" /></symbol><symbol id="i-cassette-tape" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2" /> <circle cx="8" cy="10" r="2" /> <path d="M8 12h8" /> <circle cx="16" cy="10" r="2" /> <path d="m6 20 .7-2.9A1.4 1.4 0 0 1 8.1 16h7.8a1.4 1.4 0 0 1 1.4 1l.7 3" /></symbol><symbol id="i-clapperboard" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.2 6 3 11l-.9-2.4c-.3-1.1.3-2.2 1.3-2.5l13.5-4c1.1-.3 2.2.3 2.5 1.3Z" /> <path d="m6.2 5.3 3.1 3.9" /> <path d="m12.4 3.4 3.1 4" /> <path d="M3 11h18v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z" /></symbol><symbol id="i-credit-card" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="5" rx="2" /> <line x1="2" x2="22" y1="10" y2="10" /></symbol><symbol id="i-ear" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8.5a6.5 6.5 0 1 1 13 0c0 6-6 6-6 10a3.5 3.5 0 1 1-7 0" /> <path d="M15 8.5a2.5 2.5 0 0 0-5 0v1a2 2 0 1 1 0 4" /></symbol><symbol id="i-flame" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z" /></symbol><symbol id="i-hand-heart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 14h2a2 2 0 1 0 0-4h-3c-.6 0-1.1.2-1.4.6L3 16" /> <path d="m7 20 1.6-1.4c.3-.4.8-.6 1.4-.6h4c1.1 0 2.1-.4 2.8-1.2l4.6-4.4a2 2 0 0 0-2.75-2.91l-4.2 3.9" /> <path d="m2 15 6 6" /> <path d="M19.5 8.5c.7-.7 1.5-1.6 1.5-2.7A2.73 2.73 0 0 0 16 4a2.78 2.78 0 0 0-5 1.8c0 1.2.8 2 1.5 2.8L16 12Z" /></symbol><symbol id="i-handshake" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m11 17 2 2a1 1 0 1 0 3-3" /> <path d="m14 14 2.5 2.5a1 1 0 1 0 3-3l-3.88-3.88a3 3 0 0 0-4.24 0l-.88.88a1 1 0 1 1-3-3l2.81-2.81a5.79 5.79 0 0 1 7.06-.87l.47.28a2 2 0 0 0 1.42.25L21 4" /> <path d="m21 3 1 11h-2" /> <path d="M3 3 2 14l6.5 6.5a1 1 0 1 0 3-3" /> <path d="M3 4h8" /></symbol><symbol id="i-heart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" /></symbol><symbol id="i-hospital" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6v4" /> <path d="M14 14h-4" /> <path d="M14 18h-4" /> <path d="M14 8h-4" /> <path d="M18 12h2a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-9a2 2 0 0 1 2-2h2" /> <path d="M18 22V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v18" /></symbol><symbol id="i-hourglass" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 22h14" /> <path d="M5 2h14" /> <path d="M17 22v-4.172a2 2 0 0 0-.586-1.414L12 12l-4.414 4.414A2 2 0 0 0 7 17.828V22" /> <path d="M7 2v4.172a2 2 0 0 0 .586 1.414L12 12l4.414-4.414A2 2 0 0 0 17 6.172V2" /></symbol><symbol id="i-house" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8" /> <path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /></symbol><symbol id="i-key-round" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.586 17.414A2 2 0 0 0 2 18.828V21a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h1a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h.172a2 2 0 0 0 1.414-.586l.814-.814a6.5 6.5 0 1 0-4-4z" /> <circle cx="16.5" cy="7.5" r=".5" fill="currentColor" /></symbol><symbol id="i-laugh" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10" /> <path d="M18 13a6 6 0 0 1-6 5 6 6 0 0 1-6-5h12Z" /> <line x1="9" x2="9.01" y1="9" y2="9" /> <line x1="15" x2="15.01" y1="9" y2="9" /></symbol><symbol id="i-luggage" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 20a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2" /> <path d="M8 18V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v14" /> <path d="M10 20h4" /> <circle cx="16" cy="20" r="2" /> <circle cx="8" cy="20" r="2" /></symbol><symbol id="i-mail" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2" /> <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" /></symbol><symbol id="i-message-circle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z" /></symbol><symbol id="i-mic-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="2" x2="22" y1="2" y2="22" /> <path d="M18.89 13.23A7.12 7.12 0 0 0 19 12v-2" /> <path d="M5 10v2a7 7 0 0 0 12 5" /> <path d="M15 9.34V5a3 3 0 0 0-5.68-1.33" /> <path d="M9 9v3a3 3 0 0 0 5.12 2.12" /> <line x1="12" x2="12" y1="19" y2="22" /></symbol><symbol id="i-mic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z" /> <path d="M19 10v2a7 7 0 0 1-14 0v-2" /> <line x1="12" x2="12" y1="19" y2="22" /></symbol><symbol id="i-music" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13" /> <circle cx="6" cy="18" r="3" /> <circle cx="18" cy="16" r="3" /></symbol><symbol id="i-newspaper" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2Zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2" /> <path d="M18 14h-8" /> <path d="M15 18h-5" /> <path d="M10 6h8v4h-8V6Z" /></symbol><symbol id="i-paperclip" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13.234 20.252 21 12.3" /> <path d="m16 6-8.414 8.586a2 2 0 0 0 0 2.828 2 2 0 0 0 2.828 0l8.414-8.586a4 4 0 0 0 0-5.656 4 4 0 0 0-5.656 0l-8.415 8.585a6 6 0 1 0 8.486 8.486" /></symbol><symbol id="i-phone-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.68 13.31a16 16 0 0 0 3.41 2.6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7 2 2 0 0 1 1.72 2v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.42 19.42 0 0 1-3.33-2.67m-2.67-3.34a19.79 19.79 0 0 1-3.07-8.63A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91" /> <line x1="22" x2="2" y1="2" y2="22" /></symbol><symbol id="i-phone" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" /></symbol><symbol id="i-play" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="6 3 20 12 6 21 6 3" /></symbol><symbol id="i-pointer" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 14a8 8 0 0 1-8 8" /> <path d="M18 11v-1a2 2 0 0 0-2-2a2 2 0 0 0-2 2" /> <path d="M14 10V9a2 2 0 0 0-2-2a2 2 0 0 0-2 2v1" /> <path d="M10 9.5V4a2 2 0 0 0-2-2a2 2 0 0 0-2 2v10" /> <path d="M18 11a2 2 0 1 1 4 0v3a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15" /></symbol><symbol id="i-radio" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.9 19.1C1 15.2 1 8.8 4.9 4.9" /> <path d="M7.8 16.2c-2.3-2.3-2.3-6.1 0-8.5" /> <circle cx="12" cy="12" r="2" /> <path d="M16.2 7.8c2.3 2.3 2.3 6.1 0 8.5" /> <path d="M19.1 4.9C23 8.8 23 15.1 19.1 19" /></symbol><symbol id="i-send-horizontal" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3.714 3.048a.498.498 0 0 0-.683.627l2.843 7.627a2 2 0 0 1 0 1.396l-2.842 7.627a.498.498 0 0 0 .682.627l18-8.5a.5.5 0 0 0 0-.904z" /> <path d="M6 12h16" /></symbol><symbol id="i-siren" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 18v-6a5 5 0 1 1 10 0v6" /> <path d="M5 21a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-1a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2z" /> <path d="M21 12h1" /> <path d="M18.5 4.5 18 5" /> <path d="M2 12h1" /> <path d="M12 2v1" /> <path d="m4.929 4.929.707.707" /> <path d="M12 12v6" /></symbol><symbol id="i-square" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" /></symbol><symbol id="i-switch-camera" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 19H4a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h5" /> <path d="M13 5h7a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2h-5" /> <circle cx="12" cy="12" r="3" /> <path d="m18 22-3-3 3-3" /> <path d="m6 2 3 3-3 3" /></symbol><symbol id="i-triangle-alert" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3" /> <path d="M12 9v4" /> <path d="M12 17h.01" /></symbol><symbol id="i-trophy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6" /> <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18" /> <path d="M4 22h16" /> <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22" /> <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22" /> <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z" /></symbol><symbol id="i-tv" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="15" x="2" y="7" rx="2" ry="2" /> <polyline points="17 2 12 7 7 2" /></symbol><symbol id="i-users" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /> <circle cx="9" cy="7" r="4" /> <path d="M22 21v-2a4 4 0 0 0-3-3.87" /> <path d="M16 3.13a4 4 0 0 1 0 7.75" /></symbol><symbol id="i-video" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m16 13 5.223 3.482a.5.5 0 0 0 .777-.416V7.87a.5.5 0 0 0-.752-.432L16 10.5" /> <rect x="2" y="6" width="14" height="12" rx="2" /></symbol><symbol id="i-volume-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4.702a.705.705 0 0 0-1.203-.498L6.413 7.587A1.4 1.4 0 0 1 5.416 8H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2.416a1.4 1.4 0 0 1 .997.413l3.383 3.384A.705.705 0 0 0 11 19.298z" /> <path d="M16 9a5 5 0 0 1 0 6" /> <path d="M19.364 18.364a9 9 0 0 0 0-12.728" /></symbol><symbol id="i-volume-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4.702a.705.705 0 0 0-1.203-.498L6.413 7.587A1.4 1.4 0 0 1 5.416 8H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2.416a1.4 1.4 0 0 1 .997.413l3.383 3.384A.705.705 0 0 0 11 19.298z" /> <line x1="22" x2="16" y1="9" y2="15" /> <line x1="16" x2="22" y1="9" y2="15" /></symbol><symbol id="i-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18" /> <path d="m6 6 12 12" /></symbol></svg>
 <header>
   <svg viewBox="0 0 512 512" aria-hidden="true"><rect width="512" height="512" fill="#fff8ee"/><path d="M256 96 L416 226 L384 226 L384 396 L128 396 L128 226 L96 226 Z" fill="#ea580c"/><path d="M256 356 C 214 324, 176 296, 176 260 C 176 236, 194 218, 216 218 C 234 218, 248 228, 256 242 C 264 228, 278 218, 296 218 C 318 218, 336 236, 336 260 C 336 296, 298 324, 256 356 Z" fill="#fff8ee"/><circle cx="256" cy="150" r="22" fill="#facc15"/></svg>
   <div><h1><span data-en="SadaSneha">सदा स्नेहा</span></h1><p><span data-en="Sneha – your own, with you every day">स्नेहा – आपकी अपनी, रोज़ आपके साथ</span></p></div>
@@ -407,8 +451,8 @@
         <h1><span data-en="You are far away. They are not alone.">आप दूर हैं, पर वे अकेले नहीं।</span></h1>
         <p class="lead"><span data-en="Sneha is a warm AI companion for your parents. She talks with them every day in their own language, plays their favourite old songs, reminds them of meals and medicines – and tells you at once if anything is wrong.">स्नेहा आपके माता-पिता की प्यारी AI साथी है। वह रोज़ उनकी अपनी भाषा में बात करती है, उनके पसंदीदा पुराने गाने सुनाती है, खाने-दवाई की याद दिलाती है – और कुछ भी गड़बड़ लगे तो तुरंत आपको बताती है।</span></p>
         <div class="doors">
-        <button class="door family" type="button" data-door="family">🤝 <span data-en="For my parents / family">अपने माता-पिता / परिवार के लिए</span><small><span data-en="Sign up in 2 minutes, see how they are, get alerts">2 मिनट में पंजीकरण, रोज़ का हाल, ज़रूरी ख़बरें</span></small></button>
-        <button class="door elder" type="button" data-door="elder">🙏 <span data-en="I will talk to Sneha myself">मैं ख़ुद स्नेहा से बात करूँगा / करूँगी</span><small><span data-en="Big, simple buttons: Sneha, songs, call family">बड़े, आसान बटन: स्नेहा, गाने, घर वालों को फ़ोन</span></small></button>
+        <button class="door family" type="button" data-door="family"><svg class="ico" aria-hidden="true"><use href="#i-handshake"/></svg> <span data-en="For my parents / family">अपने माता-पिता / परिवार के लिए</span><small><span data-en="Sign up in 2 minutes, see how they are, get alerts">2 मिनट में पंजीकरण, रोज़ का हाल, ज़रूरी ख़बरें</span></small></button>
+        <button class="door elder" type="button" data-door="elder"><svg class="ico" aria-hidden="true"><use href="#i-hand-heart"/></svg> <span data-en="I will talk to Sneha myself">मैं ख़ुद स्नेहा से बात करूँगा / करूँगी</span><small><span data-en="Big, simple buttons: Sneha, songs, call family">बड़े, आसान बटन: स्नेहा, गाने, घर वालों को फ़ोन</span></small></button>
       </div>
         <p class="muted small no-native"><span data-en="From ₹449 a month · Cancel any time · No hidden charges">₹449 प्रति माह से · कभी भी बंद करें · कोई छुपा शुल्क नहीं</span></p>
         <a class="next" href="#pg-sneha" aria-label="आगे / Next">⌄</a>
@@ -495,8 +539,8 @@
       <h2><span data-en="Our promise">हमारा वादा</span></h2>
       <p class="lead"><span data-en="Millions of parents in India live alone while their children work in other cities. SadaSneha was born in Jabalpur with one aim: that no parent feels alone, and no child lies awake worrying. Technology with a warm heart – always with love.">भारत में लाखों माता-पिता अकेले रहते हैं, जबकि बच्चे दूसरे शहरों में काम करते हैं। सदा स्नेहा का जन्म जबलपुर में एक ही लक्ष्य से हुआ: कोई माता-पिता अकेला महसूस न करे, और कोई बच्चा चिंता में जागता न रहे। दिल वाली तकनीक – सदा स्नेह के साथ।</span></p>
       <div class="doors">
-        <button class="door family" type="button" data-door="family">🤝 <span data-en="For my parents / family">अपने माता-पिता / परिवार के लिए</span><small><span data-en="Sign up in 2 minutes, see how they are, get alerts">2 मिनट में पंजीकरण, रोज़ का हाल, ज़रूरी ख़बरें</span></small></button>
-        <button class="door elder" type="button" data-door="elder">🙏 <span data-en="I will talk to Sneha myself">मैं ख़ुद स्नेहा से बात करूँगा / करूँगी</span><small><span data-en="Big, simple buttons: Sneha, songs, call family">बड़े, आसान बटन: स्नेहा, गाने, घर वालों को फ़ोन</span></small></button>
+        <button class="door family" type="button" data-door="family"><svg class="ico" aria-hidden="true"><use href="#i-handshake"/></svg> <span data-en="For my parents / family">अपने माता-पिता / परिवार के लिए</span><small><span data-en="Sign up in 2 minutes, see how they are, get alerts">2 मिनट में पंजीकरण, रोज़ का हाल, ज़रूरी ख़बरें</span></small></button>
+        <button class="door elder" type="button" data-door="elder"><svg class="ico" aria-hidden="true"><use href="#i-hand-heart"/></svg> <span data-en="I will talk to Sneha myself">मैं ख़ुद स्नेहा से बात करूँगा / करूँगी</span><small><span data-en="Big, simple buttons: Sneha, songs, call family">बड़े, आसान बटन: स्नेहा, गाने, घर वालों को फ़ोन</span></small></button>
       </div>
       <footer class="site-foot">
         <p><b>सदा स्नेहा – SadaSneha</b><br>Gopu Associate · 1809, Old Napier Town, Jabalpur, Madhya Pradesh, India</p>
@@ -511,7 +555,7 @@
   <!-- The elder's phone: the code from the family, once -->
   <section id="v-elogin" class="view hidden">
     <div class="card">
-      <h2>🔑 <span data-en="Your family's code">घर वालों से मिला कोड</span></h2>
+      <h2><svg class="ico" aria-hidden="true"><use href="#i-key-round"/></svg> <span data-en="Your family's code">घर वालों से मिला कोड</span></h2>
       <p class="muted"><span data-en="Ask your son or daughter for the SadaSneha code (like GS-4K7P9QX2), or open the link they sent you.">अपने बेटे-बेटी से सदा स्नेहा का कोड पूछिए (जैसे GS-4K7P9QX2), या उनका भेजा लिंक खोलिए।</span></p>
       <input id="ecode-in" autocomplete="off" autocapitalize="characters" placeholder="GS-XXXXXXXX" style="font-size:22px;text-align:center">
       <div id="ecode-err" class="err"></div>
@@ -530,15 +574,15 @@
     <div id="e-new" class="card hidden"></div>
     <div id="e-likes" class="card hidden"></div>
     <div class="tiles">
-      <button class="tile big" data-go="talk" type="button"><span class="ic">🗣️</span><span data-en="Talk to Sneha">स्नेहा से बात</span><small data-en="Speak; she listens">बोलिए, वह सुनेगी</small></button>
-      <button class="tile" id="t-people" type="button"><span class="ic">📞</span><span data-en="Call my people">अपनों से बात</span><small data-en="Video, voice, phone">वीडियो · आवाज़ · फ़ोन</small></button>
-      <button class="tile" data-go="tv" type="button"><span class="ic">📺</span><span data-en="TV">टीवी</span><small data-en="News, cricket, films">ख़बरें · क्रिकेट · फ़िल्में</small></button>
-      <button class="tile" data-go="radio" type="button"><span class="ic">📻</span><span data-en="Radio">रेडियो</span><small data-en="Vividh Bharati, news">विविध भारती · समाचार</small></button>
-      <button class="tile" id="t-songs" type="button"><span class="ic">🎵</span><span data-en="Songs & bhajans">गाने और भजन</span><small data-en="Sneha plays them">स्नेहा सुनाएगी</small></button>
-      <button class="tile" data-go="chat" type="button"><span class="ic">💬</span><span data-en="Family chat">परिवार की बातचीत</span><small data-en="Photos, voice notes">फ़ोटो · आवाज़ संदेश</small></button>
-      <button class="tile" id="t-msgs" type="button"><span class="ic">💌</span><span data-en="Messages">संदेश</span><small data-en="From and to family">घर वालों के संदेश</small></button>
-      <button class="tile" data-go="trip" type="button"><span class="ic">🧳</span><span data-en="Travelling">सफ़र</span><small data-en="Family sees where you reached">घर वाले देखें कहाँ पहुँचे</small></button>
-      <button class="tile sos" id="t-help" type="button">🚨 <span data-en="Help – tell my family now">मदद – घर वालों को अभी बताएँ</span></button>
+      <button class="tile big" data-go="talk" type="button"><span class="ic"><svg class="ico" aria-hidden="true"><use href="#i-mic"/></svg></span><span data-en="Talk to Sneha">स्नेहा से बात</span><small data-en="Speak; she listens">बोलिए, वह सुनेगी</small></button>
+      <button class="tile" id="t-people" type="button"><span class="ic"><svg class="ico" aria-hidden="true"><use href="#i-phone"/></svg></span><span data-en="Call my people">अपनों से बात</span><small data-en="Video, voice, phone">वीडियो · आवाज़ · फ़ोन</small></button>
+      <button class="tile" data-go="tv" type="button"><span class="ic"><svg class="ico" aria-hidden="true"><use href="#i-tv"/></svg></span><span data-en="TV">टीवी</span><small data-en="News, cricket, films">ख़बरें · क्रिकेट · फ़िल्में</small></button>
+      <button class="tile" data-go="radio" type="button"><span class="ic"><svg class="ico" aria-hidden="true"><use href="#i-radio"/></svg></span><span data-en="Radio">रेडियो</span><small data-en="Vividh Bharati, news">विविध भारती · समाचार</small></button>
+      <button class="tile" id="t-songs" type="button"><span class="ic"><svg class="ico" aria-hidden="true"><use href="#i-music"/></svg></span><span data-en="Songs & bhajans">गाने और भजन</span><small data-en="Sneha plays them">स्नेहा सुनाएगी</small></button>
+      <button class="tile" data-go="chat" type="button"><span class="ic"><svg class="ico" aria-hidden="true"><use href="#i-message-circle"/></svg></span><span data-en="Family chat">परिवार की बातचीत</span><small data-en="Photos, voice notes">फ़ोटो · आवाज़ संदेश</small></button>
+      <button class="tile" id="t-msgs" type="button"><span class="ic"><svg class="ico" aria-hidden="true"><use href="#i-mail"/></svg></span><span data-en="Messages">संदेश</span><small data-en="From and to family">घर वालों के संदेश</small></button>
+      <button class="tile" data-go="trip" type="button"><span class="ic"><svg class="ico" aria-hidden="true"><use href="#i-luggage"/></svg></span><span data-en="Travelling">सफ़र</span><small data-en="Family sees where you reached">घर वाले देखें कहाँ पहुँचे</small></button>
+      <button class="tile sos" id="t-help" type="button"><svg class="ico" aria-hidden="true"><use href="#i-siren"/></svg> <span data-en="Help – tell my family now">मदद – घर वालों को अभी बताएँ</span></button>
     </div>
     <div id="e-panel" class="card hidden" style="margin-top:12px"></div>
     <details class="card" style="margin-top:12px">
@@ -552,7 +596,7 @@
   <!-- सफ़र साथी: the elder starts a trip; the family sees where they have reached -->
   <section id="v-trip" class="view hidden">
     <div class="card"><button class="linkbtn homebtn" type="button" data-back>🏠 <span data-en="Home">घर</span></button>
-      <h2>🧳 <span data-en="Travel companion">सफ़र साथी</span></h2>
+      <h2><svg class="ico" aria-hidden="true"><use href="#i-luggage"/></svg> <span data-en="Travel companion">सफ़र साथी</span></h2>
       <div id="trip-elder" class="hidden">
         <div id="trip-new">
           <p style="margin:0 0 8px"><span data-en="Going somewhere? Your family will see where you have reached and when you will arrive, so they can come to pick you up.">सफ़र पर जा रहे हैं? घर वाले देख पाएँगे कि आप कहाँ तक पहुँचे और कब पहुँचेंगे, ताकि लेने आ सकें।</span></p>
@@ -574,7 +618,7 @@
         <div id="trip-fam-facts" style="font-size:18px"></div>
         <div style="display:flex;gap:8px;margin-top:10px"><button class="btn primary" id="trip-call" type="button" style="flex:1">📞 <span data-en="Call">कॉल करें</span></button>
           <button class="btn secondary" id="trip-refresh" type="button" style="flex:1">🔄 <span data-en="Refresh">ताज़ा करें</span></button></div>
-        <p class="muted" style="font-size:13px"><span data-en="Updates about every 5 minutes. Map © OpenStreetMap contributors.">लगभग हर 5 मिनट में नई जगह। नक़्शा © OpenStreetMap contributors.</span></p>
+        <p class="muted" style="font-size:14px"><span data-en="Updates about every 5 minutes. Map © OpenStreetMap contributors.">लगभग हर 5 मिनट में नई जगह। नक़्शा © OpenStreetMap contributors.</span></p>
       </div>
     </div>
   </section>
@@ -582,7 +626,7 @@
   <!-- Radio: Akashvani live inside the app -->
   <section id="v-radio" class="view hidden">
     <div class="card"><button class="linkbtn homebtn" type="button" data-back>🏠 <span data-en="Home">घर</span></button>
-      <h2>📻 <span data-en="Radio – Akashvani">रेडियो – आकाशवाणी</span></h2>
+      <h2><svg class="ico" aria-hidden="true"><use href="#i-radio"/></svg> <span data-en="Radio – Akashvani">रेडियो – आकाशवाणी</span></h2>
       <div id="radio-now" class="radio-now hidden"><b id="radio-name">—</b><span id="radio-state"></span>
         <button class="btn warm" type="button" id="radio-stop">⏹ <span data-en="Stop">बंद करें</span></button></div>
       <div id="radio-fav" class="radio-grid"></div>
@@ -595,22 +639,22 @@
       </div>
       <details class="msg-fold" id="radio-world"><summary><b>🌍 <span data-en="Radio from around the world">दुनिया भर के रेडियो</span></b><small data-en="Opens Radio Garden or TuneIn">Radio Garden या TuneIn में खुलेगा</small></summary><div class="radio-list" id="radio-world-list"></div></details>
       <details class="msg-fold" id="radio-private"><summary><b>🎙️ <span data-en="Private FM (opens their own app)">प्राइवेट FM (उनके अपने ऐप में खुलेगा)</span></b><small data-en="Radio Mirchi, Red FM, Big FM, Radio City">रेडियो मिर्ची, रेड FM, बिग FM, रेडियो सिटी</small></summary><div class="radio-list" id="radio-private-list"></div>
-        <p class="muted" style="font-size:13px;padding:0 10px"><span data-en="These channels allow listening only in their own apps. The first time, install their app from the Play Store.">ये चैनल सिर्फ़ अपने ऐप में सुनने देते हैं। पहली बार उनका ऐप Play Store से लगा लीजिए।</span></p></details>
+        <p class="muted" style="font-size:14px;padding:0 10px"><span data-en="These channels allow listening only in their own apps. The first time, install their app from the Play Store.">ये चैनल सिर्फ़ अपने ऐप में सुनने देते हैं। पहली बार उनका ऐप Play Store से लगा लीजिए।</span></p></details>
       <details class="msg-fold" id="radio-fm"><summary><b>📻 <span data-en="All FM stations">सभी FM स्टेशन</span></b><small data-en="FM Gold, FM Rainbow and city FM, all of India">FM गोल्ड, FM रेनबो और शहरों के FM – पूरे भारत के</small></summary><div class="radio-list" id="radio-fm-list"></div></details>
       <details class="msg-fold" id="radio-every"><summary><b>🇮🇳 <span data-en="Every Akashvani station">आकाशवाणी के सभी स्टेशन</span> (<span id="radio-n"></span>)</b><small data-en="Sorted by name">नाम के क्रम में</small></summary><div class="radio-list" id="radio-every-list"></div></details>
-      <p class="muted" style="font-size:13px"><span data-en="Live streams of Prasar Bharati (All India Radio).">प्रसार भारती (आकाशवाणी) की लाइव प्रसारण।</span></p>
+      <p class="muted" style="font-size:14px"><span data-en="Live streams of Prasar Bharati (All India Radio).">प्रसार भारती (आकाशवाणी) की लाइव प्रसारण।</span></p>
     </div>
   </section>
 
   <!-- News and bhajan TV (official YouTube live channels) -->
   <section id="v-tv" class="view hidden">
     <div class="card"><button class="linkbtn homebtn" type="button" data-back>🏠 <span data-en="Home">घर</span></button>
-      <h2>📺 <span data-en="TV">टीवी</span></h2>
+      <h2><svg class="ico" aria-hidden="true"><use href="#i-tv"/></svg> <span data-en="TV">टीवी</span></h2>
       <div id="tv-cats" class="tv-cats"></div>
       <div id="tv-player" class="tv-player hidden"></div>
       <div id="tv-list" class="radio-grid"></div>
       <p id="tv-note" class="muted" style="font-size:14px"></p>
-      <p class="muted" style="font-size:13px"><span data-en="Official free channels on YouTube; YouTube may show ads.">YouTube पर चैनलों के आधिकारिक, मुफ़्त प्रसारण; YouTube विज्ञापन दिखा सकता है।</span></p>
+      <p class="muted" style="font-size:14px"><span data-en="Official free channels on YouTube; YouTube may show ads.">YouTube पर चैनलों के आधिकारिक, मुफ़्त प्रसारण; YouTube विज्ञापन दिखा सकता है।</span></p>
     </div>
   </section>
 
@@ -619,16 +663,16 @@
     <div class="chat-head"><button class="ch-back" type="button" id="chat-back" aria-label="वापस / Back">←</button>
       <span class="av" style="background:#c2410c;width:44px;height:44px;font-size:22px">👨‍👩‍👧</span>
       <span class="ch-title"><b data-en="Family chat">परिवार की बातचीत</b><small data-en="Everyone in the family">परिवार के सब लोग</small></span>
-      <button class="ch-ic" type="button" id="chat-vcall" aria-label="वीडियो कॉल / Video call">📹</button><button class="ch-ic" type="button" id="chat-acall" aria-label="कॉल / Call">📞</button></div>
+      <button class="ch-ic" type="button" id="chat-vcall" aria-label="वीडियो कॉल / Video call"><svg class="ico" aria-hidden="true"><use href="#i-video"/></svg></button><button class="ch-ic" type="button" id="chat-acall" aria-label="कॉल / Call"><svg class="ico" aria-hidden="true"><use href="#i-phone"/></svg></button></div>
     <div id="chat-list" class="chat-list"></div>
     <div class="chat-bar">
       <div class="chat-field">
-        <button type="button" id="chat-file" title="फ़ाइल / File">📎</button>
+        <button type="button" id="chat-file" title="फ़ाइल / File" aria-label="फ़ाइल भेजें / Send a file"><svg class="ico" aria-hidden="true"><use href="#i-paperclip"/></svg></button>
         <textarea id="chat-text" rows="1" maxlength="1000" placeholder="संदेश लिखिए"></textarea>
-        <button type="button" id="chat-photo" title="फ़ोटो / Photo">📷</button>
+        <button type="button" id="chat-photo" title="फ़ोटो / Photo" aria-label="फ़ोटो भेजें / Send a photo"><svg class="ico" aria-hidden="true"><use href="#i-camera"/></svg></button>
       </div>
-      <button type="button" id="chat-mic" class="round" title="आवाज़ संदेश / Voice note">🎤</button>
-      <button type="button" id="chat-send" class="round send hidden" title="भेजें / Send">➤</button>
+      <button type="button" id="chat-mic" class="round" title="आवाज़ संदेश / Voice note" aria-label="आवाज़ संदेश रिकॉर्ड करें / Record a voice note"><svg class="ico" aria-hidden="true"><use href="#i-mic"/></svg></button>
+      <button type="button" id="chat-send" class="round send hidden" title="भेजें / Send" aria-label="भेजें / Send"><svg class="ico" aria-hidden="true"><use href="#i-send-horizontal"/></svg></button>
     </div>
     <input type="file" id="chat-photo-in" accept="image/*" class="hidden">
     <input type="file" id="chat-file-in" accept="application/pdf,image/*,audio/*,video/mp4,text/plain" class="hidden">
@@ -638,7 +682,7 @@
   <!-- The elder's own people (friends beyond family): phone and WhatsApp -->
   <section id="v-people" class="view hidden">
     <div class="card"><button class="linkbtn homebtn" type="button" id="people-back">🏠 <span data-en="Home">घर</span></button>
-      <h2>📒 <span id="people-title" data-en="My people">मेरे लोग</span></h2>
+      <h2><svg class="ico" aria-hidden="true"><use href="#i-book-open"/></svg> <span id="people-title" data-en="My people">मेरे लोग</span></h2>
       <p class="muted" style="margin:0"><span data-en="Friends, doctor, hospital, auto… Tap 📞 to phone or 🟢 for WhatsApp. You can also tell Sneha: “call the doctor”.">दोस्त, डॉक्टर, अस्पताल, ऑटो… 📞 दबाकर फ़ोन, 🟢 दबाकर WhatsApp। स्नेहा से भी कह सकते हैं: "डॉक्टर को फ़ोन लगाओ"।</span></p>
       <div id="people-list" style="margin-top:10px"></div></div>
     <div class="card"><h3 style="margin:0 0 6px">➕ <span data-en="Add someone">किसी को जोड़ें</span></h3>
@@ -675,8 +719,8 @@
       <div class="card" id="c-friend-call"><div class="push-card" style="margin-bottom:8px"></div><h2 style="font-size:18px">📞📹 <span data-en="Free calls">मुफ़्त कॉल</span></h2><div class="vc-list"></div></div>
       <div class="card"><h2 style="font-size:18px">🎁 <span data-en="Free for you">आपके लिए मुफ़्त</span></h2>
         <div class="tiles">
-          <button class="tile" data-go="tv" type="button"><span class="ic">📺</span><span data-en="TV">टीवी</span><small data-en="News, cricket, old films">ख़बरें · क्रिकेट · पुरानी फ़िल्में</small></button>
-          <button class="tile" data-go="radio" type="button"><span class="ic">📻</span><span data-en="Radio">रेडियो</span><small data-en="Vividh Bharati, news">विविध भारती · समाचार</small></button>
+          <button class="tile" data-go="tv" type="button"><span class="ic"><svg class="ico" aria-hidden="true"><use href="#i-tv"/></svg></span><span data-en="TV">टीवी</span><small data-en="News, cricket, old films">ख़बरें · क्रिकेट · पुरानी फ़िल्में</small></button>
+          <button class="tile" data-go="radio" type="button"><span class="ic"><svg class="ico" aria-hidden="true"><use href="#i-radio"/></svg></span><span data-en="Radio">रेडियो</span><small data-en="Vividh Bharati, news">विविध भारती · समाचार</small></button>
         </div></div>
       <div class="card friend-show">
         <h2 style="font-size:20px">💛 <span data-en="Sneha for your own parents">अपने माता-पिता के लिए स्नेहा</span></h2>
@@ -712,7 +756,7 @@
   <section id="v-perm" class="view hidden">
     <div class="card sneha-hero">
       <figure class="sneha-face"><img src="sneha.jpg" width="120" height="120" alt="स्नेहा / Sneha" style="width:120px;height:120px"></figure>
-      <h2>📹 <span data-en="To talk to Sneha on video">स्नेहा से वीडियो पर बात करने के लिए</span></h2>
+      <h2><svg class="ico" aria-hidden="true"><use href="#i-video"/></svg> <span data-en="To talk to Sneha on video">स्नेहा से वीडियो पर बात करने के लिए</span></h2>
       <p><span data-en="Sneha needs your camera and microphone so she can see and hear you when you talk to her.">स्नेहा को आपका कैमरा और माइक चाहिए, ताकि बात करते समय वह आपको देख-सुन सके।</span></p>
       <ul class="plain" style="text-align:left">
         <li>🔒 <span data-en="Video is never recorded or stored.">वीडियो कभी रिकॉर्ड या सेव नहीं होगा।</span></li>
@@ -773,7 +817,7 @@
 
 
     <div data-tab="talk" class="card" id="msg-card">
-      <h2>💌 <span id="msg-title"><span data-en="Message for your loved one">अपनों का संदेश</span></span></h2>
+      <h2><svg class="ico" aria-hidden="true"><use href="#i-mail"/></svg> <span id="msg-title"><span data-en="Message for your loved one">अपनों का संदेश</span></span></h2>
       <p class="muted"><span data-en="Speak or type a message here. Sneha will read it out lovingly in her next call.">यहाँ बोलकर या लिखकर संदेश भेजिए। स्नेहा अगली कॉल में इसे प्यार से पढ़कर सुनाएगी।</span><br>Speak or type a message; Sneha reads it out in her next call.</p>
       <label for="msg-from">आपका नाम / Your name</label>
       <input id="msg-from" placeholder="जैसे: सत्येंद्र" autocomplete="name">
@@ -787,9 +831,9 @@
 
     <div data-tab="talk" class="card"><div style="display:flex;gap:8px"><button class="btn primary" type="button" data-go="chat" style="flex:1">💬 <span data-en="Family chat">परिवार की बातचीत</span></button>
       <button class="btn secondary" type="button" data-go="people" style="flex:1">📒 <span data-en="Their contacts">उनके लोग</span></button></div></div>
-    <div data-tab="talk" class="card" id="vc-card"><div class="push-card" style="margin-bottom:8px"></div><h2>📹 <span data-en="Free voice &amp; video calls">मुफ़्त आवाज़ और वीडियो कॉल</span></h2><p class="muted" style="margin:0 0 8px"><span data-en="Video goes straight between the phones; nothing is recorded.">वीडियो सीधे फ़ोन से फ़ोन जाता है; कुछ रिकॉर्ड नहीं होता।</span></p><div class="vc-list"></div></div>
+    <div data-tab="talk" class="card" id="vc-card"><div class="push-card" style="margin-bottom:8px"></div><h2><svg class="ico" aria-hidden="true"><use href="#i-video"/></svg> <span data-en="Free voice &amp; video calls">मुफ़्त आवाज़ और वीडियो कॉल</span></h2><p class="muted" style="margin:0 0 8px"><span data-en="Video goes straight between the phones; nothing is recorded.">वीडियो सीधे फ़ोन से फ़ोन जाता है; कुछ रिकॉर्ड नहीं होता।</span></p><div class="vc-list"></div></div>
     <div data-tab="family" class="card" id="circle-card">
-      <h2>👥 <span data-en="Family & caretakers">परिवार और देखभाल करने वाले</span></h2>
+      <h2><svg class="ico" aria-hidden="true"><use href="#i-users"/></svg> <span data-en="Family & caretakers">परिवार और देखभाल करने वाले</span></h2>
       <p class="muted"><span data-en="Add people who should know how they are. Family see daily news and messages; a caretaker or neighbour sees only today's status and alerts. Nobody sees payments.">उन्हें जोड़िए जिन्हें हाल पता होना चाहिए। परिवार: रोज़ की ख़बर और संदेश। देखभाल करने वाले / पड़ोसी: सिर्फ़ आज का हाल और ज़रूरी ख़बर। भुगतान कोई नहीं देखता।</span></p>
       <div id="circle-list"></div>
       <label for="ci-name"><span data-en="Name">नाम</span></label><input id="ci-name" maxlength="40" placeholder="जैसे: काव्या / शर्मा जी">
@@ -823,26 +867,26 @@
     </div>
 
     <div class="card hidden" id="bhakti-card">
-      <h2>🙏 <span data-en="Thought of devotion">आज का भक्ति विचार</span></h2>
+      <h2><svg class="ico" aria-hidden="true"><use href="#i-hand-heart"/></svg> <span data-en="Thought of devotion">आज का भक्ति विचार</span></h2>
       <p id="bhakti-line" class="bhakti-line"></p>
       <a id="bhakti-site" class="hidden" target="_blank" rel="noopener"></a>
     </div>
 
     <div class="card hidden" id="news-card">
-      <h2>📰 <span data-en="Today's news">आज की ख़बरें</span></h2>
+      <h2><svg class="ico" aria-hidden="true"><use href="#i-newspaper"/></svg> <span data-en="Today's news">आज की ख़बरें</span></h2>
       <div id="news-list"></div>
       <p class="muted" id="news-src"></p>
     </div>
 
     <div class="card hidden" id="radio-card">
-      <h2>📻 <span data-en="Radio">रेडियो</span></h2>
+      <h2><svg class="ico" aria-hidden="true"><use href="#i-radio"/></svg> <span data-en="Radio">रेडियो</span></h2>
       <p class="muted"><span data-en="Akashvani live, inside the app: Vividh Bharati, news and your region's station.">आकाशवाणी लाइव, ऐप के अंदर: विविध भारती, समाचार और आपके इलाक़े का स्टेशन।</span></p>
       <button class="btn primary" type="button" data-go="radio">📻 <span data-en="Open the radio">रेडियो खोलें</span></button>
       <button class="btn secondary" type="button" data-go="tv">📺 <span data-en="TV: news, bhajan, shows">टीवी: ख़बरें, भजन, धारावाहिक</span></button>
     </div>
 
     <div class="card" id="likes-card">
-      <h2>💛 <span data-en="What do you like?">मेरी पसंद</span></h2>
+      <h2><svg class="ico" aria-hidden="true"><use href="#i-heart"/></svg> <span data-en="What do you like?">मेरी पसंद</span></h2>
       <p class="muted"><span data-en="Choose what you would like to see in the app every day.">ऐप में रोज़ क्या देखना पसंद करेंगे? चुनिए।</span></p>
       <label class="check"><input type="checkbox" id="like-bhakti"> <span>🙏 <span data-en="Devotion: a thought for the day">भक्ति: रोज़ एक विचार</span></span></label>
       <select id="like-faith" class="hidden"></select>
@@ -916,7 +960,7 @@
   <!-- Payments -->
   <section id="v-pay" class="view hidden">
     <div class="card" id="pay-now">
-      <h2>💳 <span data-en="Choose a plan and pay online">प्लान चुनें और ऑनलाइन भुगतान करें</span></h2>
+      <h2><svg class="ico" aria-hidden="true"><use href="#i-credit-card"/></svg> <span data-en="Choose a plan and pay online">प्लान चुनें और ऑनलाइन भुगतान करें</span></h2>
       <label for="pn-plan"><span data-en="Plan">प्लान</span></label><select id="pn-plan"></select>
       <label for="pn-cycle"><span data-en="Pay for">कितने समय का</span></label><select id="pn-cycle"></select>
       <p class="rs-big" id="pn-amount">—</p>
@@ -925,7 +969,7 @@
       <label for="pn-state"><span data-en="State">राज्य</span></label><input id="pn-state" maxlength="60" placeholder="मध्य प्रदेश">
       <button class="btn primary" id="pn-go" type="button">🔒 <span data-en="Pay securely (UPI / card)">सुरक्षित भुगतान करें (UPI / कार्ड)</span></button>
       <p id="pn-msg" class="muted"></p>
-      <p class="muted" style="font-size:13px"><span data-en="Payments by Razorpay. By paying you accept our">भुगतान Razorpay से। भुगतान करके आप हमारी</span> <a href="terms.html" target="_blank" rel="noopener"><span data-en="Terms">शर्तें</span></a> <span data-en="and">और</span> <a href="refund.html" target="_blank" rel="noopener"><span data-en="Refund policy">रिफ़ंड नीति</span></a> <span data-en="">मानते हैं।</span></p>
+      <p class="muted" style="font-size:14px"><span data-en="Payments by Razorpay. By paying you accept our">भुगतान Razorpay से। भुगतान करके आप हमारी</span> <a href="terms.html" target="_blank" rel="noopener"><span data-en="Terms">शर्तें</span></a> <span data-en="and">और</span> <a href="refund.html" target="_blank" rel="noopener"><span data-en="Refund policy">रिफ़ंड नीति</span></a> <span data-en="">मानते हैं।</span></p>
     </div>
     <div class="card">
       <h2>भुगतान / Payments</h2>
@@ -941,9 +985,9 @@
         <video id="talk-self" class="hidden" playsinline muted></video>
         <span class="talk-ai">स्नेहा – आपकी AI सहायिका</span><span id="talk-cam-on" class="talk-cam hidden">● कैमरा चालू</span><span id="talk-mood" class="talk-mood hidden"></span>
         <div id="face-notes" class="face-notes hidden" aria-hidden="true"><span>♪</span><span>♫</span><span>♩</span><span>♬</span><span>♪</span><p>🎵 गाना ढूँढ रही हूँ…</p></div></div>
-      <div id="talk-sym" class="talk-sym idle" aria-live="polite"><span class="ico">👇</span><span class="lbl">बटन दबाइए</span></div>
+      <div id="talk-sym" class="talk-sym idle" aria-live="polite"><span class="sym"><svg class="ico" aria-hidden="true"><use href="#i-pointer"/></svg></span><span class="lbl">बटन दबाइए</span></div>
       <p id="talk-state" class="talk-state hidden"><span data-en="Press the button and speak">बटन दबाकर बोलिए</span></p>
-      <button class="talk-mic" id="talk-mic" type="button" aria-label="बोलें / Speak">🎤</button>
+      <button class="talk-mic" id="talk-mic" type="button" aria-label="बोलें / Speak"><svg class="ico big" aria-hidden="true"><use href="#i-mic"/></svg></button>
       <div id="loc-ask" class="card hidden" style="margin:10px 0;text-align:left;box-shadow:none;border:2px solid #fed7aa">
         <p style="margin:0 0 6px"><b>📍 <span data-en="Shall Sneha know whether you are at home or out?">स्नेहा जान सके कि आप घर पर हैं या बाहर?</span></b></p>
         <p class="muted" style="font-size:14px;margin:0 0 8px"><span data-en="The phone tells Sneha only the town's name (to talk about its weather). Your location is not saved anywhere and not shown to the family; only in an emergency do they get the town's name.">फ़ोन स्नेहा को सिर्फ़ शहर का नाम बताएगा, ताकि वह वहाँ के मौसम की बात कर सके। आपकी जगह कहीं सेव नहीं होती, घर वालों को भी नहीं दिखती; सिर्फ़ किसी ज़रूरी हालत में उन्हें शहर का नाम जाता है।</span></p>
@@ -955,7 +999,7 @@
       <button class="btn secondary" id="face-open" type="button" style="width:100%;margin-top:8px">👨‍👩‍👧 <span data-en="Sneha knows the family">स्नेहा परिवार को पहचाने</span></button>
       <div id="face-panel" class="card hidden" style="margin-top:10px;text-align:left">
         <p style="margin:0 0 6px"><b><span data-en="Faces saved on this phone only">चेहरे सिर्फ़ इसी फ़ोन पर सेव होते हैं</span></b></p>
-        <p class="muted" style="font-size:13px;margin:0 0 8px"><span data-en="Each family member saves their own face, by their own choice. The face pattern stays on this phone; it never goes to our server or anywhere else. Sneha only learns the name. Delete any time.">परिवार का हर सदस्य अपनी मर्ज़ी से अपना चेहरा सेव करता है। चेहरे का पैटर्न इसी फ़ोन में रहता है, हमारे सर्वर या कहीं और नहीं जाता। स्नेहा को सिर्फ़ नाम पता चलता है। कभी भी मिटा सकते हैं।</span></p>
+        <p class="muted" style="font-size:14px;margin:0 0 8px"><span data-en="Each family member saves their own face, by their own choice. The face pattern stays on this phone; it never goes to our server or anywhere else. Sneha only learns the name. Delete any time.">परिवार का हर सदस्य अपनी मर्ज़ी से अपना चेहरा सेव करता है। चेहरे का पैटर्न इसी फ़ोन में रहता है, हमारे सर्वर या कहीं और नहीं जाता। स्नेहा को सिर्फ़ नाम पता चलता है। कभी भी मिटा सकते हैं।</span></p>
         <div id="face-list"></div>
         <label style="display:block;margin-top:8px"><span data-en="Name">नाम</span> <input id="face-name" type="text" maxlength="30" style="width:100%"></label>
         <label style="display:block;margin-top:6px"><span data-en="Relation">रिश्ता</span> <select id="face-rel" style="width:100%">
@@ -972,7 +1016,7 @@
       <button type="button" class="linkbtn" id="talk-cc" style="font-size:14px"></button>
       <button type="button" class="linkbtn" id="talk-report" style="font-size:14px">🚩 <span data-en="Sneha's reply felt wrong? Tell us">स्नेहा का जवाब ठीक नहीं लगा? बताइए</span></button>
       <div id="talk-log" class="talk-log hidden"></div>
-      <p class="muted" style="font-size:13px"><span data-en="Nothing is recorded or saved. With the camera on, Sneha sees a small picture only to understand your mood.">कुछ भी रिकॉर्ड या सेव नहीं होता। कैमरा चालू हो तो स्नेहा सिर्फ़ आपका मन समझने के लिए एक छोटी तस्वीर देखती है।</span>
+      <p class="muted" style="font-size:14px"><span data-en="Nothing is recorded or saved. With the camera on, Sneha sees a small picture only to understand your mood.">कुछ भी रिकॉर्ड या सेव नहीं होता। कैमरा चालू हो तो स्नेहा सिर्फ़ आपका मन समझने के लिए एक छोटी तस्वीर देखती है।</span>
         <br><button type="button" class="linkbtn" id="talk-photo"></button> · <button type="button" class="linkbtn" id="talk-loc"></button> · <a href="privacy.html" target="_blank" rel="noopener"><span data-en="Privacy">गोपनीयता</span></a></p>
     </div>
   </section>
@@ -1112,11 +1156,11 @@
   <span id="vc-av" class="vc-av"></span>
   <div class="vc-top"><b id="vc-name">—</b><span id="vc-state"></span></div>
   <div class="vc-bar">
-    <button type="button" id="vc-mute"><b>🎤</b><span data-en="Mute">आवाज़ बंद</span></button>
-    <button type="button" id="vc-cam"><b>📷</b><span data-en="Camera">कैमरा</span></button>
-    <button type="button" id="vc-flip"><b>🔄</b><span data-en="Flip">पलटें</span></button>
-    <button type="button" id="vc-spk" class="hidden"><b>🔊</b><span data-en="Speaker">स्पीकर</span></button>
-    <button type="button" id="vc-end" class="end"><b>📵</b><span data-en="End">काटें</span></button>
+    <button type="button" id="vc-mute"><b><svg class="ico" aria-hidden="true"><use href="#i-mic-off"/></svg></b><span data-en="Mute">आवाज़ बंद</span></button>
+    <button type="button" id="vc-cam"><b><svg class="ico" aria-hidden="true"><use href="#i-camera"/></svg></b><span data-en="Camera">कैमरा</span></button>
+    <button type="button" id="vc-flip"><b><svg class="ico" aria-hidden="true"><use href="#i-switch-camera"/></svg></b><span data-en="Flip">पलटें</span></button>
+    <button type="button" id="vc-spk" class="hidden"><b><svg class="ico" aria-hidden="true"><use href="#i-volume-2"/></svg></b><span data-en="Speaker">स्पीकर</span></button>
+    <button type="button" id="vc-end" class="end"><b><svg class="ico" aria-hidden="true"><use href="#i-phone-off"/></svg></b><span data-en="End">काटें</span></button>
   </div>
 </div>
 <div id="vc-ring" class="vc-ring hidden" role="alertdialog">
@@ -1128,17 +1172,17 @@
     <button type="button" id="vc-accept" class="yes"><span class="rb"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25 11.4 11.4 0 0 0 3.6.57 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.57a1 1 0 0 1-.25 1z"/></svg></span><span data-en="Answer">उठाएँ</span></button>
   </div>
 </div>
-<div id="backbar" class="backbar hidden"><button type="button" data-goback><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17 4.5v15L5.5 12z"/></svg><span data-en="Back">पीछे</span></button></div>
+<div id="backbar" class="backbar hidden"><button type="button" data-goback><svg class="ico" aria-hidden="true"><use href="#i-arrow-left"/></svg><span data-en="Back">पीछे</span></button><button type="button" class="bb-home" data-gohome><svg class="ico" aria-hidden="true"><use href="#i-house"/></svg><span data-en="Home">घर</span></button></div>
 <div id="talk-bar" class="talk-bar hidden" role="toolbar" aria-label="बातचीत के बटन / Talk controls">
-  <button type="button" id="tb-back" data-goback><b>◀</b><span data-en="Back">पीछे</span></button>
-  <button type="button" id="tb-mic" class="hidden"><b>🎤</b><span data-en="Speak">बोलें</span></button>
-  <button type="button" id="tb-stop"><b>⏹</b><span data-en="Stop">रोकें</span></button>
-  <button type="button" id="tb-cam"><b>📷</b><span data-en="Camera">कैमरा</span></button>
-  <button type="button" id="tb-song"><b>🎵</b><span data-en="Song off">गाना बंद</span></button>
-  <button type="button" id="tb-end"><b>✖</b><span data-en="End">बंद करें</span></button>
+  <button type="button" id="tb-back" data-goback><b><svg class="ico" aria-hidden="true"><use href="#i-arrow-left"/></svg></b><span data-en="Back">पीछे</span></button>
+  <button type="button" id="tb-mic" class="hidden"><b><svg class="ico" aria-hidden="true"><use href="#i-mic"/></svg></b><span data-en="Speak">बोलें</span></button>
+  <button type="button" id="tb-stop"><b><svg class="ico" aria-hidden="true"><use href="#i-square"/></svg></b><span data-en="Stop">रोकें</span></button>
+  <button type="button" id="tb-cam"><b><svg class="ico" aria-hidden="true"><use href="#i-camera"/></svg></b><span data-en="Camera">कैमरा</span></button>
+  <button type="button" id="tb-song"><b><svg class="ico" aria-hidden="true"><use href="#i-volume-x"/></svg></b><span data-en="Song off">गाना बंद</span></button>
+  <button type="button" id="tb-end"><b><svg class="ico" aria-hidden="true"><use href="#i-x"/></svg></b><span data-en="End">बंद करें</span></button>
 </div>
 <nav id="tabs" class="hidden">
-  <button type="button" id="nav-back" data-goback class="hidden"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17 4.5v15L5.5 12z"/></svg><span data-en="Back">पीछे</span></button>
+  <button type="button" id="nav-back" data-goback class="hidden"><svg class="ico" aria-hidden="true"><use href="#i-arrow-left"/></svg><span data-en="Back">पीछे</span></button>
   <button data-go="home" data-tab="today" class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><span data-en="Today">आज</span></button>
   <button data-go="home" data-tab="talk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 5h16v11H9l-5 4z"/></svg><span data-en="Talk">बात</span></button>
   <button data-go="home" data-tab="family"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8" cy="8" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M2 20c0-3.5 2.7-6 6-6s6 2.5 6 6M14 20c0-2.6 1.4-4.6 3.5-4.6S21 17.4 21 20"/></svg><span data-en="Family">परिवार</span></button>
@@ -1388,7 +1432,7 @@ window.addEventListener('popstate', (e) => {
   if (st.view) { NAV.skip = true; try { show(st.view); } finally { NAV.skip = false; } }
 });
 function homeView() { return store.get('gs_role') === 'elder' ? 'elder' : store.get('gs_code') ? 'home' : 'care'; }
-document.addEventListener('click', (e) => { if (e.target.closest('[data-goback]')) { e.preventDefault(); history.back(); } });
+document.addEventListener('click', (e) => { if (e.target.closest('[data-goback]')) { e.preventDefault(); history.back(); } else if (e.target.closest('[data-gohome]')) { e.preventDefault(); show(homeView()); } });
 function homeTab(t) {
   HOMETAB = t;
   document.querySelectorAll('#v-home > .card, #v-home > details').forEach((c) => c.classList.toggle('tab-off', (c.dataset.tab || 'today') !== t));
@@ -1405,15 +1449,16 @@ function show(view) {
   const navTab = view === 'home' ? HOMETAB : { pay: 'account', sneha: 'account', help: 'account', meds: 'family' }[view];
   document.querySelectorAll('nav button').forEach((b) => b.classList.toggle('on', b.dataset.tab === navTab));
   if (view === 'home') homeTab(HOMETAB);
-  window.scrollTo(0, 0);
+  document.documentElement.classList.toggle('snap', view === 'role');
+  window.scrollTo(0, 0); document.documentElement.scrollTop = 0; document.body.scrollTop = 0;
   if (view === 'home') { loadStatus(); circleList(); if (!$('#song-send-card').innerHTML) songCard($('#song-send-card'), { needFrom: true, body: () => ({ code: store.get('gs_code') }) }); }
   $('#talk-bar').classList.toggle('hidden', view !== 'talk');
   // the back button: at the bottom of every inner screen (inside the talk buttons and the family tabs where those sit at the bottom)
   const inner = !ROOTS.includes(view);
+  document.body.classList.toggle('inner', inner);
   $('#nav-back').classList.toggle('hidden', !(tabbed && view !== 'home'));
   const bar = inner && !tabbed && view !== 'talk';
   $('#backbar').classList.toggle('hidden', !bar); document.body.classList.toggle('has-back', bar);
-  document.documentElement.classList.toggle('snap', view === 'role');
   if (view === 'pay' && NATIVE) { show('home'); return; }
   if (view === 'pay') payInit();
   if (view === 'radio') radioOpen();
@@ -1475,20 +1520,39 @@ function buildForm() {
         html += `<label>${x.label}${req}</label>` + x.options.map((o, i) =>
           `<label class="check"><input type="checkbox" name="${k}" value="${o.replace(/"/g, '&quot;')}"> <span>${o}</span></label>`).join('');
       } else if (x.type === 'dropdown') {
-        html += `<label for="f-${k}">${x.label}${req}</label><select id="f-${k}" name="${k}">` +
+        html += `<label for="f-${k}">${x.label}${req}</label><select id="f-${k}" name="${k}"${x.required ? ' data-req="1"' : ''}>` +
           (x.options.length > 1 ? '<option value="">चुनें / Choose</option>' : '') +
           x.options.map((o) => `<option>${o}</option>`).join('') + '</select>';
       } else if (x.type === 'textarea') {
-        html += `<label for="f-${k}">${x.label}${req}</label><textarea id="f-${k}" name="${k}"${ph}></textarea>`;
+        html += `<label for="f-${k}">${x.label}${req}</label><textarea id="f-${k}" name="${k}"${ph}${x.required ? ' data-req="1"' : ''}></textarea>`;
       } else {
         const t = x.type === 'number' ? 'number' : x.type === 'email' ? 'email' : /phone/.test(k) ? 'tel' : 'text';
-        html += `<label for="f-${k}">${x.label}${req}</label><input id="f-${k}" name="${k}" type="${t}"${ph}${t === 'tel' ? ' inputmode="numeric"' : ''}>`;
+        html += `<label for="f-${k}">${x.label}${req}</label><input id="f-${k}" name="${k}" type="${t}"${ph}${t === 'tel' ? ' inputmode="numeric"' : ''}${x.required ? ' data-req="1"' : ''}>`;
       }
     }
     html += '</fieldset>';
   }
   html += '<button class="btn primary" type="submit">जमा करें / Submit</button>';
   f.innerHTML = html;
+  // one group at a time (steps), so the form is never a long scroll
+  (function steps() {
+    const sets = [...f.querySelectorAll('fieldset')], submit = f.querySelector('button[type=submit]');
+    if (sets.length < 2) return;
+    const prog = document.createElement('p'); prog.className = 'step-prog'; prog.setAttribute('aria-live', 'polite'); f.prepend(prog);
+    const nav = document.createElement('div'); nav.className = 'step-nav';
+    nav.innerHTML = `<button type="button" class="btn secondary" data-step="-1">${ico('arrow-left')} ${T('पीछे', 'Back')}</button><button type="button" class="btn primary" data-step="1">${T('आगे', 'Next')}</button>`;
+    submit.before(nav);
+    let at = 0;
+    const go = (i) => { at = i; sets.forEach((x, j) => { x.hidden = j !== i; });
+      nav.querySelector('[data-step="-1"]').hidden = i === 0; nav.querySelector('[data-step="1"]').hidden = i === sets.length - 1; submit.hidden = i !== sets.length - 1;
+      prog.innerHTML = `<b>${T('चरण', 'Step')} ${i + 1} / ${sets.length}</b> · ${esc(sets[i].querySelector('legend').textContent.split(' / ')[LANG === 'en' ? 1 : 0] || '')}<span class="step-bar"><span style="width:${Math.round((i + 1) / sets.length * 100)}%"></span></span>`;
+      window.scrollTo({ top: Math.max(0, f.getBoundingClientRect().top + window.scrollY - 70) }); };
+    nav.addEventListener('click', (e) => { const b = e.target.closest('[data-step]'); if (!b) return;
+      const d = +b.dataset.step;
+      if (d > 0) { const miss = [...sets[at].querySelectorAll('[data-req]')].find((el) => !String(el.value || '').trim()); if (miss) { miss.focus(); toast(T('यह भरना ज़रूरी है', 'This is needed')); return; } }
+      go(Math.max(0, Math.min(sets.length - 1, at + d))); });
+    go(0);
+  })();
   for (const k of ['wake_time', 'breakfast_time', 'lunch_time', 'medicine_time']) { const el = $('#f-' + k); if (el) swapForPick(el, timePick); }
   // PIN code -> state, district and a list of localities (from India Post, files in pin/)
   const pin = $('#f-pincode'), loc = $('#f-locality');
@@ -2705,12 +2769,12 @@ $('#chat-mic').addEventListener('click', async () => {
   const type = ['audio/webm;codecs=opus', 'audio/mp4', 'audio/ogg'].find((t) => window.MediaRecorder && MediaRecorder.isTypeSupported(t)) || '';
   const rec = new MediaRecorder(st, type ? { mimeType: type, audioBitsPerSecond: 24000 } : undefined); const parts = []; const t0 = Date.now();
   rec.ondataavailable = (e) => { if (e.data.size) parts.push(e.data); };
-  rec.onstop = async () => { st.getTracks().forEach((x) => x.stop()); CHAT.rec = null; $('#chat-mic').classList.remove('rec'); $('#chat-mic').textContent = '🎤'; clearTimeout(rec.t);
+  rec.onstop = async () => { st.getTracks().forEach((x) => x.stop()); CHAT.rec = null; $('#chat-mic').classList.remove('rec'); $('#chat-mic').innerHTML = ico('mic'); clearTimeout(rec.t);
     const secs = Math.round((Date.now() - t0) / 1000); if (secs < 1) return chatMsg('', '');
     const blob = new Blob(parts, { type: (rec.mimeType || type || 'audio/webm').split(';')[0] });
     chatSend({ kind: 'voice', data: await fileB64(blob), file_type: blob.type, seconds: secs }); };
   rec.start(); CHAT.rec = rec; rec.t = setTimeout(() => rec.state === 'recording' && rec.stop(), 120000);
-  $('#chat-mic').classList.add('rec'); $('#chat-mic').textContent = '⏹'; chatMsg('🔴 बोलिए… भेजने के लिए ⏹ दबाएँ', '🔴 Speak… tap ⏹ to send');
+  $('#chat-mic').classList.add('rec'); $('#chat-mic').innerHTML = ico('square'); chatMsg('🔴 बोलिए… भेजने के लिए ⏹ दबाएँ', '🔴 Speak… tap ⏹ to send');
 });
 $('#chat-back').addEventListener('click', () => show(store.get('gs_role') === 'elder' ? 'elder' : store.get('gs_code') ? 'home' : 'care'));
 
@@ -2806,8 +2870,14 @@ function radioOpen() {
   const drawReg = () => { try { localStorage.setItem('gs_radioreg', sel.value); } catch (e) {}
     const states = (REG[sel.value] || []).slice().sort((a, b) => (b === myState) - (a === myState));
     const box = $('#radio-region-list'); box.innerHTML = ''; states.push('India');
+    // the first state (theirs, if known) open; every other state folded, so the page stays short
+    let first = true;
     for (const st of states) { const list = byName.filter((x) => x.s === st); if (!list.length) continue;
-      const h = document.createElement('p'); h.className = 'pl-head'; h.textContent = st === 'India' ? T('🇮🇳 पूरे देश के', 'All India') : (st === myState ? '⭐ ' : '') + st; box.append(h); list.forEach((x) => box.append(row(x))); } };
+      const title = st === 'India' ? T('पूरे देश के', 'All India') : (st === myState ? '⭐ ' : '') + st;
+      if (first) { const h = document.createElement('p'); h.className = 'pl-head'; h.textContent = title; box.append(h); list.forEach((x) => box.append(row(x))); first = false; continue; }
+      const d = document.createElement('details'); d.className = 'msg-fold';
+      d.innerHTML = `<summary><b>${esc(title)}</b><small>${list.length} ${T('स्टेशन', 'stations')}</small></summary>`;
+      const inner = document.createElement('div'); inner.className = 'radio-list'; list.forEach((x) => inner.append(row(x))); d.append(inner); box.append(d); } };
   sel.onchange = drawReg; drawReg();
   // the world: two well-known apps that carry their own licences (they open outside SadaSneha)
   const WORLD = [['📻 Radio Garden', 'https://radio.garden', T('एक घूमता हुआ ग्लोब: उँगली से घुमाइए, किसी हरे बिंदु पर रुकिए – उस शहर का रेडियो बजने लगेगा।', 'A globe: spin it with a finger and stop on a green dot – that city’s radio plays.')],
@@ -2864,7 +2934,8 @@ document.addEventListener('fullscreenchange', () => { if (!document.fullscreenEl
 
 // ---- TV: one category at a time (news with the family's own state first, cricket, shows, bhajan, old serials) ----
 let TVCUR = 'news';
-const TV_CATS = [['news', '📰', 'ख़बरें', 'News'], ['cricket', '🏏', 'क्रिकेट', 'Cricket'], ['shows', '😄', 'धारावाहिक', 'Shows'], ['movies', '🎬', 'पुरानी फ़िल्में', 'Old films'], ['bhakti', '🙏', 'भजन', 'Bhajan'], ['old', '📼', 'पुराने धारावाहिक', 'Old serials']];
+function ico(n, c) { return `<svg class="ico${c ? ' ' + c : ''}" aria-hidden="true"><use href="#i-${n}"/></svg>`; }
+const TV_CATS = [['news', 'newspaper', 'ख़बरें', 'News'], ['cricket', 'trophy', 'क्रिकेट', 'Cricket'], ['shows', 'laugh', 'धारावाहिक', 'Shows'], ['movies', 'clapperboard', 'पुरानी फ़िल्में', 'Old films'], ['bhakti', 'flame', 'भजन', 'Bhajan'], ['old', 'cassette-tape', 'पुराने धारावाहिक', 'Old serials']];
 const famState = () => { try { return String((ELDER && ELDER.family && ELDER.family.state) || (JSON.parse(store.get('gs_last') || '{}').family || {}).state || '').toLowerCase(); } catch (e) { return ''; } };
 function tvChannels(cat) {
   const tv = RADIO.tv || {};
@@ -2897,7 +2968,7 @@ function tvShow(c, b, live, src) {
   const p = $('#tv-player');
   p.innerHTML = `<iframe src="${src}" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen title="${esc(c.n)}"></iframe>` +
     (live ? `<button class="btn secondary" type="button" id="tv-recent" style="margin-top:8px">▶ ${T('लाइव नहीं चल रहा? पिछले कार्यक्रम देखें', 'Not live now? Watch recent programmes')}</button>` : '') +
-    `<p class="muted" style="font-size:13px;margin:4px 0 0">${T('अगर यहाँ न चले:', 'If it does not play here:')} <a href="${c.list ? 'https://www.youtube.com/playlist?list=' + encodeURIComponent(c.list) : 'https://www.youtube.com/channel/' + encodeURIComponent(c.id) + (live ? '/live' : '/videos')}" target="_blank" rel="noopener">${T('YouTube पर खोलें', 'open in YouTube')}</a></p>`;
+    `<p class="muted" style="font-size:14px;margin:4px 0 0">${T('अगर यहाँ न चले:', 'If it does not play here:')} <a href="${c.list ? 'https://www.youtube.com/playlist?list=' + encodeURIComponent(c.list) : 'https://www.youtube.com/channel/' + encodeURIComponent(c.id) + (live ? '/live' : '/videos')}" target="_blank" rel="noopener">${T('YouTube पर खोलें', 'open in YouTube')}</a></p>`;
   if (live) $('#tv-recent').onclick = () => tvPlay(c, b, false);
   p.classList.remove('hidden'); fsOpen(p);
 }
@@ -2906,14 +2977,14 @@ function tvCat(cat) {
   try { localStorage.setItem('gs_tvcat', cat); } catch (e) {}
   document.querySelectorAll('#tv-cats button').forEach((x) => x.classList.toggle('on', x.dataset.cat === cat));
   tvStop(); const g = $('#tv-list'); g.innerHTML = '';
-  tvChannels(cat).forEach((c) => { const b = document.createElement('button'); b.type = 'button'; b.textContent = (c.live ? '🔴 ' : '▶ ') + c.n; b.onclick = () => tvPlay(c, b, !!c.live); g.append(b); });
+  tvChannels(cat).forEach((c) => { const b = document.createElement('button'); b.type = 'button'; b.innerHTML = (c.live ? '<span class="live-dot" aria-label="live"></span>' : ico('play')) + ' ' + esc(c.n); b.onclick = () => tvPlay(c, b, !!c.live); g.append(b); });
   $('#tv-note').textContent = cat === 'cricket' ? T('भारत के मैच लाइव मुफ़्त सिर्फ़ टीवी पर DD Sports (DD Free Dish) पर आते हैं। यहाँ आधिकारिक हाइलाइट्स, पुराने क़िस्से और क्रिकेट की ख़बरें हैं।', 'Live India matches are free only on DD Sports (DD Free Dish) on TV. Here: official highlights, classic stories and cricket news.')
     : cat === 'movies' ? T('▶ दबाइए: पूरी फ़िल्में, एक के बाद एक। सबसे ऊपर आपकी भाषा की।', 'Press ▶: full films, one after another; your language first.')
     : cat === 'news' ? T('🔴 = लाइव। सबसे ऊपर आपके राज्य के चैनल।', '🔴 = live. Your own state\'s channels come first.') : T('▶ दबाइए: नए एपिसोड एक के बाद एक चलते रहेंगे।', 'Press ▶: episodes play one after another.');
 }
 function tvOpen() {
   const box = $('#tv-cats'); box.innerHTML = '';
-  TV_CATS.forEach(([k, ic, hi, en]) => { const b = document.createElement('button'); b.type = 'button'; b.dataset.cat = k; b.innerHTML = `<span>${ic}</span>${T(hi, en)}`; b.onclick = () => tvCat(k); box.append(b); });
+  TV_CATS.forEach(([k, ic, hi, en]) => { const b = document.createElement('button'); b.type = 'button'; b.dataset.cat = k; b.innerHTML = `<span>${ico(ic)}</span>${T(hi, en)}`; b.onclick = () => tvCat(k); box.append(b); });
   let last = 'news'; try { last = localStorage.getItem('gs_tvcat') || 'news'; } catch (e) {}
   tvCat(TV_CATS.some((c) => c[0] === last) ? last : 'news');
 }
@@ -2943,7 +3014,7 @@ document.querySelectorAll('[data-door]').forEach((d) => d.addEventListener('clic
 }));
 (function sitePlans() {
   const box = $('#site-plans'); if (!box || !PLANS.plans) return;
-  box.innerHTML = PLANS.plans.filter((p) => p.per_month > 0).map((p, i) => `<div class="plan ${p.key === 'plus' ? 'best' : ''}"><h3>${esc(p.hi.split(' (')[0])} <small class="muted">${esc(p.en)}</small>${p.key === 'plus' ? ' <span class="pill ok" style="font-size:12px">' + T('सबसे पसंदीदा', 'Most chosen') + '</span>' : ''}</h3>` +
+  box.innerHTML = PLANS.plans.filter((p) => p.per_month > 0).map((p, i) => `<div class="plan ${p.key === 'plus' ? 'best' : ''}"><h3>${esc(p.hi.split(' (')[0])} <small class="muted">${esc(p.en)}</small>${p.key === 'plus' ? ' <span class="pill ok" style="font-size:14px">' + T('सबसे पसंदीदा', 'Most chosen') + '</span>' : ''}</h3>` +
     `<div class="rs">₹${p.per_month.toLocaleString('en-IN')}<small> / ${T('माह', 'month')}</small></div><p>${esc(T(PLAN_HI[p.key] || p.includes, p.includes))}</p>` +
     `<button class="btn ${p.key === 'plus' ? 'primary' : 'secondary'}" type="button" data-plan="${p.key}">${T('यह प्लान चुनें', 'Choose this plan')}</button></div>`).join('');
   box.querySelectorAll('[data-plan]').forEach((b) => b.addEventListener('click', () => { store.set('gs_plan_pick', b.dataset.plan); store.set('gs_role', 'family'); show(store.get('gs_code') ? 'pay' : 'welcome'); }));
@@ -3202,7 +3273,8 @@ function talkDraw(F) {
 // What Sneha is doing, as a symbol: 👂 listening, 💭 thinking, 🗣️ speaking, 🎵 song, 🎤 your turn.
 // Words appear only for messages that need them (permissions, network), or when captions are switched on.
 const CC = () => store.get('gs_cc') === 'on';
-function talkSym(ico, cls, label) { const s = $('#talk-sym'); s.className = 'talk-sym ' + (cls || ''); s.querySelector('.ico').textContent = ico; s.querySelector('.lbl').textContent = label || ''; }
+const SYM = { '⏳': 'hourglass', '⚠️': 'triangle-alert', '🎵': 'music', '👂': 'ear', '👇': 'pointer', '🗣️': 'audio-lines' };
+function talkSym(ico, cls, label) { const s = $('#talk-sym'); s.className = 'talk-sym ' + (cls || ''); s.querySelector('.sym').innerHTML = window.ico(SYM[ico] || 'pointer'); s.querySelector('.lbl').textContent = label || ''; }
 function talkState(hi, en) {
   $('#talk-state').textContent = T(hi, en);
   const h = String(hi);
@@ -3249,7 +3321,7 @@ function talkSpeak(b64, mime, text) {
     }
     const a = new Audio('data:' + (mime || 'audio/mpeg') + ';base64,' + b64); TALK.audio = a;
     try { const src = TALK.ac.createMediaElementSource(a); src.connect(TALK.an); } catch (e) {}
-    a.onplay = () => { TALK.speaking = true; $('#talk-mic').textContent = '⏹'; talkBargeStart(); }; a.onended = a.onerror = () => { TALK.speaking = false; $('#talk-mic').textContent = '🎤'; done(); };
+    a.onplay = () => { TALK.speaking = true; $('#talk-mic').innerHTML = ico('square', 'big'); talkBargeStart(); }; a.onended = a.onerror = () => { TALK.speaking = false; $('#talk-mic').innerHTML = ico('mic', 'big'); done(); };
     a.play().catch(() => { TALK.speaking = false; done(); });
   });
 }
@@ -3406,7 +3478,7 @@ function talkInterrupt() {
   try { if (TALK.audio) { TALK.audio.pause(); TALK.audio.currentTime = 0; } } catch (e) {}
   try { speechSynthesis.cancel(); } catch (e) {}
   TALK.speaking = false; TALK.cut = true;
-  $('#talk-mic').textContent = '🎤';
+  $('#talk-mic').innerHTML = ico('mic', 'big');
 }
 // With the camera on: one small still photo of this moment, so Sneha can see (never stored)
 function talkStill() {
