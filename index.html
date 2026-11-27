@@ -243,6 +243,8 @@
   .toast { position: fixed; left: 50%; bottom: 96px; transform: translateX(-50%); z-index: 90; background: #431407; color: #fff; padding: 12px 18px; border-radius: 14px; font-size: 18px; box-shadow: 0 6px 20px rgba(0,0,0,.25); max-width: 90vw; text-align: center; }
   .trip-banner { display: block; width: 100%; margin: 10px 0 0; padding: 12px 14px; border: 2px solid #fb923c; border-radius: 16px; background: #fff7ed; color: #7c2d12; font: inherit; font-size: 18px; font-weight: 800; text-align: left; cursor: pointer; }
   .trip-banner.hidden { display: none; }
+  /* the Play Store app shows no prices or payment (Google Play's payments rule); families pay on the website */
+  html.native .no-native { display: none !important; }
   .install-bar { position: fixed; left: 8px; right: 8px; bottom: 8px; z-index: 40; display: flex; gap: 8px; align-items: center; background: #fff7ed; border: 2px solid #fb923c; border-radius: 18px; padding: 10px 12px; box-shadow: 0 6px 20px rgba(0,0,0,.18); color: #7c2d12; }
   .install-bar > span { flex: 1; font-size: 16px; } .install-bar small { display: block; font-size: 13px; }
   .install-bar .btn { width: auto; margin: 0; padding: 10px 16px; } .install-x { border: 0; background: none; font-size: 22px; color: #7c2d12; cursor: pointer; }
@@ -408,7 +410,7 @@
         <button class="door family" type="button" data-door="family">🤝 <span data-en="For my parents / family">अपने माता-पिता / परिवार के लिए</span><small><span data-en="Sign up in 2 minutes, see how they are, get alerts">2 मिनट में पंजीकरण, रोज़ का हाल, ज़रूरी ख़बरें</span></small></button>
         <button class="door elder" type="button" data-door="elder">🙏 <span data-en="I will talk to Sneha myself">मैं ख़ुद स्नेहा से बात करूँगा / करूँगी</span><small><span data-en="Big, simple buttons: Sneha, songs, call family">बड़े, आसान बटन: स्नेहा, गाने, घर वालों को फ़ोन</span></small></button>
       </div>
-        <p class="muted small"><span data-en="From ₹449 a month · Cancel any time · No hidden charges">₹449 प्रति माह से · कभी भी बंद करें · कोई छुपा शुल्क नहीं</span></p>
+        <p class="muted small no-native"><span data-en="From ₹449 a month · Cancel any time · No hidden charges">₹449 प्रति माह से · कभी भी बंद करें · कोई छुपा शुल्क नहीं</span></p>
         <a class="next" href="#pg-sneha" aria-label="आगे / Next">⌄</a>
       </div>
     </div>
@@ -471,7 +473,7 @@
       <p class="muted small"><span data-en="Works even on a keypad phone (calls); the app needs a smartphone.">कीपैड फ़ोन पर भी चलता है (कॉल); ऐप के लिए स्मार्टफ़ोन चाहिए।</span></p>
     </div>
 
-    <div class="pg" id="pg-plans">
+    <div class="pg no-native" id="pg-plans">
       <p class="kicker"><span data-en="Plans">प्लान</span></p>
       <h2><span data-en="Simple, honest prices">आसान, साफ़ क़ीमतें</span></h2>
       <div id="site-plans" class="plans"></div>
@@ -904,7 +906,7 @@
     <p id="h-updated" class="muted" style="text-align:center"></p>
       <div data-tab="family" class="card"><button class="btn secondary" type="button" data-go="meds">💊 <span data-en="Medicines and times">दवाइयाँ और समय</span></button></div>
     <div data-tab="account" class="card acct-links">
-      <button class="btn secondary" type="button" data-go="pay">💳 <span data-en="Plan and payments">प्लान और भुगतान</span></button>
+      <button class="btn secondary no-native" type="button" data-go="pay">💳 <span data-en="Plan and payments">प्लान और भुगतान</span></button>
       <button class="btn secondary" type="button" data-go="sneha">🙋 <span data-en="About Sneha">स्नेहा के बारे में</span></button>
       <button class="btn secondary" type="button" data-go="help">🆘 <span data-en="Help and emergency numbers">मदद और आपात नंबर</span></button>
       <a class="btn secondary" href="privacy.html" style="text-decoration:none;text-align:center">🔒 <span data-en="Privacy">गोपनीयता</span></a>
@@ -968,6 +970,7 @@
         <button class="btn secondary fs-go fs-hide" id="song-big" type="button">⛶ <span data-en="Full screen">पूरी स्क्रीन</span></button>
         <button class="btn secondary fs-hide" id="song-stop" type="button">⏹ <span data-en="Stop the song">गाना बंद करें</span></button></div>
       <button type="button" class="linkbtn" id="talk-cc" style="font-size:14px"></button>
+      <button type="button" class="linkbtn" id="talk-report" style="font-size:14px">🚩 <span data-en="Sneha's reply felt wrong? Tell us">स्नेहा का जवाब ठीक नहीं लगा? बताइए</span></button>
       <div id="talk-log" class="talk-log hidden"></div>
       <p class="muted" style="font-size:13px"><span data-en="Nothing is recorded or saved. With the camera on, Sneha sees a small picture only to understand your mood.">कुछ भी रिकॉर्ड या सेव नहीं होता। कैमरा चालू हो तो स्नेहा सिर्फ़ आपका मन समझने के लिए एक छोटी तस्वीर देखती है।</span>
         <br><button type="button" class="linkbtn" id="talk-photo"></button> · <button type="button" class="linkbtn" id="talk-loc"></button> · <a href="privacy.html" target="_blank" rel="noopener"><span data-en="Privacy">गोपनीयता</span></a></p>
@@ -1358,6 +1361,7 @@ function show(view) {
   const bar = inner && !tabbed && view !== 'talk';
   $('#backbar').classList.toggle('hidden', !bar); document.body.classList.toggle('has-back', bar);
   document.documentElement.classList.toggle('snap', view === 'role');
+  if (view === 'pay' && NATIVE) { show('home'); return; }
   if (view === 'pay') payInit();
   if (view === 'radio') radioOpen();
   if (view === 'trip') tripOpen(); else { try { clearInterval(TRIP.timer); } catch (e) {} }
@@ -2208,6 +2212,7 @@ const ICE_POLICY = new URLSearchParams(location.search).get('relay') === '1' ? '
 // ---- Inside the SadaSneha Android app: native call alerts (ring like a phone call) and earpiece/speaker ----
 const NATIVE = (() => { try { return !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform() && window.Capacitor.Plugins.SnehaNative); } catch (e) { return false; } })();
 const SN = NATIVE ? window.Capacitor.Plugins.SnehaNative : null;
+if (NATIVE) { document.documentElement.classList.add('native'); try { const f = document.querySelector('#f-plans span'); if (f) { f.dataset.en = 'Start SadaSneha for my parents'; f.textContent = T('अपने माता-पिता के लिए सदा स्नेहा शुरू करें', 'Start SadaSneha for my parents'); } } catch (e) {} }
 async function vcSpeaker(on) {
   if (SN && $('#vc').classList.contains('audio')) vcState(on ? '🔊 स्पीकर पर' : '📞 फ़ोन कान से लगाइए, या 🔊 स्पीकर दबाइए', on ? '🔊 On speaker' : '📞 Hold the phone to your ear, or press 🔊 Speaker'); if (!SN) return; try { const r = await SN.setSpeaker({ on }); VC.spk = !!(r && r.speaker); } catch (e) { VC.spk = on; }
   const b = $('#vc-spk'); if (b) { b.querySelector('b').textContent = VC.spk ? '🔊' : '👂'; b.querySelector('span').textContent = VC.spk ? T('स्पीकर', 'Speaker') : T('कान से', 'Earpiece'); b.classList.toggle('on', VC.spk); } }
@@ -2544,7 +2549,7 @@ async function ringCheck(box) {
   box.querySelectorAll('[data-rc]').forEach((b) => { b.onclick = async () => {
     const k = b.dataset.rc;
     try { if (k === 'test') { await SN.testRing(); b.textContent = T('⏳ 10 सेकंड… अब फ़ोन लॉक कीजिए', '⏳ 10 seconds… lock the phone now'); return; }
-      if (k === 'battery') await SN.openBatterySettings(); else if (k === 'full') await SN.openCallSettings(); else await SN.openAppSettings(); } catch (e) {}
+      if (k === 'battery') { toast(T('सूची में "सदा स्नेहा" चुनें → "ऑप्टिमाइज़ न करें"', 'Pick SadaSneha in the list → "Do not optimise"'), 5000); await SN.openBatterySettings(); } else if (k === 'full') await SN.openCallSettings(); else await SN.openAppSettings(); } catch (e) {}
     setTimeout(() => ringCheck(box), 3000); }; });
 }
 document.addEventListener('visibilitychange', () => { if (!document.hidden && NATIVE) document.querySelectorAll('.push-card').forEach((b) => { if (store.get('gs_push')) ringCheck(b); }); });
@@ -3500,6 +3505,15 @@ $('#talk-photo').addEventListener('click', () => {
   }
 });
 talkPhotoShow();
+// "🚩": report Sneha's last reply (an AI can be wrong); the founder reviews these in the talk records
+$('#talk-report').addEventListener('click', async () => {
+  const h = TALK.history || [], i = h.map((x) => x.r).lastIndexOf('s');
+  if (i < 0) { toast(T('अभी स्नेहा ने कुछ कहा ही नहीं', 'Sneha has not said anything yet')); return; }
+  const why = window.prompt(T(`स्नेहा ने कहा: "${h[i].t.slice(0, 120)}"\n\nक्या ग़लत लगा? (चाहें तो ख़ाली छोड़ दें)`, `Sneha said: "${h[i].t.slice(0, 120)}"\n\nWhat was wrong? (optional)`), '');
+  if (why === null) return;
+  try { await fetch(API.talk, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ code: store.get('gs_code'), report: { reply: h[i].t, heard: (h[i - 1] && h[i - 1].r === 'u' ? h[i - 1].t : ''), why } }) }); } catch (e) {}
+  toast(T('धन्यवाद! हमारी टीम इसे देखेगी 🙏', 'Thank you! Our team will look at it 🙏'), 3000);
+});
 const LOC_ASK_HTML = $('#loc-ask').innerHTML;
 $('#talk-loc').addEventListener('click', () => {
   if (store.get('gs_loc') === 'yes') { if (window.confirm(T('स्नेहा को घर पर या बाहर बताना बंद करें?', 'Stop telling Sneha whether you are home or out?'))) { store.set('gs_loc', 'no'); store.del('gs_home_ll'); TALK_LOC = null; locAskShow(); } }
