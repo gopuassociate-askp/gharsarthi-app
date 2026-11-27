@@ -243,6 +243,13 @@
   .acct-links .btn { margin: 6px 0; }
   .pp-kinds { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0 8px; } .pp-kinds button { border: 2px solid #fdba74; background: #fff7ed; color: #7c2d12; border-radius: 999px; padding: 6px 12px; font: inherit; font-size: 15px; cursor: pointer; } .pp-kinds button.on { background: #c2410c; color: #fff; border-color: #c2410c; }
   .btn.dial { display: block; text-align: center; text-decoration: none; background: #15803d; color: #fff; font-size: 24px; padding: 18px; border-radius: 18px; }
+  .msg-fold { margin-top: 12px; border: 1px solid var(--line); border-radius: 14px; background: #fffaf5; }
+  .msg-fold > summary { cursor: pointer; padding: 12px 14px; font-size: 17px; list-style: none; }
+  .msg-fold > summary::after { content: ' ▾'; color: var(--muted); } .msg-fold[open] > summary::after { content: ' ▴'; }
+  .msg-fold > summary small { display: block; color: var(--muted); font-size: 14px; margin-top: 2px; }
+  .msg-fold #msg-list { padding: 0 12px 8px; }
+  .ring-check > summary { cursor: pointer; padding: 6px 0; font-size: 17px; } .ring-check p { margin: 6px 0; } .ring-check .btn { margin: 6px 0; }
+  .radio-list { display: flex; flex-direction: column; max-height: 60vh; overflow-y: auto; padding: 0 8px 8px; }
   .tile.sos { background: #dc2626; color: #fff; grid-column: 1 / -1; min-height: 90px; }
   .door { display: block; width: 100%; border: 0; border-radius: 24px; padding: 22px 16px; margin: 12px 0; font: inherit; font-size: 21px; font-weight: 800; text-align: left; cursor: pointer; }
   .door small { display: block; font-size: 15px; font-weight: 500; margin-top: 4px; opacity: .85; }
@@ -536,6 +543,8 @@
       <div id="radio-fav" class="radio-grid"></div>
       <input id="radio-q" type="search" placeholder="🔍 शहर या स्टेशन खोजें… / Search a city or station…" style="margin-top:12px">
       <div id="radio-all"></div>
+      <details class="msg-fold" id="radio-fm"><summary><b>📻 <span data-en="All FM stations">सभी FM स्टेशन</span></b><small data-en="FM Gold, FM Rainbow and city FM, all of India">FM गोल्ड, FM रेनबो और शहरों के FM – पूरे भारत के</small></summary><div class="radio-list" id="radio-fm-list"></div></details>
+      <details class="msg-fold" id="radio-every"><summary><b>🇮🇳 <span data-en="Every Akashvani station">आकाशवाणी के सभी स्टेशन</span> (<span id="radio-n"></span>)</b><small data-en="Sorted by name">नाम के क्रम में</small></summary><div class="radio-list" id="radio-every-list"></div></details>
       <p class="muted" style="font-size:13px"><span data-en="Live streams of Prasar Bharati (All India Radio).">प्रसार भारती (आकाशवाणी) की लाइव प्रसारण।</span></p>
     </div>
   </section>
@@ -718,7 +727,7 @@
       <button class="btn warm hidden" id="msg-mic" type="button">🎤 बोलकर लिखें / Speak</button>
       <button class="btn primary" id="msg-send" type="button">संदेश भेजें / Send</button>
       <div id="msg-err" class="err"></div>
-      <div id="msg-list"></div>
+      <details id="msg-fold" class="msg-fold hidden"><summary id="msg-sum"></summary><div id="msg-list"></div></details>
     </div>
 
     <div data-tab="talk" class="card"><div style="display:flex;gap:8px"><button class="btn primary" type="button" data-go="chat" style="flex:1">💬 <span data-en="Family chat">परिवार की बातचीत</span></button>
@@ -1542,7 +1551,12 @@ $('#photo-in').addEventListener('change', (e) => {
 function renderMessages(list, who) {
   $('#msg-title').textContent = T(`${who || 'अपनों'} के लिए संदेश`, `Message for ${who || 'your loved one'}`);
   const box = $('#msg-list'); box.innerHTML = '';
-  for (const m of list || []) {
+  // folded: one line with the count; tap to see them all (a long list confuses)
+  const all = list || [], unseen = all.filter((m) => m.direction === 'to_family' && m.level && !m.ack_by && !m.call_note).length;
+  $('#msg-fold').classList.toggle('hidden', !all.length);
+  $('#msg-sum').innerHTML = `📬 <b>${T('संदेश', 'Messages')} (${all.length})</b>${unseen ? ` · <span style="color:#b45309">${T(unseen + ' अभी देखे नहीं', unseen + ' not seen yet')}</span>` : ''}` +
+    (all[0] ? `<small>${esc(String(all[0].from || '') + ': ' + String(all[0].text || '').slice(0, 60))}${String(all[0].text || '').length > 60 ? '…' : ''}</small>` : '');
+  for (const m of all) {
     const up = m.direction === 'to_family';
     const lv = LEVEL[m.level] || (m.urgent ? LEVEL.urgent : null);
     const st = up ? `<span class="pill ${lv ? lv[0] : 'ok'}">${lv ? lv[1] : 'परिवार को भेजा ✓'}</span>`
@@ -2259,8 +2273,32 @@ async function pushOn(quiet) {
     return !!r.ok;
   } catch (e) { return false; }
 }
+// the Android app: what could stop a call from ringing on this phone, with one-tap fixes and a self-test
+async function ringCheck(box) {
+  let i = {}; try { i = await SN.info(); } catch (e) {}
+  const ok = (v) => (v ? '✅' : '❌');
+  const last = i.lastPush ? new Date(i.lastPush).toLocaleString(LANG === 'en' ? 'en-IN' : 'hi-IN', { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' }) : T('अभी तक नहीं', 'not yet');
+  const oem = /xiaomi|redmi|poco|oppo|realme|vivo|iqoo|oneplus|huawei|honor|samsung/i.test(i.maker || '');
+  box.innerHTML = `<details class="ring-check"${i.notifications && i.callChannel && i.battery && i.fullScreen ? '' : ' open'}><summary>📞 <b>${T('कॉल की घंटी – जाँच', 'Call ringing – check')}</b> ${i.notifications && i.callChannel && i.battery && i.fullScreen ? '✅' : '⚠️'}</summary>
+    <p>${ok(i.notifications && i.callChannel)} ${T('सूचनाएँ (notifications) चालू', 'Notifications on')}</p>
+    <p>${ok(i.battery)} ${T('बैटरी: बिना रोक (Unrestricted)', 'Battery: unrestricted')}</p>
+    <p>${ok(i.fullScreen)} ${T('लॉक फ़ोन पर पूरी स्क्रीन घंटी', 'Full-screen ring on a locked phone')}</p>
+    <p>📨 ${T('आख़िरी कॉल-सूचना इस फ़ोन पर पहुँची', 'Last call alert reached this phone')}: <b>${last}</b></p>
+    ${oem ? `<p class="muted" style="font-size:14px">${T(`${i.maker} फ़ोन पर: सेटिंग में "Autostart / अपने-आप शुरू" चालू करें और Recent apps से ऐप को ऊपर स्वाइप करके बंद न करें।`, `On ${i.maker} phones: turn on "Autostart" in settings, and do not swipe the app away from recent apps.`)}</p>` : ''}
+    <button class="btn warm" type="button" data-rc="test">🔔 ${T('घंटी जाँचें (10 सेकंड में बजेगी, फ़ोन लॉक कर दीजिए)', 'Test the ring (rings in 10 s, lock the phone)')}</button>
+    ${i.battery ? '' : `<button class="btn secondary" type="button" data-rc="battery">🔋 ${T('बैटरी की रोक हटाएँ', 'Remove battery restriction')}</button>`}
+    ${i.fullScreen ? '' : `<button class="btn secondary" type="button" data-rc="full">📲 ${T('पूरी स्क्रीन घंटी की अनुमति', 'Allow full-screen ring')}</button>`}
+    <button class="btn secondary" type="button" data-rc="app">⚙️ ${T('ऐप की सेटिंग खोलें', 'Open app settings')}</button></details>`;
+  box.querySelectorAll('[data-rc]').forEach((b) => { b.onclick = async () => {
+    const k = b.dataset.rc;
+    try { if (k === 'test') { await SN.testRing(); b.textContent = T('⏳ 10 सेकंड… अब फ़ोन लॉक कीजिए', '⏳ 10 seconds… lock the phone now'); return; }
+      if (k === 'battery') await SN.openBatterySettings(); else if (k === 'full') await SN.openCallSettings(); else await SN.openAppSettings(); } catch (e) {}
+    setTimeout(() => ringCheck(box), 3000); }; });
+}
+document.addEventListener('visibilitychange', () => { if (!document.hidden && NATIVE) document.querySelectorAll('.push-card').forEach((b) => { if (store.get('gs_push')) ringCheck(b); }); });
 function pushCard() {
   document.querySelectorAll('.push-card').forEach((box) => {
+    if (NATIVE && store.get('gs_push')) { ringCheck(box); return; }
     if (NATIVE) {   // the Android app: on by itself; Android 14 asks once for full-screen calls
       const fs = store.get('gs_fullscreen') !== 'no';
       box.innerHTML = store.get('gs_push') ? (fs ? '<p style="margin:0">📞 ' + T('कॉल आने पर फ़ोन की तरह घंटी बजेगी ✓', 'Calls will ring like a phone call ✓') + '</p>'
@@ -2440,6 +2478,11 @@ function radioOpen() {
   const draw = () => { const q = $('#radio-q').value.trim().toLowerCase(); const box = $('#radio-all'); box.innerHTML = '';
     if (!q) return; sts.filter((s) => s.n.toLowerCase().includes(q)).slice(0, 40).forEach((st) => { const b = document.createElement('button'); b.type = 'button'; b.className = 'radio-row'; b.textContent = '📻 ' + st.n; b.onclick = () => radioPlay(st, b); box.append(b); }); };
   $('#radio-q').oninput = draw; draw();
+  // everything on show, folded: all FM stations, and every station (so nobody thinks there are only a few)
+  const row = (st) => { const b = document.createElement('button'); b.type = 'button'; b.className = 'radio-row'; b.textContent = '📻 ' + st.n; b.onclick = () => radioPlay(st, b); return b; };
+  const byName = sts.slice().sort((a, b) => a.n.localeCompare(b.n));
+  $('#radio-fm-list').replaceChildren(...byName.filter((x) => /\bFM\b|Rainbow|Gold|Vividh|VBS/i.test(x.n)).map(row));
+  $('#radio-every-list').replaceChildren(...byName.map(row)); $('#radio-n').textContent = sts.length;
 }
 $('#radio-stop').addEventListener('click', radioStop);
 
