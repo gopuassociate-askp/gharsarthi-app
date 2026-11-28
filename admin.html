@@ -5,6 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
 <title>SadaSneha Admin</title>
+<link rel="manifest" href="admin-manifest.json">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="theme-color" content="#c2410c">
 <style>
   :root { --bg: #fff8ee; --card: #fff; --ink: #3b1d0e; --muted: #8a5a3c; --line: #f1dcc4; --brand: #ea580c; --red: #b91c1c; --green: #15803d; }
   * { box-sizing: border-box; }
@@ -61,6 +65,7 @@
     <h2>Founder login</h2>
     <p class="muted">Enter the admin key you set in n8n (workflow "SadaSneha - admin", node "Admin key"). It is kept only in this browser tab and is forgotten when you close it.</p>
     <input id="key" type="password" autocomplete="current-password" placeholder="Admin key">
+    <label style="display:flex;gap:8px;align-items:center;margin:8px 0;font-size:15px"><input type="checkbox" id="remember" checked> Remember on this device (only on your own phone or laptop)</label>
     <div id="login-err" class="err"></div>
     <button class="btn" id="login-go">Open admin</button>
   </section>
@@ -167,7 +172,7 @@ const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '
 const ist = (iso) => iso ? new Date(iso).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }) : '—';
 const tel = (p) => p ? `<a href="tel:${esc(p)}">${esc(p)}</a>` : '—';
 let KEY = ''; let DATA = null;
-try { KEY = sessionStorage.getItem('adminKey') || ''; } catch (e) {}
+try { KEY = localStorage.getItem('adminKey') || sessionStorage.getItem('adminKey') || ''; } catch (e) {}
 
 async function api(path, opts = {}) {
   const r = await fetch(API + path, { ...opts, headers: { ...(opts.headers || {}), 'x-admin-key': KEY } });
@@ -190,7 +195,7 @@ async function load() {
   }
 }
 function logout() {
-  KEY = ''; try { sessionStorage.removeItem('adminKey'); } catch (e) {}
+  KEY = ''; try { sessionStorage.removeItem('adminKey'); localStorage.removeItem('adminKey'); } catch (e) {}
   $('#v-main').classList.add('hidden'); $('#v-login').classList.remove('hidden');
   $('#refresh').classList.add('hidden'); $('#logout').classList.add('hidden');
 }
@@ -383,11 +388,13 @@ $('#fams').addEventListener('click', async (e) => {
 $('#login-go').addEventListener('click', () => {
   KEY = $('#key').value.trim(); $('#login-err').textContent = '';
   if (!KEY) return;
-  try { sessionStorage.setItem('adminKey', KEY); } catch (e) {}
+  try { if (!$('#remember') || $('#remember').checked) localStorage.setItem('adminKey', KEY); else sessionStorage.setItem('adminKey', KEY); } catch (e) {}
   $('#key').value = ''; load();
 });
 $('#key').addEventListener('keydown', (e) => { if (e.key === 'Enter') $('#login-go').click(); });
 $('#logout').addEventListener('click', logout);
+// installable as an app (phone: ⋮ → Install app / Add to Home screen; laptop: the install icon in the address bar)
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(() => {});
 $('#refresh').addEventListener('click', load);
 setInterval(() => { if (KEY && !document.hidden) load(); }, 60000);
 if (KEY) load();
