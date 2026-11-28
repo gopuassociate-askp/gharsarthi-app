@@ -449,6 +449,10 @@
   .otp-box { margin: 6px 0 4px; } .otp-or { text-align: center; color: var(--muted); margin: 14px 0 6px; } .otp-or span { background: var(--card); padding: 0 10px; }
   input.otp-ok { border-color: #16a34a !important; background: #f0fdf4; } .otp-inline .btn { margin-top: 8px; }
   .lock-card { border: 2px dashed #fdba74; } .access-banner { margin: 10px 0 0; padding: 8px 12px; background: rgba(255,255,255,.75); border-radius: 12px; font-size: 16px; font-weight: 700; }
+
+/* Continue with Google (Firebase) */
+.btn.g-fb { background: #fff; color: #1f1f1f; border: 1px solid #747775; display: inline-flex; align-items: center; justify-content: center; gap: 10px; width: 100%; max-width: 320px; }
+.g-mark { font: 700 20px/1 Arial, sans-serif; color: #4285f4; }
 </style>
 </head>
 <body>
@@ -2352,15 +2356,7 @@ if (window.__PREVIEW) {
   // preview: a pretend Google account, so the founder sees the whole journey
   $('#g-preview').classList.remove('hidden');
   $('#g-preview').addEventListener('click', () => { store.set('gs_g_email', 'preview.family@gmail.com'); store.set('gs_g_name', 'Preview Family'); askPermsThen('signup'); });
-} else {
-  const gs = document.createElement('script'); gs.src = 'https://accounts.google.com/gsi/client'; gs.async = true;
-  gs.onload = () => {
-    google.accounts.id.initialize({ client_id: GOOGLE_CLIENT_ID, callback: (r) => onGoogle(r.credential), ux_mode: 'popup' });
-    google.accounts.id.renderButton($('#g-btn'), { theme: 'filled_blue', size: 'large', shape: 'pill', text: 'continue_with', width: 300, locale: LANG === 'en' ? 'en' : 'hi' });
-  };
-  gs.onerror = () => { $('#g-msg').textContent = 'Google बटन लोड नहीं हुआ; "मेरे पास कोड है" से आगे बढ़ें / Google did not load; use "I have a code"'; };
-  document.head.appendChild(gs);
-}
+}   // the real button: Google sign-in through SadaSneha's own Firebase project (24-phone-login.js)
 
 
 
@@ -3530,8 +3526,7 @@ async function loadJoin() {
     $('#join-text').textContent = T(`आपको ${j.elder || 'वरिष्ठजन'} की देखभाल-मंडली में जोड़ा गया है (${j.level === 'family' ? 'परिवार: रोज़ की ख़बर और संदेश' : j.level === 'friend' ? 'मित्र: उनसे मुफ़्त आवाज़ और वीडियो कॉल' : 'देखभाल: आज का हाल और ज़रूरी ख़बर'})। आगे बढ़ने के लिए Google से लॉग-इन कीजिए।`,
       `You have been added to ${j.elder || 'the elder'}'s care circle (${j.level === 'family' ? 'family: daily news and messages' : j.level === 'friend' ? 'friend: free voice and video calls with them' : 'caretaker: today and alerts'}). Continue with Google.`);
     window.__gMode = 'join';
-    const render = () => { try { google.accounts.id.renderButton($('#join-g'), { theme: 'filled_blue', size: 'large', shape: 'pill', text: 'continue_with', width: 300, locale: LANG === 'en' ? 'en' : 'hi' }); } catch (e) { setTimeout(render, 500); } };
-    render();
+    googleButton($('#join-g'), $('#join-msg'), onJoinGoogle);
   } catch (e) { $('#join-title').textContent = T('इंटरनेट नहीं', 'Offline'); }
 }
 async function onJoinGoogle(cred) {
@@ -4301,13 +4296,57 @@ function otpSignedIn(r, phone, want) {
   // a new family: sign-up, with this number filled in and already checked
   show('signup'); setTimeout(() => { const f = $('#f-family_phone'); if (f) { f.value = phone; f.readOnly = true; f.classList.add('otp-ok'); } }, 300);
 }
+// ---- Continue with Google, through the same Firebase project (sadasneha-85005) ----
+// Google does not allow its sign-in page inside an app's web view, so in the Android app this button is not shown
+// (the mobile OTP works there).
+async function googleToken() {
+  const auth = await otpFirebase();
+  const res = await auth.signInWithPopup(new window.firebase.auth.GoogleAuthProvider());
+  const t = await res.user.getIdToken();
+  try { await auth.signOut(); } catch (x) {}
+  return t;
+}
+function googleButton(el, msgEl, onToken) {
+  if (!el) return;
+  if (NATIVE) { el.classList.add('hidden'); return; }
+  el.innerHTML = `<button type="button" class="btn g-fb"><span class="g-mark" aria-hidden="true">G</span> ${T('Google से आगे बढ़ें', 'Continue with Google')}</button>`;
+  const b = el.querySelector('button');
+  const face = b.innerHTML;
+  b.onclick = async () => {
+    const say = (t) => { if (msgEl) msgEl.textContent = t; };
+    busy(b, true, T('Google खुल रहा है…', 'Opening Google…')); say('');
+    try { await onToken(await googleToken()); ulog('step', 'google-ok'); }
+    catch (x) {
+      const code = String((x && x.code) || (x && x.message) || x);
+      if (!/popup-closed|cancelled-popup/.test(code)) say(/operation-not-allowed|config|unauthorized-domain/.test(code)
+        ? T('Google से लॉग इन अभी चालू नहीं है; मोबाइल नंबर या कोड से आगे बढ़ें', 'Google sign-in is not on yet; use your mobile number or code')
+        : /popup-blocked/.test(code) ? T('ब्राउज़र ने Google की खिड़की रोक दी; फिर से दबाइए', 'The browser blocked the Google window; tap again')
+        : T('Google से लॉग इन नहीं हो पाया, फिर कोशिश कीजिए', 'Google sign-in failed, please try again'));
+      if (!/popup-closed|cancelled-popup/.test(code)) ulog('error', 'google', null, code.slice(0, 120));
+    } finally { busy(b, false); b.innerHTML = face; }
+  };
+}
+// a family owner by their sign-up Gmail; else perhaps a member of someone's circle; else a new family
+async function onGoogleToken(id_token) {
+  const r = await (await fetch(API.otp, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ id_token }) })).json();
+  if (!r.ok || !r.email) throw new Error(r.why || 'server');
+  store.set('gs_g_email', r.email); store.set('gs_g_name', r.name || '');
+  if (r.matches && r.matches.length) { store.set('gs_code', r.matches[0].code); store.set('gs_role', 'family'); try { localStorage.removeItem('gs_last'); } catch (e) {} return askPermsThen('home'); }
+  try { const m = await circleCall({ action: 'login', cred: id_token }); if (m.ok) { store.set('gs_member', m.key); return show('care'); } } catch (e) {}
+  askPermsThen('signup');
+}
+if (!window.__PREVIEW) googleButton($('#g-btn'), $('#g-msg'), onGoogleToken);
+if (NATIVE) { const t = $('#g-msg') && $('#g-msg').nextElementSibling; if (t) t.classList.add('hidden'); }
+
 // the two sign-in screens
 (function () {
   const fam = document.createElement('div'); fam.id = 'otp-family'; fam.className = 'otp-box';
   const famCard = $('#code-in') && $('#code-in').closest('.card');
   if (famCard) { famCard.querySelector('h2').insertAdjacentHTML('afterend', `<p class="muted">${T('अपने मोबाइल नंबर से – OTP आएगा', 'With your mobile number – you get an OTP')}</p>`); famCard.querySelector('p.muted').after(fam);
     fam.insertAdjacentHTML('afterend', `<p class="otp-or"><span>${T('या कोड से', 'or with your code')}</span></p>`);
-    otpBox(fam, { id: 'otpf', done: (r, p) => otpSignedIn(r, p, '') }); }
+    otpBox(fam, { id: 'otpf', done: (r, p) => otpSignedIn(r, p, '') });
+    if (!NATIVE) { const g = document.createElement('div'); g.className = 'g-btn'; const gm = document.createElement('p'); gm.className = 'err';
+      fam.before(g, gm); googleButton(g, gm, onGoogleToken); g.insertAdjacentHTML('afterend', `<p class="otp-or"><span>${T('या मोबाइल नंबर से', 'or with your mobile number')}</span></p>`); } }
   const eld = document.createElement('div'); eld.id = 'otp-elder'; eld.className = 'otp-box';
   const eCard = $('#ecode-in') && $('#ecode-in').closest('.card');
   if (eCard) { eCard.querySelector('p.muted').after(eld); eld.insertAdjacentHTML('afterend', `<p class="otp-or"><span>${T('या घर वालों का कोड', 'or the family\'s code')}</span></p>`);
