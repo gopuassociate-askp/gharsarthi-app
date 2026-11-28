@@ -523,6 +523,14 @@ div.talk-sakhi.mono.hidden { display: none; }
 
 .sakhi-clip video { width: 100%; height: auto; aspect-ratio: 16 / 9; object-fit: cover; border-radius: 18px; border: 3px solid #14b8a6; background: #ccfbf1; display: block; }
 #v-free .sakhi-clip { margin-bottom: 10px; }
+
+/* Sakhi on the talk screen: still face, and the same face talking (video) on top while she speaks */
+div.talk-sakhi:not(.mono) { position: relative; width: 100%; max-width: 320px; aspect-ratio: 1; margin: 0 auto; border-radius: 50%; overflow: hidden; border: 6px solid #14b8a6; background: #ccfbf1; transition: box-shadow .2s; }
+div.talk-sakhi.hidden { display: none; }
+.talk-sakhi .sk-rest, .talk-sakhi .sk-talk { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.talk-sakhi .sk-talk { opacity: 0; transition: opacity .18s; }
+.talk-sakhi.speaking .sk-talk { opacity: 1; }
+div.talk-sakhi.speaking { box-shadow: 0 0 0 10px rgba(20, 184, 166, .25), 0 0 0 20px rgba(20, 184, 166, .12); }
 </style>
 </head>
 <body>
@@ -569,8 +577,6 @@ div.talk-sakhi.mono.hidden { display: none; }
       <div><h2 style="margin:4px 0"><span data-en="Namaste">नमस्ते</span><span id="f-name"></span> 🙏</h2>
       <p style="margin:0"><span data-en="I'm Sakhi, Sneha's friend – with you every day">मैं सखी, स्नेहा की सहेली – हर दिन आपके साथ</span></p></div>
     </div>
-    <div class="clip sakhi-clip hidden" id="f-clip"><video src="video/sakhi.mp4" poster="video/sakhi-poster.jpg" controls playsinline preload="none" aria-label="सखी का परिचय / Sakhi introduces herself"></video></div>
-    <button class="btn secondary" id="f-meet" type="button" style="width:100%;margin:0 0 10px">▶ <span data-en="Meet Sakhi">सखी से मिलिए</span></button>
     <p class="muted" id="f-date" style="margin:0 0 10px;text-align:center"></p>
     <div class="tiles" id="f-tiles">
       <button class="tile big" data-free="talk" type="button"><span class="ic"><svg class="ico" aria-hidden="true"><use href="#i-mic"/></svg></span><span data-en="Talk to Sakhi">सखी से बात</span><small data-en="Chat, riddles, antakshari, anything">गपशप, पहेली, अंताक्षरी, कुछ भी</small></button>
@@ -683,7 +689,7 @@ div.talk-sakhi.mono.hidden { display: none; }
     <div class="pg" id="pg-sakhi">
       <p class="kicker"><span data-en="Meet Sakhi – free for everyone">सखी से मिलिए – सबके लिए मुफ़्त</span></p>
       <h2><span data-en="Sneha's friend, with you every day">स्नेहा की सहेली, हर दिन आपके साथ</span></h2>
-      <div class="clip sakhi-clip"><video src="video/sakhi.mp4" poster="video/sakhi-poster.jpg" controls playsinline preload="none" aria-label="सखी का परिचय / Sakhi introduces herself"></video></div>
+      <div class="sakhi-site"><img src="sakhi-full.jpg" alt="सखी – स्नेहा की सहेली / Sakhi – Sneha's friend" width="320" height="320" loading="lazy"></div>
       <ul class="ticks">
         <li><b><span data-en="Talk about anything">कुछ भी बात करें</span></b> – <span data-en="chat, riddles, antakshari, questions, in your language.">गपशप, पहेली, अंताक्षरी, सवाल – आपकी अपनी भाषा में।</span></li>
         <li><b><span data-en="Songs, radio and TV">गाने, रेडियो और टीवी</span></b> – <span data-en="old and new songs, bhajans, radio from India and the world, news and cricket.">पुराने-नए गाने, भजन, भारत और दुनिया के रेडियो, ख़बरें और क्रिकेट।</span></li>
@@ -4728,25 +4734,31 @@ const sakhiNow = () => TALK.persona === 'sakhi' || isFreeUser();
 const talkWho = () => (sakhiNow() ? T('सखी', 'Sakhi') : T('स्नेहा', 'Sneha'));
 function sakhiFace(on) {
   const box = $('#v-talk .talk-face'); if (!box) return;
-  let img = $('#talk-sakhi');
-  if (!img) { img = document.createElement('img'); img.id = 'talk-sakhi'; img.className = 'talk-sakhi hidden'; img.alt = 'सखी / Sakhi'; img.src = 'sakhi.jpg';
-    // until her picture is in the app: a calm circle with her initial
-    img.onerror = () => { const m = document.createElement('div'); m.id = 'talk-sakhi'; m.className = img.className + ' mono'; m.textContent = 'स'; m.setAttribute('aria-label', 'सखी / Sakhi'); img.replaceWith(m); };
-    box.append(img); }
-  img.classList.toggle('hidden', !on); $('#talk-canvas').classList.toggle('hidden', !!on);
+  let face = $('#talk-sakhi');
+  if (!face) {
+    // her calm face, and the same face talking (the founder's video, silent): the video plays only while her voice sounds
+    face = document.createElement('div'); face.id = 'talk-sakhi'; face.className = 'talk-sakhi hidden'; face.setAttribute('role', 'img'); face.setAttribute('aria-label', 'सखी / Sakhi');
+    face.innerHTML = '<img class="sk-rest" src="face-sakhi/rest.jpg" alt=""><video class="sk-talk" src="face-sakhi/talk.mp4" muted playsinline loop preload="auto" aria-hidden="true"></video>';
+    box.append(face);
+  }
+  face.classList.toggle('hidden', !on); $('#talk-canvas').classList.toggle('hidden', !!on);
   // family face recognition belongs to the family's phone; the report link names who answered
   const fo = $('#face-open'); if (fo) fo.classList.toggle('hidden', isFreeUser());
   const rp = $('#talk-report'); if (rp) rp.innerHTML = '🚩 ' + (on ? T('सखी का जवाब ठीक नहीं लगा? बताइए', 'Sakhi\'s reply felt wrong? Tell us') : T('स्नेहा का जवाब ठीक नहीं लगा? बताइए', 'Sneha\'s reply felt wrong? Tell us'));
   const tag = box.querySelector('.talk-ai'); if (tag) tag.textContent = on ? T('सखी – स्नेहा की सहेली (AI)', 'Sakhi – Sneha\'s friend (AI)') : T('स्नेहा – आपकी AI सहायिका', 'Sneha – your AI companion');
 }
-// while she speaks, her open smile comes and goes with the voice, so she looks like she is talking
-const SAKHI_TALK = new Image(); SAKHI_TALK.src = 'sakhi-talk.jpg';
+// while her voice sounds, she talks (lips, face and head from the video); a moment of quiet and she rests again
+let skVoiceAt = 0;
 setInterval(() => {
-  const img = $('#talk-sakhi'); if (!img || img.classList.contains('hidden') || img.tagName !== 'IMG') return;
-  img.classList.toggle('speaking', !!TALK.speaking);
-  const want = TALK.speaking && TALK.level > 0.5 ? 'sakhi-talk.jpg' : 'sakhi.jpg';
-  if (!img.src.endsWith(want)) img.src = want;
-}, 160);
+  const face = $('#talk-sakhi'); if (!face || face.classList.contains('hidden')) return;
+  const v = face.querySelector('.sk-talk'); if (!v) return;
+  const now = performance.now();
+  if (TALK.speaking) skVoiceAt = now;
+  const talking = now - skVoiceAt < 300;
+  face.classList.toggle('speaking', talking);
+  if (talking && v.paused) { v.play().catch(() => {}); }
+  if (!talking && !v.paused) v.pause();
+}, 100);
 const talkOpenBefore = talkOpen;
 talkOpen = async function () {
   if (isFreeUser()) { TALK.persona = 'sakhi'; TALK.lang = ULANG[store.get('gs_ulang') || 'hi'] || 'hi-IN'; }
@@ -4873,9 +4885,6 @@ show = function (view) {
 };
 // after sign-in: keep the free account's key (every signed-in person has one)
 function keepUser(r) { if (r && r.user && r.user.key) { store.set('gs_user', r.user.key); if (r.user.name) store.set('gs_uname', r.user.name); if (r.user.lang) store.set('gs_ulang', r.user.lang); } }
-
-// Sakhi's own short introduction (video), on the free home
-$('#f-meet').addEventListener('click', () => { const c = $('#f-clip'); c.classList.remove('hidden'); $('#f-meet').classList.add('hidden'); const v = c.querySelector('video'); v.play().catch(() => {}); ulog('tap', 'sakhi-video'); });
 // ---- Starting Sneha from the free home: for my parents, or for myself (v-buy), then the sign-up form ----
 // "For myself": the same form with the relation "Myself (the elder)", and after sign-up this phone becomes the elder's.
 // A free user's memories with Sakhi go along to the new family (app-me 'link'), so Sneha already knows them.
