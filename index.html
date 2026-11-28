@@ -541,6 +541,24 @@ div.talk-sakhi.speaking { box-shadow: 0 0 0 10px rgba(20, 184, 166, .25), 0 0 0 
 .draft-card .btn { width: 100%; }
 .form-later { display: block; margin: 10px auto 0; font-size: 16px; min-height: 48px; }
 #signup-form.self .self-hide, #signup-form [hidden] { display: none !important; }
+
+/* first impression: Sneha, then Sakhi */
+.btn.intro-go { display: flex; align-items: center; gap: 12px; width: 100%; max-width: 420px; margin: 12px auto; text-align: left; background: linear-gradient(135deg, #fff7ed, #ecfeff); border: 2px solid #14b8a6; color: inherit; padding: 10px 14px; }
+.intro-go small { display: block; font-size: 14px; font-weight: 400; opacity: .8; }
+.intro-faces { display: flex; flex: none; }
+.intro-faces img { width: 44px; height: 44px; border-radius: 50%; object-fit: cover; border: 2px solid #fff; }
+.intro-faces img + img { margin-left: -12px; }
+.intro { position: fixed; inset: 0; z-index: 70; background: rgba(0, 0, 0, .6); display: flex; align-items: center; justify-content: center; padding: 16px; }
+.intro.hidden { display: none; }
+.intro-card { background: var(--card); color: inherit; border-radius: 24px; padding: 16px; width: 100%; max-width: 440px; text-align: center; }
+.intro-who { margin: 0 0 8px; font-weight: 700; color: #0f766e; }
+.intro-stage { position: relative; width: 100%; aspect-ratio: 1; border-radius: 50%; overflow: hidden; border: 6px solid #f59e0b; background: #fde68a; }
+.intro-stage video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.intro-stage video.hidden { display: none; }
+.intro-stage:has(.iv-sakhi:not(.hidden)) { border-color: #14b8a6; background: #ccfbf1; }
+.intro-cc { min-height: 4.6em; margin: 12px 0; font-size: 18px; line-height: 1.5; }
+.intro-btns { display: grid; gap: 10px; }
+.intro-btns .btn.hidden { display: none; }
 </style>
 </head>
 <body>
@@ -4064,13 +4082,13 @@ function hmmKind(text) {
   const t = String(text || '');
   if (!t) return '';
   if (HMM_SOFT.test(t)) return 'soft';
-  if (/(फ़ोन|फोन|कॉल|call|मिलाओ|मिलाइए|भेज|याद दिला|लिख ल|नोट कर)/i.test(t)) return 'do';
-  if (/(गाना|गाने|भजन|रेडियो|टीवी|चैनल|चलाओ|चलाइए|लगाओ|लगाइए|सुनाओ|सुनाइए|बजाओ|बजाइए|दिखाओ|दिखाइए|खोलो|खोलिए|play)/i.test(t)) return 'play';
-  if (/[?？]|क्या|कब|कैसे|कौन|कहाँ|कहां|कितन|क्यों|बताओ|बताइए|मौसम|तिथि|त्योहार|what|when|how|who|where|why/i.test(t)) return 'look';
+  // only a clear "play / put on <a song, bhajan, radio, TV>" gets a specific line; everything else a neutral one,
+  // so the filler never promises something the answer then does not do (or contradicts "I could not hear")
+  if (/(गाना|गाने|भजन|रेडियो|टीवी|चैनल)/i.test(t) && /(चलाओ|चलाइए|लगाओ|लगाइए|सुनाओ|सुनाइए|बजाओ|बजाइए|दिखाओ|दिखाइए|play)/i.test(t)) return 'play';
   return '';
 }
-const SNEHA_HMM = { play: 'hi-laga', do: 'hi-kar', look: 'hi-dekh', soft: 'hi', long: 'hi-pal' };
-const SAKHI_HMM = { play: 'ज़रूर! अभी लगाती हूँ।', do: 'ज़रूर, करती हूँ।', look: 'चलिए, देखती हूँ…', soft: 'हाँ, मैं सुन रही हूँ…', plain: ['अच्छा…', 'हम्म…', 'ज़रूर…'], long: 'बस एक सेकंड…' };
+const SNEHA_HMM = { play: 'hi-laga', soft: 'hi', long: 'hi-pal' };
+const SAKHI_HMM = { play: 'ज़रूर! अभी लगाती हूँ।', soft: 'मैं सुन रही हूँ…', plain: ['अच्छा…', 'जी…'], long: 'बस एक सेकंड…' };
 function hmmPlay(file) {
   return new Promise((done) => {
     try {
@@ -4141,10 +4159,10 @@ function talkListenPhone(auto) {
       if (words && CC()) $('#talk-state').textContent = '👂 ' + words.slice(-70);
     };
     rec.onerror = (e) => { if (['not-allowed', 'service-not-allowed', 'network', 'audio-capture', 'language-not-supported'].includes(e.error)) { failed = true; TALK.srOff = true; } };
-    // patient: 3 seconds of quiet after they have spoken ends the turn; 9 seconds of nothing for a nudge
+    // patient: 2.6–4 seconds of quiet after they have spoken ends the turn (a short pause to think does not); 10 seconds of nothing for a nudge
     const tick = setInterval(() => {
       const now = performance.now();
-      if ((heardAt && now - heardAt > (sentenceDone ? 1400 : 3000)) || (!heardAt && auto >= 0 && now - started > 9000) || now - started > 40000 || !TALK.open) { try { rec.stop(); } catch (e) {} }
+      if ((heardAt && now - heardAt > (sentenceDone ? 2600 : 4000)) || (!heardAt && auto >= 0 && now - started > 10000) || now - started > 60000 || !TALK.open) { try { rec.stop(); } catch (e) {} }
     }, 200);
     rec.onend = () => {
       ended = true; clearInterval(tick); $('#talk-mic').classList.remove('rec');
@@ -4189,7 +4207,7 @@ async function talkListen(opt) {
     if (t - started < 400) { floor = (floor * samples + rms) / (++samples); return; }
     const level = Math.max(5, floor * 2.2);
     if (rms > level) { spoken += 100; if (spoken >= 500) heard = true; quietSince = t; }
-    if ((heard && t - quietSince > 3000) || t - started > 40000 || (auto >= 0 && !heard && t - started > 9000) || !TALK.open) { if (rec.state === 'recording') rec.stop(); }
+    if ((heard && t - quietSince > 3500) || t - started > 60000 || (auto >= 0 && !heard && t - started > 9000) || !TALK.open) { if (rec.state === 'recording') rec.stop(); }
   }, 100);
   rec.onstop = async () => {
     clearInterval(vad); st.getTracks().forEach((t) => t.stop()); $('#talk-mic').classList.remove('rec');
@@ -5059,6 +5077,71 @@ function openInAppLink(code) {
   const back = encodeURIComponent('https://sadasneha.in/?unlock=' + code);
   return /Android/i.test(navigator.userAgent) ? `intent://sadasneha.in/unlock?code=${code}#Intent;scheme=https;package=in.sadasneha.app;S.browser_fallback_url=${back};end` : 'https://sadasneha.in/?unlock=' + code;
 }
+// ---- First impression: Sneha introduces herself (her own video), then hands over to her friend Sakhi, who tells what
+// the app gives everyone for free and why Sneha matters for parents. Sakhi's face is her video (silent) and her voice
+// is the phone's own, the same voice she talks with in the app. Subtitles throughout (a phone may have no Hindi voice).
+const INTRO_SAKHI = [
+  'धन्यवाद स्नेहा! नमस्ते, मैं सखी हूँ, स्नेहा की सहेली।',
+  'मुझसे कुछ भी बात कीजिए – गपशप, पहेलियाँ, अंताक्षरी या कोई सवाल, आपकी अपनी भाषा में।',
+  'गाने, भजन, रेडियो, टीवी, रोज़ का योग और सत्संग – सब मुफ़्त, सब एक जगह।',
+  'और अगर आपके माता-पिता आपसे दूर रहते हैं, तो स्नेहा रोज़ उनसे प्यार से बात करती है, और कुछ भी गड़बड़ लगे तो तुरंत आपको बताती है।',
+  'चलिए, शुरू करते हैं! सखी – बातें भी, मुस्कान भी।',
+];
+const INTRO_SNEHA_CC = 'नमस्ते, मैं स्नेहा हूँ। मैं रोज़ आपका हालचाल पूछूँगी और हमेशा आपके साथ रहूँगी।';   // her words in video/welcome.mp4
+function introOpen() {
+  let box = $('#intro');
+  if (!box) {
+    box = document.createElement('div'); box.id = 'intro'; box.className = 'intro'; box.setAttribute('role', 'dialog'); box.setAttribute('aria-modal', 'true'); box.setAttribute('aria-label', T('स्नेहा और सखी से मिलिए', 'Meet Sneha and Sakhi'));
+    box.innerHTML = `<div class="intro-card"><p class="intro-who"></p><div class="intro-stage"><video class="iv-sneha" src="video/welcome.mp4" poster="sneha.jpg" playsinline preload="auto"></video>
+      <video class="iv-sakhi hidden" src="face-sakhi/talk.mp4" poster="face-sakhi/rest.jpg" muted playsinline loop preload="auto"></video></div>
+      <p class="intro-cc" aria-live="polite"></p>
+      <div class="intro-btns"><button class="btn secondary" type="button" data-intro="skip">${T('छोड़ें', 'Skip')}</button><button class="btn primary hidden" type="button" data-intro="start">${T('शुरू करें', 'Start')}</button></div></div>`;
+    document.body.append(box);
+    box.querySelector('[data-intro="skip"]').onclick = introClose;
+    box.querySelector('[data-intro="start"]').onclick = () => { introClose(); if (!store.get('gs_code') && !store.get('gs_user') && !store.get('gs_member')) show('start'); };
+  }
+  INTRO.run = (INTRO.run || 0) + 1; const run = INTRO.run;
+  box.classList.remove('hidden'); try { mediaPauseAll(); } catch (e) {}
+  const who = box.querySelector('.intro-who'), cc = box.querySelector('.intro-cc'), vs = box.querySelector('.iv-sneha'), vk = box.querySelector('.iv-sakhi');
+  box.querySelector('[data-intro="start"]').classList.add('hidden');
+  // 1) Sneha, her own video
+  who.textContent = T('स्नेहा', 'Sneha'); cc.textContent = INTRO_SNEHA_CC; vk.classList.add('hidden'); vs.classList.remove('hidden');
+  vs.currentTime = 0;
+  const sakhi = async () => {
+    if (run !== INTRO.run) return;
+    // 2) Sakhi takes over: her face talks while her (the phone's) voice speaks, line by line, with subtitles
+    who.textContent = T('सखी – स्नेहा की सहेली', 'Sakhi – Sneha\'s friend'); vs.classList.add('hidden'); vk.classList.remove('hidden');
+    for (const line of INTRO_SAKHI) {
+      if (run !== INTRO.run) return;
+      cc.textContent = line; vk.play().catch(() => {});
+      const t0 = performance.now();
+      await Promise.race([phoneSpeak(line, 'hi-IN'), new Promise((ok) => setTimeout(ok, 1500 + line.length * 85))]);
+      // no voice on this phone (spoke at once): give time to read the line
+      const read = 1200 + line.length * 45 - (performance.now() - t0); if (read > 0) { vk.pause(); await new Promise((ok) => setTimeout(ok, read)); }
+    }
+    if (run !== INTRO.run) return;
+    vk.pause(); box.querySelector('[data-intro="start"]').classList.remove('hidden'); box.querySelector('[data-intro="skip"]').classList.add('hidden');
+    try { localStorage.setItem('gs_intro_seen', '1'); } catch (e) {}
+  };
+  vs.onended = sakhi;
+  vs.play().catch(() => sakhi());
+  ulog('tap', 'intro');
+}
+const INTRO = { run: 0 };
+function introClose() {
+  INTRO.run++; const box = $('#intro'); if (!box) return;
+  box.querySelectorAll('video').forEach((v) => { try { v.pause(); } catch (e) {} });
+  try { phoneHush(); } catch (e) {}
+  box.classList.add('hidden'); box.querySelector('[data-intro="skip"]').classList.remove('hidden');
+}
+// the button, on the website's first page and on the sign-in screen
+(function introButtons() {
+  const make = () => { const b = document.createElement('button'); b.type = 'button'; b.className = 'btn intro-go';
+    b.innerHTML = `<span class="intro-faces"><img src="sneha.jpg" alt=""><img src="sakhi.jpg" alt=""></span><span>▶ ${T('स्नेहा और सखी से मिलिए', 'Meet Sneha and Sakhi')}<small>${T('1 मिनट का परिचय', 'A one-minute introduction')}</small></span>`;
+    b.onclick = introOpen; return b; };
+  const hero = $('#v-role .hero-in .lead'); if (hero) hero.after(make());
+  const st = $('#v-start .start-head'); if (st) st.after(make());
+})();
 </script>
 </body>
 </html>
