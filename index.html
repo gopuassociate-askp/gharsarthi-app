@@ -4246,10 +4246,12 @@ function otpBox(box, opts) {
       <button type="button" class="btn primary otp-check">${T('पक्का करें', 'Verify')}</button></div>
     <p class="err otp-msg" aria-live="polite"></p><div class="otp-captcha" id="${opts.id}-captcha"></div>`;
   const msg = (t) => { box.querySelector('.otp-msg').textContent = t; };
+  // (the button is kept in a variable: after an await, e.currentTarget is empty and the button would stay greyed out)
   box.querySelector('.otp-send').onclick = async (e) => {
+    const btn = e.currentTarget;
     const p = box.querySelector('.otp-phone').value.replace(/\D/g, '');
     if (!/^[6-9]\d{9}$/.test(p)) return msg(T('10 अंकों का मोबाइल नंबर लिखिए', 'Write the 10-digit mobile number'));
-    busy(e.currentTarget, true, T('भेज रहे हैं…', 'Sending…')); msg('');
+    busy(btn, true, T('भेज रहे हैं…', 'Sending…')); msg('');
     try {
       const auth = await otpFirebase();
       if (OTP.verifier) { try { OTP.verifier.clear(); } catch (x) {} }
@@ -4263,22 +4265,31 @@ function otpBox(box, opts) {
       msg(/too-many|quota/.test(code) ? T('बहुत बार कोशिश हो गई; थोड़ी देर बाद फिर कीजिए', 'Too many tries; please wait a little') : /billing|operation-not-allowed|config|unauthorized-domain/.test(code)
         ? T('मोबाइल से लॉग इन अभी चालू नहीं है; नीचे अपना कोड (GS-…) डालिए', 'Mobile sign-in is not on yet; use your code (GS-…) below') : T('कोड नहीं भेज पाए, फिर कोशिश कीजिए', 'Could not send the code; try again'));
       ulog('error', 'otp-send', null, code.slice(0, 120));
-    } finally { busy(e.currentTarget, false); }
+    } finally { busy(btn, false); box.querySelector('.otp-send').textContent = OTP.confirm ? T('OTP दोबारा भेजें', 'Send the OTP again') : T('OTP भेजें', 'Send OTP'); }
   };
   box.querySelector('.otp-check').onclick = async (e) => {
-    const c = box.querySelector('.otp-in').value.replace(/\D/g, '');
+    const btn = e.currentTarget, inp = box.querySelector('.otp-in');
+    const c = inp.value.replace(/\D/g, '');
     if (c.length !== 6 || !OTP.confirm) return msg(T('6 अंकों का कोड लिखिए', 'Write the 6-digit code'));
-    busy(e.currentTarget, true, T('जाँच रहे हैं…', 'Checking…'));
+    busy(btn, true, T('जाँच रहे हैं…', 'Checking…')); msg('');
+    let stage = 'code';
     try {
       const cred = await OTP.confirm.confirm(c);
+      stage = 'server';
       const id_token = await cred.user.getIdToken();
       const r = await (await fetch(API.otp, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ id_token }) })).json();
       if (!r.ok) throw new Error(r.why || 'server');
       store.set('gs_phone_ok', OTP.phone); ulog('step', 'otp-verified');
       try { await OTP.fb.signOut(); } catch (x) {}
       opts.done(r, OTP.phone);
-    } catch (x) { msg(T('कोड ग़लत है या पुराना हो गया; फिर से भेजिए', 'Wrong or old code; send it again')); }
-    finally { busy(e.currentTarget, false); }
+    } catch (x) {
+      const code = String((x && x.code) || (x && x.message) || x);
+      if (stage === 'code' && /invalid-verification-code/.test(code)) { msg(T('❌ यह कोड ग़लत है। SMS वाला 6 अंकों का कोड ध्यान से देखकर फिर लिखिए।', '❌ This code is wrong. Check the 6-digit code in the SMS and type it again.')); inp.select(); }
+      else if (stage === 'code' && /code-expired|session-expired/.test(code)) msg(T('⏱ कोड पुराना हो गया। "OTP दोबारा भेजें" दबाइए।', '⏱ The code has expired. Tap "Send the OTP again".'));
+      else if (stage === 'code' && /too-many/.test(code)) msg(T('बहुत बार कोशिश हो गई; थोड़ी देर बाद फिर कीजिए', 'Too many tries; please wait a little'));
+      else msg(T('अभी जाँच नहीं हो पाई (इंटरनेट?)। फिर से "पक्का करें" दबाइए।', 'Could not check just now (internet?). Tap "Verify" again.'));
+      ulog('error', 'otp-' + stage, null, code.slice(0, 120));
+    } finally { busy(btn, false); }
   };
 }
 // after a verified number: open that family, choose if there are several, or go on to sign up
