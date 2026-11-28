@@ -50,12 +50,23 @@
   <p class="muted">एक ही वाक्य, दो आवाज़ें। <b>📱 फ़ोन की अपनी आवाज़</b> (हमारे लिए मुफ़्त) और <b>💛 स्नेहा की असली आवाज़</b> (Sarvam “ritu”, पेड)। आवाज़ तेज़ करके सुनिए।</p>
 
   <div class="card">
+    <h2>भाषा</h2>
+    <select id="lang" aria-label="भाषा">
+      <option value="hi">हिंदी</option><option value="en">English</option><option value="mr">मराठी</option><option value="bn">বাংলা</option>
+      <option value="gu">ગુજરાતી</option><option value="pa">ਪੰਜਾਬੀ</option><option value="or">ଓଡ଼ିଆ</option><option value="ta">தமிழ்</option>
+      <option value="te">తెలుగు</option><option value="kn">ಕನ್ನಡ</option><option value="ml">മലയാളം</option></select>
+    <p class="note">भाषा बदलते ही वाक्य, फ़ोन की आवाज़, स्नेहा के नमूने और 🎤 – सब उसी भाषा में।</p>
+  </div>
+
+  <div class="card">
     <h2>फ़ोन की आवाज़ चुनें</h2>
     <label for="voice">आवाज़</label>
     <select id="voice"><option>लोड हो रही है…</option></select>
     <label for="rate">रफ़्तार: <span id="rate-v">0.95</span></label>
     <input id="rate" type="range" min="0.6" max="1.3" step="0.05" value="0.95">
     <p id="voice-note" class="note"></p>
+    <details class="note"><summary>आवाज़ आदमी की आ रही है?</summary>
+      Chrome में हर भाषा की एक ही आवाज़ होती है – वही जो फ़ोन की सेटिंग में चुनी है। Android: Settings → “Text-to-speech output” → Google के ⚙ → Install voice data → भाषा → कोई महिला आवाज़ चुनें (हर आवाज़ दबाकर सुन लें)। हमारे Android ऐप में यह काम ऐप ख़ुद करेगा और हमेशा महिला आवाज़ ही चुनेगा।</details>
   </div>
 
   <div id="samples"></div>
@@ -69,7 +80,7 @@
 
   <div class="card">
     <h2>🎤 फ़ोन के “कान” आज़माइए</h2>
-    <p class="muted">बटन दबाकर हिंदी या अंग्रेज़ी में बोलिए। फ़ोन ने जो सुना, नीचे लिखा आएगा – बिना हमारे सर्वर के, मुफ़्त।</p>
+    <p class="muted">बटन दबाकर ऊपर चुनी भाषा में बोलिए। फ़ोन ने जो सुना, नीचे लिखा आएगा – बिना हमारे सर्वर के, मुफ़्त।</p>
     <button class="mic" id="mic" type="button">🎤 बोलना शुरू करें</button>
     <div class="heard" id="heard" aria-live="polite"></div>
     <button class="phone" id="heard-say" type="button" style="width:100%" disabled>📱 जो सुना, फ़ोन की आवाज़ में दोहराएँ</button>
@@ -97,13 +108,25 @@
   <p class="note">यह जाँच का पन्ना है, ऐप का हिस्सा नहीं। Chrome में सबसे अच्छा चलता है।</p>
 </main>
 <script>
-const SAMPLES = [
+const ALL = { hi: [
   'नमस्ते पापा जी! मैं स्नेहा हूँ। सुबह की चाय पी ली आपने? आज का दिन बहुत अच्छा जाए।',
   'जबलपुर में आज मौसम बड़ा सुहाना है, हल्की धूप और ठंडी हवा। थोड़ी देर बाहर टहल आइए।',
   'आपकी पसंद का गाना लगा दूँ? चलिए, लग जा गले चलाती हूँ।',
   'Good morning! आज योग की क्लास सात बजे शुरू होगी। साथ में करेंगे?',
   'दवाई का समय हो गया है। खाने के बाद वाली गोली ले लीजिए, फिर मुझे बता दीजिए।',
-];
+],
+  en: ["Namaste! I am Sneha. Did you have your morning tea? Have a lovely day.", "The weather is pleasant today, with soft sunshine and a cool breeze. Go out for a short walk.", "It is time for your medicine. Please take the tablet after food, and then tell me."],
+  mr: ["नमस्कार बाबा! मी स्नेहा. सकाळचा चहा घेतलात का? आजचा दिवस छान जावो.", "आज हवा खूप छान आहे, हलकं ऊन आणि गार वारा. थोडं बाहेर फिरून या.", "औषधाची वेळ झाली आहे. जेवणानंतरची गोळी घ्या आणि मग मला सांगा."],
+  bn: ["নমস্কার বাবা! আমি স্নেহা। সকালের চা খেয়েছেন? আপনার দিনটা খুব ভালো কাটুক।", "আজ আবহাওয়া খুব সুন্দর, মিষ্টি রোদ আর ঠান্ডা হাওয়া। একটু বাইরে হেঁটে আসুন।", "ওষুধ খাওয়ার সময় হয়েছে। খাওয়ার পরের ট্যাবলেটটা খেয়ে নিন, তারপর আমাকে বলবেন।"],
+  gu: ["નમસ્તે પપ્પા! હું સ્નેહા છું. સવારની ચા પીધી? તમારો દિવસ ખૂબ સરસ જાય.", "આજે હવામાન ખૂબ સરસ છે, હળવો તડકો અને ઠંડો પવન. થોડું બહાર ફરી આવો.", "દવાનો સમય થઈ ગયો છે. જમ્યા પછીની ગોળી લઈ લો, પછી મને કહેજો."],
+  pa: ["ਸਤ ਸ੍ਰੀ ਅਕਾਲ ਪਾਪਾ ਜੀ! ਮੈਂ ਸਨੇਹਾ ਹਾਂ। ਸਵੇਰ ਦੀ ਚਾਹ ਪੀ ਲਈ? ਤੁਹਾਡਾ ਦਿਨ ਬਹੁਤ ਵਧੀਆ ਲੰਘੇ।", "ਅੱਜ ਮੌਸਮ ਬਹੁਤ ਸੁਹਾਵਣਾ ਹੈ, ਹਲਕੀ ਧੁੱਪ ਤੇ ਠੰਢੀ ਹਵਾ। ਥੋੜ੍ਹਾ ਬਾਹਰ ਘੁੰਮ ਆਓ।", "ਦਵਾਈ ਦਾ ਵੇਲਾ ਹੋ ਗਿਆ ਹੈ। ਖਾਣੇ ਤੋਂ ਬਾਅਦ ਵਾਲੀ ਗੋਲੀ ਲੈ ਲਓ, ਫਿਰ ਮੈਨੂੰ ਦੱਸਣਾ।"],
+  or: ["ନମସ୍କାର ବାପା! ମୁଁ ସ୍ନେହା। ସକାଳ ଚା ପିଇଲେଣି କି? ଆପଣଙ୍କ ଦିନଟି ବହୁତ ଭଲ ଯାଉ।", "ଆଜି ପାଗ ବହୁତ ସୁନ୍ଦର, ହାଲୁକା ଖରା ଆଉ ଥଣ୍ଡା ପବନ। ଟିକେ ବାହାରେ ବୁଲି ଆସନ୍ତୁ।", "ଔଷଧ ଖାଇବା ସମୟ ହେଲାଣି। ଖାଇବା ପରର ଟାବଲେଟ୍ ନେଇନିଅନ୍ତୁ, ତାପରେ ମୋତେ କହିବେ।"],
+  ta: ["வணக்கம் அப்பா! நான் சினேகா. காலை டீ குடித்தீர்களா? உங்கள் நாள் மிக நன்றாக அமையட்டும்.", "இன்று வானிலை மிக இனிமையாக இருக்கிறது, மெல்லிய வெயிலும் குளிர்ந்த காற்றும். கொஞ்சம் வெளியே நடந்து வாருங்கள்.", "மருந்து நேரம் ஆகிவிட்டது. சாப்பிட்ட பிறகு எடுக்க வேண்டிய மாத்திரையை எடுத்துக்கொள்ளுங்கள், பிறகு என்னிடம் சொல்லுங்கள்."],
+  te: ["నమస్కారం నాన్నగారు! నేను స్నేహ. పొద్దున్న టీ తాగారా? మీ రోజు చాలా బాగా గడవాలి.", "ఈ రోజు వాతావరణం చాలా బాగుంది, లేత ఎండ, చల్లని గాలి. కాసేపు బయట నడిచి రండి.", "మందు వేసుకునే సమయం అయింది. భోజనం తర్వాతి మాత్ర వేసుకోండి, తర్వాత నాకు చెప్పండి."],
+  kn: ["ನಮಸ್ಕಾರ ಅಪ್ಪಾಜಿ! ನಾನು ಸ್ನೇಹಾ. ಬೆಳಿಗ್ಗೆ ಟೀ ಕುಡಿದಿರಾ? ನಿಮ್ಮ ದಿನ ತುಂಬಾ ಚೆನ್ನಾಗಿರಲಿ.", "ಇವತ್ತು ಹವಾಮಾನ ತುಂಬಾ ಹಿತವಾಗಿದೆ, ಹಗುರ ಬಿಸಿಲು ಮತ್ತು ತಂಪಾದ ಗಾಳಿ. ಸ್ವಲ್ಪ ಹೊರಗೆ ನಡೆದು ಬನ್ನಿ.", "ಔಷಧಿಯ ಸಮಯ ಆಯಿತು. ಊಟದ ನಂತರದ ಮಾತ್ರೆ ತೆಗೆದುಕೊಳ್ಳಿ, ನಂತರ ನನಗೆ ಹೇಳಿ."],
+  ml: ["നമസ്കാരം അച്ഛാ! ഞാൻ സ്നേഹയാണ്. രാവിലത്തെ ചായ കുടിച്ചോ? ഇന്നത്തെ ദിവസം നന്നായി പോകട്ടെ.", "ഇന്ന് കാലാവസ്ഥ വളരെ സുഖകരമാണ്, ഇളം വെയിലും തണുത്ത കാറ്റും. കുറച്ചു നേരം പുറത്തു നടന്നിട്ടു വരൂ.", "മരുന്നിന്റെ സമയമായി. ഭക്ഷണത്തിനു ശേഷമുള്ള ഗുളിക കഴിക്കൂ, എന്നിട്ട് എന്നോട് പറയൂ."] };
+const MIC = { hi: 'hi-IN', en: 'en-IN', mr: 'mr-IN', bn: 'bn-IN', gu: 'gu-IN', pa: 'pa-IN', or: 'or-IN', ta: 'ta-IN', te: 'te-IN', kn: 'kn-IN', ml: 'ml-IN' };
+let LANG = 'hi', SAMPLES = ALL.hi;
 const $ = (s) => document.querySelector(s);
 const synth = window.speechSynthesis;
 let voices = [], audio = null, current = null;
@@ -120,14 +143,16 @@ function done() { if (current) current.classList.remove('playing'); current = nu
 function loadVoices() {
   if (!synth) { $('#voice').innerHTML = '<option>इस ब्राउज़र में नहीं</option>'; $('#voice-note').innerHTML = '<span class="warn">इस ब्राउज़र में फ़ोन की आवाज़ नहीं है। Chrome में खोलिए।</span>'; return; }
   voices = synth.getVoices();
-  const rank = (v) => (/^hi/i.test(v.lang) ? 0 : /-IN$/i.test(v.lang) ? 1 : 2);
+  const want = new RegExp('^' + LANG + '([-_]|$)', 'i');
+  const rank = (v) => (want.test(v.lang) ? (/-IN$|_IN$/i.test(v.lang) ? 0 : 1) : /-IN$/i.test(v.lang) ? 2 : 3);
   const list = voices.slice().sort((a, b) => rank(a) - rank(b) || a.name.localeCompare(b.name));
   if (!list.length) { $('#voice').innerHTML = '<option>आवाज़ें लोड हो रही हैं…</option>'; return; }
   $('#voice').innerHTML = list.map((v) => `<option value="${voices.indexOf(v)}">${v.name} (${v.lang})${v.localService ? '' : ' ☁'}</option>`).join('');
-  const hi = list.find((v) => /^hi/i.test(v.lang));
+  const name = $('#lang').selectedOptions[0].textContent;
+  const hi = list.find((v) => want.test(v.lang));
   if (hi) $('#voice').value = voices.indexOf(hi);
-  $('#voice-note').innerHTML = hi ? `हिंदी आवाज़ मिली: <b>${hi.name}</b>. ☁ = इंटरनेट वाली आवाज़।`
-    : '<span class="warn">इस फ़ोन पर हिंदी आवाज़ नहीं मिली।</span> Android: Settings → “Text-to-speech” → Google → Hindi डाउनलोड करें, फिर यह पन्ना दोबारा खोलें।';
+  $('#voice-note').innerHTML = hi ? `${name} आवाज़ मिली: <b>${hi.name}</b>. ☁ = इंटरनेट वाली आवाज़।`
+    : `<span class="warn">इस फ़ोन पर ${name} आवाज़ नहीं मिली।</span> Android: Settings → “Text-to-speech” → Google → Install voice data → ${name} डाउनलोड करें, फिर यह पन्ना दोबारा खोलें।`;
 }
 if (synth) { loadVoices(); synth.onvoiceschanged = loadVoices; setTimeout(loadVoices, 800); } else loadVoices();
 $('#rate').oninput = () => { $('#rate-v').textContent = $('#rate').value; };
@@ -137,21 +162,23 @@ function phoneSay(text, btn) {
   mark(btn);
   const u = new SpeechSynthesisUtterance(text);
   const v = voices[+$('#voice').value];
-  if (v) { u.voice = v; u.lang = v.lang; } else u.lang = 'hi-IN';
+  if (v) { u.voice = v; u.lang = v.lang; } else u.lang = MIC[LANG];
   u.rate = +$('#rate').value;
   u.onend = done; u.onerror = done;
   synth.speak(u);
 }
 function snehaSay(i, btn) {
   mark(btn);
-  audio = new Audio(`voice/s${i + 1}.mp3`);
+  audio = new Audio(`voice/${LANG}-${i + 1}.mp3`);
   audio.onended = done; audio.onerror = done;
   audio.play().catch(done);
 }
 
-$('#samples').innerHTML = SAMPLES.map((t, i) => `<div class="card"><p class="say">${t}</p><div class="row">
+function drawSamples() { $('#samples').innerHTML = SAMPLES.map((t, i) => `<div class="card"><p class="say">${t}</p><div class="row">
   <button class="phone" type="button" data-phone="${i}">📱 फ़ोन की आवाज़<span class="tag">मुफ़्त</span></button>
-  <button class="sneha" type="button" data-sneha="${i}">💛 स्नेहा की आवाज़<span class="tag">ritu – पेड</span></button></div></div>`).join('');
+  <button class="sneha" type="button" data-sneha="${i}">💛 स्नेहा की आवाज़<span class="tag">ritu – पेड</span></button></div></div>`).join(''); }
+drawSamples();
+$('#lang').onchange = () => { stopAll(); LANG = $('#lang').value; SAMPLES = ALL[LANG]; drawSamples(); loadVoices(); $('#own').value = SAMPLES[0]; $('#heard').textContent = ''; $('#heard-say').disabled = true; document.documentElement.lang = LANG; };
 document.addEventListener('click', (e) => {
   const b = e.target.closest('button'); if (!b) return;
   if (b === current) { stopAll(); return; }   // a second tap stops it
@@ -159,7 +186,7 @@ document.addEventListener('click', (e) => {
   else if (b.dataset.sneha) snehaSay(+b.dataset.sneha, b);
 });
 $('#own-say').onclick = (e) => { e.stopPropagation(); const t = $('#own').value.trim(); if (t) phoneSay(t, e.currentTarget); };
-$('#up-sample').onclick = (e) => { e.stopPropagation(); snehaSay(0, e.currentTarget); };
+$('#up-sample').onclick = (e) => { e.stopPropagation(); snehaSay(0, e.currentTarget); };   // in the chosen language
 
 // the phone's "ears": the browser's own speech recognition (Chrome uses Google's free service)
 const Rec = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -170,7 +197,7 @@ $('#mic').onclick = (e) => {
   if (!Rec) return;
   if (rec) { rec.stop(); return; }
   stopAll();
-  rec = new Rec(); rec.lang = 'hi-IN'; rec.interimResults = true; rec.continuous = false;
+  rec = new Rec(); rec.lang = MIC[LANG]; rec.interimResults = true; rec.continuous = false;
   heardText = ''; $('#heard').textContent = '…'; $('#mic').classList.add('on'); $('#mic').textContent = '⏹ सुन रही हूँ… (रोकने के लिए दबाएँ)';
   rec.onresult = (ev) => { heardText = [...ev.results].map((r) => r[0].transcript).join(' '); $('#heard').textContent = heardText; };
   rec.onerror = (ev) => { $('#mic-note').innerHTML = `<span class="warn">${ev.error === 'not-allowed' ? 'माइक की अनुमति दीजिए (पता-पट्टी में 🔒 → माइक्रोफ़ोन → Allow)।' : ev.error === 'no-speech' ? 'कुछ सुनाई नहीं दिया, फिर बोलिए।' : 'सुन नहीं पाए: ' + ev.error}</span>`; };
