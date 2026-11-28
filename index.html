@@ -4297,18 +4297,24 @@ function otpSignedIn(r, phone, want) {
   show('signup'); setTimeout(() => { const f = $('#f-family_phone'); if (f) { f.value = phone; f.readOnly = true; f.classList.add('otp-ok'); } }, 300);
 }
 // ---- Continue with Google, through the same Firebase project (sadasneha-85005) ----
-// Google does not allow its sign-in page inside an app's web view, so in the Android app this button is not shown
-// (the mobile OTP works there).
+// Google does not allow its sign-in page inside an app's web view: the Android app (1.8+) uses Android's own account
+// picker instead; older app versions do not show the button (the mobile OTP works there).
+// SadaSneha's own web client (Firebase project sadasneha-85005); public, not a secret
+const GOOGLE_WEB_CLIENT = '649604152539-b4fr5e3vov0bgten7nttrvilh5nbjk6f.apps.googleusercontent.com';
+const nativeGoogle = () => !!(NATIVE && SN && typeof SN.googleSignIn === 'function');
 async function googleToken() {
   const auth = await otpFirebase();
-  const res = await auth.signInWithPopup(new window.firebase.auth.GoogleAuthProvider());
+  // in the Android app (1.8+): Android's own account picker, then the same Firebase sign-in
+  const res = nativeGoogle()
+    ? await auth.signInWithCredential(window.firebase.auth.GoogleAuthProvider.credential((await SN.googleSignIn({ clientId: GOOGLE_WEB_CLIENT })).idToken))
+    : await auth.signInWithPopup(new window.firebase.auth.GoogleAuthProvider());
   const t = await res.user.getIdToken();
   try { await auth.signOut(); } catch (x) {}
   return t;
 }
 function googleButton(el, msgEl, onToken) {
   if (!el) return;
-  if (NATIVE) { el.classList.add('hidden'); return; }
+  if (NATIVE && !nativeGoogle()) { el.classList.add('hidden'); return; }
   el.innerHTML = `<button type="button" class="btn g-fb"><span class="g-mark" aria-hidden="true">G</span> ${T('Google से आगे बढ़ें', 'Continue with Google')}</button>`;
   const b = el.querySelector('button');
   const face = b.innerHTML;
@@ -4318,11 +4324,11 @@ function googleButton(el, msgEl, onToken) {
     try { await onToken(await googleToken()); ulog('step', 'google-ok'); }
     catch (x) {
       const code = String((x && x.code) || (x && x.message) || x);
-      if (!/popup-closed|cancelled-popup/.test(code)) say(/operation-not-allowed|config|unauthorized-domain/.test(code)
+      if (!/popup-closed|cancelled-popup|cancelled/.test(code)) say(/operation-not-allowed|config|unauthorized-domain/.test(code)
         ? T('Google से लॉग इन अभी चालू नहीं है; मोबाइल नंबर या कोड से आगे बढ़ें', 'Google sign-in is not on yet; use your mobile number or code')
         : /popup-blocked/.test(code) ? T('ब्राउज़र ने Google की खिड़की रोक दी; फिर से दबाइए', 'The browser blocked the Google window; tap again')
         : T('Google से लॉग इन नहीं हो पाया, फिर कोशिश कीजिए', 'Google sign-in failed, please try again'));
-      if (!/popup-closed|cancelled-popup/.test(code)) ulog('error', 'google', null, code.slice(0, 120));
+      if (!/popup-closed|cancelled-popup|cancelled/.test(code)) ulog('error', 'google', null, code.slice(0, 120));
     } finally { busy(b, false); b.innerHTML = face; }
   };
 }
@@ -4336,7 +4342,7 @@ async function onGoogleToken(id_token) {
   askPermsThen('signup');
 }
 if (!window.__PREVIEW) googleButton($('#g-btn'), $('#g-msg'), onGoogleToken);
-if (NATIVE) { const t = $('#g-msg') && $('#g-msg').nextElementSibling; if (t) t.classList.add('hidden'); }
+if (NATIVE && !nativeGoogle()) { const t = $('#g-msg') && $('#g-msg').nextElementSibling; if (t) t.classList.add('hidden'); }
 
 // the two sign-in screens
 (function () {
@@ -4345,7 +4351,7 @@ if (NATIVE) { const t = $('#g-msg') && $('#g-msg').nextElementSibling; if (t) t.
   if (famCard) { famCard.querySelector('h2').insertAdjacentHTML('afterend', `<p class="muted">${T('अपने मोबाइल नंबर से – OTP आएगा', 'With your mobile number – you get an OTP')}</p>`); famCard.querySelector('p.muted').after(fam);
     fam.insertAdjacentHTML('afterend', `<p class="otp-or"><span>${T('या कोड से', 'or with your code')}</span></p>`);
     otpBox(fam, { id: 'otpf', done: (r, p) => otpSignedIn(r, p, '') });
-    if (!NATIVE) { const g = document.createElement('div'); g.className = 'g-btn'; const gm = document.createElement('p'); gm.className = 'err';
+    if (!NATIVE || nativeGoogle()) { const g = document.createElement('div'); g.className = 'g-btn'; const gm = document.createElement('p'); gm.className = 'err';
       fam.before(g, gm); googleButton(g, gm, onGoogleToken); g.insertAdjacentHTML('afterend', `<p class="otp-or"><span>${T('या मोबाइल नंबर से', 'or with your mobile number')}</span></p>`); } }
   const eld = document.createElement('div'); eld.id = 'otp-elder'; eld.className = 'otp-box';
   const eCard = $('#ecode-in') && $('#ecode-in').closest('.card');
