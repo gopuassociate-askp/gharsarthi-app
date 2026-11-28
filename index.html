@@ -471,6 +471,47 @@
 /* the website's one button: start or sign in */
 .door[data-door="start"] { background: linear-gradient(135deg, #c2410c, #ea580c); color: #fff; border-color: transparent; }
 .door[data-door="start"] small, .door[data-door="start"] .ico { color: #fff; opacity: .95; }
+/* the free home and Sakhi */
+.sakhi-img, .sakhi-mono { border-radius: 50%; object-fit: cover; }
+.sakhi-mono, .talk-sakhi.mono { display: inline-flex; align-items: center; justify-content: center; width: 76px; height: 76px; background: #ccfbf1; color: #0f766e; font-size: 38px; font-weight: 800; border: 3px solid #14b8a6; }
+.free-head .sakhi-img { border: 3px solid #14b8a6; }
+.talk-sakhi { width: 100%; max-width: 320px; aspect-ratio: 1; border-radius: 50%; object-fit: cover; border: 6px solid #14b8a6; display: block; margin: 0 auto; transition: box-shadow .2s; }
+.talk-sakhi.mono { width: 260px; height: 260px; font-size: 120px; }
+.talk-sakhi.speaking { box-shadow: 0 0 0 10px rgba(20, 184, 166, .25), 0 0 0 20px rgba(20, 184, 166, .12); }
+.meet-sneha { border: 2px solid #f59e0b; background: linear-gradient(160deg, #fff7ed, #fffbeb); }
+.meet-sneha .ms-top { display: flex; gap: 12px; align-items: flex-start; }
+.meet-sneha .ms-top img { width: 64px; height: 64px; border-radius: 50%; object-fit: cover; border: 3px solid #f59e0b; flex: none; }
+.meet-sneha h2 { margin: 0 0 4px; }
+.meet-sneha .btn { width: 100%; margin-top: 10px; }
+.f-settings summary { min-height: 48px; display: flex; align-items: center; font-weight: 700; cursor: pointer; }
+.f-settings input, .f-settings select { width: 100%; }
+.f-q { font-weight: 700; margin: 14px 0 6px; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { min-height: 44px; padding: 8px 14px; border-radius: 999px; border: 1.5px solid var(--line); background: var(--card); color: inherit; font: inherit; font-size: 16px; cursor: pointer; }
+.chip.on { background: #0f766e; border-color: #0f766e; color: #fff; }
+.voice-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 6px 0; }
+.tour { position: fixed; inset: 0; z-index: 60; background: rgba(0, 0, 0, .45); display: flex; align-items: flex-end; justify-content: center; padding: 16px; }
+.tour.hidden { display: none; }
+.tour-card { background: var(--card); color: inherit; border-radius: 24px; padding: 22px 18px; width: 100%; max-width: 480px; max-height: 90vh; overflow: auto; text-align: center; }
+.tour-ic { font-size: 54px; line-height: 1; margin-bottom: 8px; }
+.tour-ic img { width: 110px; height: 110px; border-radius: 50%; object-fit: cover; border: 4px solid #14b8a6; }
+.tour-card .chips { justify-content: center; margin: 12px 0; }
+.tour-dots { display: flex; gap: 6px; justify-content: center; margin: 12px 0; }
+.tour-dots span { width: 8px; height: 8px; border-radius: 50%; background: var(--line); }
+.tour-dots span.on { background: #0f766e; width: 22px; border-radius: 4px; }
+.tour-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.tour-btns .btn.hidden + .btn, .tour-btns .btn:only-child { grid-column: 1 / -1; }
+
+/* starting Sneha: for whom */
+.buy-card .ms-top { display: flex; gap: 12px; align-items: center; margin-bottom: 10px; }
+.buy-card .ms-top img { width: 64px; height: 64px; border-radius: 50%; object-fit: cover; border: 3px solid #f59e0b; }
+.buy-card h2 { margin: 0; }
+.buy-pick { display: block; width: 100%; text-align: left; border: 2px solid var(--line); border-radius: 18px; background: var(--card); color: inherit; font: inherit; padding: 16px; margin: 10px 0; cursor: pointer; }
+.buy-pick b { display: block; font-size: 19px; margin-bottom: 6px; }
+.buy-pick small { display: block; font-size: 15px; line-height: 1.5; color: var(--muted, #6b5548); }
+.buy-pick:hover, .buy-pick:focus-visible { border-color: #ea580c; }
+div.talk-sakhi.mono { display: flex; align-items: center; justify-content: center; width: 260px; height: 260px; margin: 24px auto; border-radius: 50%; background: #ccfbf1; color: #0f766e; font-size: 120px; font-weight: 800; border: 6px solid #14b8a6; }
+div.talk-sakhi.mono.hidden { display: none; }
 </style>
 </head>
 <body>
@@ -508,6 +549,77 @@
         <p id="st-code-err" class="err" aria-live="polite"></p>
       </details>
       <p class="muted small st-legal"><span data-en="By continuing you accept the">आगे बढ़कर आप</span> <a href="terms.html"><span data-en="terms">शर्तें</span></a> <span data-en="and the">और</span> <a href="privacy.html"><span data-en="privacy policy">गोपनीयता नीति</span></a><span data-en="."> मानते हैं।</span></p>
+    </div>
+  </section>
+  <!-- Everyone's free home (signed in, no family plan): Sakhi, songs, radio, TV, yoga and games; Sneha for the family -->
+  <section id="v-free" class="view hidden">
+    <div class="card sn-head free-head">
+      <img src="sakhi.png" alt="सखी / Sakhi" width="76" height="76" class="sn-mini sakhi-img" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'sakhi-mono',textContent:'स'}))">
+      <div><h2 style="margin:4px 0"><span data-en="Namaste">नमस्ते</span><span id="f-name"></span> 🙏</h2>
+      <p style="margin:0"><span data-en="I'm Sakhi, Sneha's friend – with you every day">मैं सखी, स्नेहा की सहेली – हर दिन आपके साथ</span></p></div>
+    </div>
+    <p class="muted" id="f-date" style="margin:0 0 10px;text-align:center"></p>
+    <div class="tiles" id="f-tiles">
+      <button class="tile big" data-free="talk" type="button"><span class="ic"><svg class="ico" aria-hidden="true"><use href="#i-mic"/></svg></span><span data-en="Talk to Sakhi">सखी से बात</span><small data-en="Chat, riddles, antakshari, anything">गपशप, पहेली, अंताक्षरी, कुछ भी</small></button>
+      <button class="tile" data-free="radio" data-like="old_songs bollywood bhajan ghazal english_music" type="button"><span class="ic"><svg class="ico" aria-hidden="true"><use href="#i-music"/></svg></span><span data-en="Songs & radio">गाने और रेडियो</span><small data-en="India and the world">भारत और दुनिया</small></button>
+      <button class="tile" data-free="tv" data-like="news cricket movies comedy" type="button"><span class="ic"><svg class="ico" aria-hidden="true"><use href="#i-tv"/></svg></span><span data-en="TV">टीवी</span><small data-en="News, cricket, films">ख़बरें, क्रिकेट, फ़िल्में</small></button>
+      <button class="tile" data-free="fun" data-like="yoga spiritual games learning" type="button"><span class="ic"><svg class="ico" aria-hidden="true"><use href="#i-gamepad-2"/></svg></span><span data-en="Yoga, satsang & games">योग, सत्संग और खेल</span><small data-en="Join live, play">लाइव जुड़ें, खेलें</small></button>
+      <button class="tile sos" id="f-help" type="button"><svg class="ico" aria-hidden="true"><use href="#i-siren"/></svg> <span data-en="Help – call 108">मदद – 108 पर फ़ोन</span></button>
+    </div>
+
+    <!-- the second purpose of the app, gently: Sneha for their parents -->
+    <div class="card meet-sneha">
+      <div class="ms-top"><img src="sneha.jpg" alt="स्नेहा / Sneha" width="64" height="64">
+        <div><h2><span data-en="Meet Sneha">स्नेहा से मिलिए</span></h2>
+        <p><span data-en="Far from your parents? Sneha talks with them lovingly every day, reminds them of medicines, and tells you at once if something seems wrong.">माता-पिता से दूर हैं? स्नेहा रोज़ उनसे प्यार से बात करती है, दवाई की याद दिलाती है, और कुछ गड़बड़ लगे तो तुरंत आपको बताती है।</span></p></div></div>
+      <button class="btn secondary" id="f-sneha-voice" type="button">▶ <span data-en="Hear Sneha's own voice">स्नेहा की अपनी आवाज़ सुनिए</span></button>
+      <button class="btn primary" id="f-trial" type="button"><span data-en="Try it free for 7 days">7 दिन मुफ़्त आज़माइए</span></button>
+      <p class="muted small"><span data-en="For your parents, or for yourself. No payment for 7 days.">माता-पिता के लिए, या अपने लिए। 7 दिन कोई पैसा नहीं।</span></p>
+    </div>
+
+    <details class="card f-settings">
+      <summary>⚙ <span data-en="My settings">मेरी सेटिंग</span></summary>
+      <label for="f-myname"><span data-en="My name">मेरा नाम</span></label>
+      <input id="f-myname" maxlength="40" autocomplete="given-name">
+      <label for="f-lang"><span data-en="Sakhi's language">सखी की भाषा</span></label>
+      <select id="f-lang">
+        <option value="hi">हिंदी</option><option value="en">English</option><option value="mr">मराठी</option><option value="bn">বাংলা</option>
+        <option value="gu">ગુજરાતી</option><option value="pa">ਪੰਜਾਬੀ</option><option value="or">ଓଡ଼ିଆ</option><option value="ta">தமிழ்</option>
+        <option value="te">తెలుగు</option><option value="kn">ಕನ್ನಡ</option><option value="ml">മലയാളം</option></select>
+      <p class="f-q"><span data-en="What do you enjoy?">आपको क्या पसंद है?</span></p>
+      <div class="chips" id="f-likes"></div>
+      <button class="btn secondary" id="f-voice" type="button"><span data-en="Choose Sakhi's voice">सखी की आवाज़ चुनें</span></button>
+      <div id="f-voices" class="hidden"></div>
+      <button class="btn primary" id="f-save" type="button"><span data-en="Save">सहेजें</span></button>
+      <p id="f-msg" class="muted" aria-live="polite"></p>
+      <button class="linkbtn" id="f-out" type="button"><span data-en="Sign out on this phone">इस फ़ोन पर लॉग-आउट</span></button>
+    </details>
+
+    <!-- once, on the first visit: what the app is, then what they enjoy -->
+    <div id="f-tour" class="tour hidden" role="dialog" aria-modal="true" aria-label="सदा स्नेहा">
+      <div class="tour-card">
+        <div class="tour-pages"></div>
+        <div class="tour-dots"></div>
+        <div class="tour-btns"><button class="btn secondary" id="tour-skip" type="button"><span data-en="Skip">छोड़ें</span></button>
+          <button class="btn primary" id="tour-next" type="button"><span data-en="Next">आगे</span></button></div>
+      </div>
+    </div>
+  </section>
+  <!-- Starting Sneha (7 days free): for my parents, or for myself -->
+  <section id="v-buy" class="view hidden">
+    <div class="card buy-card">
+      <div class="ms-top"><img src="sneha.jpg" alt="स्नेहा / Sneha" width="64" height="64">
+        <div><h2><span data-en="Sneha – 7 days free">स्नेहा – 7 दिन मुफ़्त</span></h2>
+        <p class="muted"><span data-en="Who is it for?">किसके लिए?</span></p></div></div>
+      <button class="buy-pick" type="button" data-buy="parents">
+        <b>👪 <span data-en="For my parents / an elder at home">मेरे माता-पिता / घर के बुज़ुर्ग के लिए</span></b>
+        <small><span data-en="You sign up here. Then install the app on their phone and enter the family code: their phone becomes simple, with big buttons, and Sneha talks with them every day. You see how they are, here.">आप यहाँ पंजीकरण करें। फिर उनके फ़ोन में ऐप डालकर परिवार का कोड डालें: उनका फ़ोन आसान, बड़े बटन वाला बन जाता है और स्नेहा रोज़ उनसे बात करती है। उनका हाल आप यहाँ देखते हैं।</span></small>
+      </button>
+      <button class="buy-pick" type="button" data-buy="self">
+        <b>🙏 <span data-en="For myself">मेरे अपने लिए</span></b>
+        <small><span data-en="This phone becomes simple, with big buttons, and Sneha talks with you every day. Your children join free by a link and get news if anything is wrong.">यही फ़ोन आसान, बड़े बटन वाला बन जाता है और स्नेहा रोज़ आपसे बात करती है। आपके बच्चे लिंक से मुफ़्त जुड़ते हैं और कुछ गड़बड़ हो तो उन्हें ख़बर मिलती है।</span></small>
+      </button>
+      <p class="muted small"><span data-en="No payment for 7 days. Sakhi and all the free things stay with you either way.">7 दिन कोई पैसा नहीं। सखी और सारी मुफ़्त चीज़ें हर हाल में आपके साथ रहती हैं।</span></p>
     </div>
   </section>
   <!-- Welcome: no code saved yet -->
@@ -1545,7 +1657,7 @@ const store = {
 // the family's page in four tabs: आज (today), बात (talk), परिवार (family), खाता (account)
 let HOMETAB = 'today';
 const NAV = { skip: false };
-const ROOTS = ['elder', 'home', 'care', 'welcome', 'role', 'start'];
+const ROOTS = ['elder', 'home', 'care', 'welcome', 'role', 'start', 'free'];
 function toast(text, ms) { const t = document.createElement('div'); t.className = 'toast'; t.textContent = text; document.body.append(t); setTimeout(() => t.remove(), ms || 2200); }
 // the back key goes one screen back; on the first screen it asks for a second press instead of closing the app
 window.addEventListener('popstate', (e) => {
@@ -1561,7 +1673,7 @@ window.addEventListener('popstate', (e) => {
   }
   if (st.view) { NAV.skip = true; try { show(st.view); } finally { NAV.skip = false; } }
 });
-function homeView() { return store.get('gs_role') === 'elder' ? 'elder' : store.get('gs_code') ? 'home' : 'care'; }
+function homeView() { return store.get('gs_role') === 'elder' && store.get('gs_code') ? 'elder' : store.get('gs_code') ? 'home' : store.get('gs_member') ? 'care' : store.get('gs_user') ? 'free' : (NATIVE ? 'start' : 'role'); }
 document.addEventListener('click', (e) => { if (e.target.closest('[data-goback]')) { e.preventDefault(); history.back(); } else if (e.target.closest('[data-gohome]')) { e.preventDefault(); show(homeView()); } });
 function homeTab(t) {
   HOMETAB = t;
@@ -1571,7 +1683,7 @@ function homeTab(t) {
 function show(view) {
   ulog('view', view);
   if (FS) fsClose(true);
-  if (!NAV.skip) { try { const cur = history.state && history.state.view; if (!cur) { history.replaceState({ view: ROOTS.includes(view) ? view : homeView(), guard: true }, ''); history.pushState({ view }, ''); } else if (cur !== view && ['elder', 'home', 'care'].includes(view) && ['welcome', 'role', 'start', 'login', 'elogin', 'signup', 'done', 'join'].includes(cur)) history.replaceState({ view }, ''); else if (cur !== view) history.pushState({ view }, ''); } catch (e) {} }
+  if (!NAV.skip) { try { const cur = history.state && history.state.view; if (!cur) { history.replaceState({ view: ROOTS.includes(view) ? view : homeView(), guard: true }, ''); history.pushState({ view }, ''); } else if (cur !== view && ['elder', 'home', 'care', 'free'].includes(view) && ['welcome', 'role', 'start', 'login', 'elogin', 'signup', 'done', 'join'].includes(cur)) history.replaceState({ view }, ''); else if (cur !== view) history.pushState({ view }, ''); } catch (e) {} }
   document.querySelectorAll('.view').forEach((v) => v.classList.add('hidden'));
   $('#v-' + view).classList.remove('hidden');
   const tabbed = ['home', 'pay', 'meds', 'sneha', 'help'].includes(view);
@@ -3356,7 +3468,7 @@ function tvOpen() {
   tvCat(TV_CATS.some((c) => c[0] === last) ? last : 'news');
 }
 function tvStop() { const p = $('#tv-player'); if (p) { p.innerHTML = ''; p.classList.add('hidden'); } }
-document.querySelectorAll('[data-back]').forEach((b) => b.addEventListener('click', () => show(store.get('gs_role') === 'elder' ? 'elder' : store.get('gs_code') ? 'home' : 'care')));
+document.querySelectorAll('[data-back]').forEach((b) => b.addEventListener('click', () => show(homeView())));
 
 // ---- Two doors (elder / family), the elder's simple home, and the family circle ----
 API.circle = API_BASE + '/app-circle';
@@ -3753,9 +3865,9 @@ function talkSpeak(b64, mime, text) {
     let finished = false; const done = () => { if (finished) return; finished = true; TALK.speaking = false; resolve(); };
     setTimeout(done, 4000 + String(text || '').length * 110);
     if (!b64) {
-      try { const u = new SpeechSynthesisUtterance(text); u.lang = 'hi-IN'; TALK.speaking = true;
+      try { TALK.speaking = true; $('#talk-mic').innerHTML = ico('square', 'big');
         const fake = setInterval(() => { TALK.level = 0.3 + Math.random() * 0.6; }, 90);
-        u.onend = () => { clearInterval(fake); TALK.speaking = false; done(); }; speechSynthesis.speak(u); } catch (e) { done(); }
+        phoneSpeak(text, TALK.lang).then(() => { clearInterval(fake); TALK.speaking = false; $('#talk-mic').innerHTML = ico('mic', 'big'); done(); }); } catch (e) { done(); }
       return;
     }
     const a = new Audio('data:' + (mime || 'audio/mpeg') + ';base64,' + b64); TALK.audio = a;
@@ -3877,6 +3989,7 @@ async function talkListen(opt) {
   talkAudioCtx();   // other sound pauses by itself while we talk (MEDIA below), and comes back after
   if (TALK.rec && TALK.rec.state === 'recording') { TALK.tapStop = true; TALK.rec.stop(); return; }   // second tap: done speaking
   TALK.tapStop = false;
+  if (sakhiNow() && nativeEars() && await talkListenNative(auto)) return;
   if (PHONE_SR && !TALK.srOff) {
     try { if (store.get('gs_media') !== 'granted') { const t = await navigator.mediaDevices.getUserMedia({ audio: true }); t.getTracks().forEach((x) => x.stop()); store.set('gs_media', 'granted'); } } catch (e) {}
     if (await talkListenPhone(auto)) return;
@@ -3913,6 +4026,7 @@ async function talkListen(opt) {
   talkState('सुन रही हूँ… बोलिए 👂', 'Listening… speak 👂');
 }
 function talkInterrupt() {
+  try { phoneHush(); } catch (e) {}
   try { if (TALK.audio) { TALK.audio.pause(); TALK.audio.currentTime = 0; } } catch (e) {}
   try { speechSynthesis.cancel(); } catch (e) {}
   TALK.speaking = false; TALK.cut = true;
@@ -4019,23 +4133,25 @@ setInterval(async () => {
   TALK.whoBusy = true; try { const w = await faceWho(); if (w) TALK.who = { at: Date.now(), w }; } finally { TALK.whoBusy = false; }
 }, 3000);
 async function talkSend(blob, typed) {
-  TALK.busy = true; $('#talk-mic').disabled = true; talkState('स्नेहा सोच रही है…', 'Sneha is thinking…');
+  TALK.busy = true; $('#talk-mic').disabled = true; talkState(`${talkWho()} सोच रही है…`, `${talkWho()} is thinking…`);
   TALK.replyIn = false;
   const hmm = talkHmm();
   const whoNow = TALK.cam && TALK.who && Date.now() - TALK.who.at < 8000 ? TALK.who.w : null;
   const b64 = blob ? await new Promise((ok) => { const r = new FileReader(); r.onload = () => ok(String(r.result).split(',')[1]); r.readAsDataURL(blob); }) : '';
   try {
     const j = await (await fetch(API.talk, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({ wx: TALK_WX || undefined, loc: TALK_LOC || undefined, wx_here: TALK_LOC && TALK_LOC.at === 'other_city' ? TALK_WX_HERE || undefined : undefined, likes: likesForSneha(), intro: store.get('gs_intro') !== 'off', code: store.get('gs_code'), audio: b64, mime: blob ? blob.type : '', text: typed || undefined, history: TALK.history, mood: TALK.mood, cam: !!TALK.cam, cam_first: !!TALK.cam && !TALK.camSent, image: talkStill(), photo_ok: store.get('gs_photo_ok') === 'yes', who: whoNow }) })).json();
+      body: JSON.stringify({ wx: TALK_WX || undefined, loc: TALK_LOC || undefined, wx_here: TALK_LOC && TALK_LOC.at === 'other_city' ? TALK_WX_HERE || undefined : undefined, likes: likesForSneha(), intro: store.get('gs_intro') !== 'off', code: store.get('gs_code') || undefined, key: store.get('gs_code') ? undefined : (store.get('gs_user') || undefined), voice: isFreeUser() ? 'phone' : undefined, lang: isFreeUser() ? (store.get('gs_ulang') || undefined) : undefined, audio: b64, mime: blob ? blob.type : '', text: typed || undefined, history: TALK.history, mood: TALK.mood, cam: !!TALK.cam, cam_first: !!TALK.cam && !TALK.camSent, image: talkStill(), photo_ok: store.get('gs_photo_ok') === 'yes', who: whoNow }) })).json();
     if (TALK.cam) TALK.camSent = true;
     if (!j.ok) {
       talkState(j.why === 'limit' ? 'आज बहुत बात हो गई, थोड़ी देर बाद फिर बात करेंगे 💛' : 'माफ़ कीजिए, अभी बात नहीं हो पाई। फिर कोशिश करें।',
         j.why === 'limit' ? 'We have talked a lot; let us talk again in a while 💛' : 'Sorry, that did not work. Please try again.');
       return;
     }
+    // who answered: Sakhi (free, or after Sneha's share of the day) or Sneha
+    TALK.persona = j.handover ? 'sneha' : (j.persona || 'sneha'); TALK.personaDay = istDay(new Date()); sakhiFace(TALK.persona === 'sakhi');
     if (j.heard) { talkLog('u', j.heard); TALK.history.push({ r: 'u', t: j.heard }); }
     talkLog('s' + (j.urgent ? ' urgent' : ''), j.reply); TALK.history.push({ r: 's', t: j.reply + (j.play ? ` (गाना चलाया: ${j.play})` : '') + (j.seen ? ` [[देखा: ${j.seen}]]` : '') }); TALK.history = TALK.history.slice(-10);
-    talkState(j.urgent ? 'घर वालों को ख़बर दी जा रही है 🚨' : 'स्नेहा बोल रही है… (रोकने के लिए ⏹ दबाएँ)', j.urgent ? 'The family is being told now 🚨' : 'Sneha is speaking… (tap ⏹ to stop)');
+    talkState(j.urgent ? (isFreeUser() ? '108 पर फ़ोन लगाइए 🚨' : 'घर वालों को ख़बर दी जा रही है 🚨') : `${talkWho()} बोल रही है… (रोकने के लिए ⏹ दबाएँ)`, j.urgent ? (isFreeUser() ? 'Call 108 now 🚨' : 'The family is being told now 🚨') : `${talkWho()} is speaking… (tap ⏹ to stop)`);
     TALK.replyIn = true;
     await hmm;
     TALK.busy = false; $('#talk-mic').disabled = false; TALK.cut = false;
@@ -4043,6 +4159,8 @@ async function talkSend(blob, typed) {
     if (j.play) { $('#song-box').classList.remove('hidden'); $('#song-title').textContent = '🎵 ' + j.play; $('#song-notes').classList.remove('hidden'); $('#face-notes').classList.remove('hidden'); }
     // her voice comes in up to two pieces, made at the same time on the server: play them one after another
     await talkPlayReply(j);
+    // Sneha's share of the day is over: she said goodbye in her own voice; now Sakhi says hello in the phone's
+    if (j.handover && !TALK.cut) { TALK.persona = 'sakhi'; sakhiFace(true); talkLog('s', SAKHI_HELLO); TALK.history.push({ r: 's', t: SAKHI_HELLO }); await talkSpeak('', '', SAKHI_HELLO); }
     if (!(TALK.rec && TALK.rec.state === 'recording')) talkState('बटन दबाकर बोलिए', 'Press the button and speak');
     if (j.open && !TALK.cut) cmdOpen(j.open);
     else if (j.play && !TALK.cut) { SONG.facts = j.song_facts || null; songPlay(j.play, j.play_id); }
@@ -4056,7 +4174,7 @@ $('#tb-mic').addEventListener('click', () => talkListen());
 $('#tb-stop').addEventListener('click', () => { talkBargeStop(); talkInterrupt(); try { if (TALK.rec && TALK.rec.state === 'recording') { TALK.tapStop = true; TALK.rec.stop(); } } catch (e) {} songStop(); talkState('रुक गई। बटन दबाकर बोलिए', 'Stopped. Press the button and speak'); });
 $('#tb-cam').addEventListener('click', () => $('#talk-cam').click());
 $('#tb-song').addEventListener('click', () => { songStop(); talkState('बटन दबाकर बोलिए', 'Press the button and speak'); window.scrollTo({ top: 0, behavior: 'smooth' }); });
-$('#tb-end').addEventListener('click', () => show(store.get('gs_role') === 'elder' ? 'elder' : 'home'));
+$('#tb-end').addEventListener('click', () => show(homeView()));
 function talkPhotoShow() {
   const on = store.get('gs_photo_ok') === 'yes';
   $('#talk-photo').textContent = on ? T('ज़रूरत पर तस्वीर घर वालों को: हाँ (बदलें)', 'Emergency photo to family: on (change)') : T('ज़रूरत पर तस्वीर घर वालों को: नहीं (बदलें)', 'Emergency photo to family: off (change)');
@@ -4259,6 +4377,7 @@ if (params.get('wake') === '1' && store.get('gs_code')) {
 show(params.get('ack') ? 'seen' : params.get('join') ? 'join' : params.get('health') && (store.get('gs_code') || store.get('gs_member')) ? 'health' : params.get('trip') && (store.get('gs_code') || store.get('gs_member')) ? 'trip' : params.get('chat') && (store.get('gs_code') || store.get('gs_member')) ? 'chat'
   : store.get('gs_code') ? (location.hash === '#talk' || params.get('talk') === '1' ? 'talk' : store.get('gs_role') === 'elder' ? 'elder' : 'home')
   : store.get('gs_member') ? 'care'
+  : store.get('gs_user') ? 'free'
   : params.get('view') === 'signup' ? 'signup' : NATIVE ? 'start' : 'role');
 // ---- Sign in with the mobile number: Google (Firebase) sends the OTP by SMS; our server checks Google's proof
 // and finds the family whose own or elder's mobile it is. New numbers go on to sign up, already verified.
@@ -4337,6 +4456,7 @@ function otpBox(box, opts) {
 }
 // after a verified number: open that family, choose if there are several, or go on to sign up
 function otpSignedIn(r, phone, want) {
+  keepUser(r);
   const m = (r.matches || []).filter((x) => !want || x.role === want);
   const open = (x) => { store.set('gs_code', x.code); store.set('gs_role', x.role); try { localStorage.removeItem('gs_last'); } catch (e) {} toast(T('स्वागत है! 🙏', 'Welcome! 🙏')); show(x.role === 'elder' ? 'elder' : 'home'); };
   if (m.length === 1) return open(m[0]);
@@ -4347,8 +4467,8 @@ function otpSignedIn(r, phone, want) {
     return;
   }
   if (want === 'elder') { toast(T('यह नंबर अभी किसी परिवार में नहीं जुड़ा। घर वालों से लिंक माँगिए।', 'This number is not in a family yet. Ask your family for the link.'), 5000); return; }
-  // a new family: sign-up, with this number filled in and already checked
-  show('signup'); setTimeout(() => { const f = $('#f-family_phone'); if (f) { f.value = phone; f.readOnly = true; f.classList.add('otp-ok'); } }, 300);
+  // someone new: their free home (Sakhi, songs, radio, yoga…); a family plan starts from "स्नेहा से मिलिए" with the number already checked
+  store.set('gs_role', 'free'); ulog('step', 'free-signup', null, 'otp'); show('free');
 }
 // ---- Continue with Google, through the same Firebase project (sadasneha-85005) ----
 // Google does not allow its sign-in page inside an app's web view: the Android app (1.8+) uses Android's own account
@@ -4390,10 +4510,10 @@ function googleButton(el, msgEl, onToken) {
 async function onGoogleToken(id_token) {
   const r = await (await fetch(API.otp, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ id_token }) })).json();
   if (!r.ok || !r.email) throw new Error(r.why || 'server');
-  store.set('gs_g_email', r.email); store.set('gs_g_name', r.name || '');
+  store.set('gs_g_email', r.email); store.set('gs_g_name', r.name || ''); keepUser(r);
   if (r.matches && r.matches.length) { store.set('gs_code', r.matches[0].code); store.set('gs_role', 'family'); try { localStorage.removeItem('gs_last'); } catch (e) {} return askPermsThen('home'); }
   try { const m = await circleCall({ action: 'login', cred: id_token }); if (m.ok) { store.set('gs_member', m.key); return show('care'); } } catch (e) {}
-  askPermsThen('signup');
+  store.set('gs_role', 'free'); ulog('step', 'free-signup', null, 'google'); show('free');
 }
 
 // sign-up: the family's own mobile must be verified by OTP before the form is sent
@@ -4474,6 +4594,208 @@ gvStart = function (list, video) { if (isLocked('meeting')) { toast(T('परि
 })();
 // where "sign in" leads: the app goes straight to it; the website shows what SadaSneha is first
 const entryView = () => (NATIVE ? 'start' : 'role');
+// ---- Everyone's free home (v-free) and Sakhi, Sneha's friend ----
+// Anyone who signs in (Google or mobile OTP) without a family plan gets this home: Sakhi to talk with, songs, radio, TV,
+// yoga, satsang and games. Sakhi's ears and voice are the phone's own (free); her brain is on our server (safety/n8n:
+// talk.handler.js, persona 'sakhi'). Paying families keep Sneha; after her share of the day Sneha hands over to Sakhi.
+API.me = API_BASE + '/app-me';
+const meCall = async (body) => (await fetch(API.me, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ key: store.get('gs_user'), ...body }) })).json();
+const isFreeUser = () => !store.get('gs_code') && !store.get('gs_member') && !!store.get('gs_user');
+const ULANG = { hi: 'hi-IN', en: 'en-IN', mr: 'mr-IN', bn: 'bn-IN', gu: 'gu-IN', pa: 'pa-IN', or: 'or-IN', ta: 'ta-IN', te: 'te-IN', kn: 'kn-IN', ml: 'ml-IN' };
+const SAKHI_HELLO = 'नमस्ते! मैं सखी हूँ, स्नेहा की सहेली। स्नेहा ने बताया आप बहुत अच्छी बातें करते हैं। चलिए, आगे बात करते हैं!';
+
+// ---- the phone's own voice: one fixed voice (a woman's, chosen once), in the user's language ----
+// In the Android app (1.9+) Android speaks (SnehaNative.ttsSpeak); in a browser, the browser's speechSynthesis.
+const PV = { voices: [] };
+function pvLoad() { try { PV.voices = window.speechSynthesis ? speechSynthesis.getVoices() : []; } catch (e) { PV.voices = []; } return PV.voices; }
+if (window.speechSynthesis) { pvLoad(); try { speechSynthesis.onvoiceschanged = pvLoad; } catch (e) {} }
+const FEMALE_HINT = /female|woman|lekha|veena|kalpana|heera|swara|aditi|raveena|priya|neerja|google हिन्दी|google hindi/i;
+function pvPick(lang) {
+  const want = String(lang || 'hi-IN').slice(0, 2).toLowerCase();
+  const list = pvLoad().filter((v) => String(v.lang).toLowerCase().replace('_', '-').startsWith(want));
+  const saved = store.get('gs_pvoice');
+  return list.find((v) => v.name === saved) || list.find((v) => FEMALE_HINT.test(v.name)) || list[0] || null;
+}
+function phoneSpeak(text, lang) {
+  lang = lang || TALK.lang || 'hi-IN';
+  if (NATIVE && SN && typeof SN.ttsSpeak === 'function') return SN.ttsSpeak({ text: String(text || ''), lang, voice: store.get('gs_pvoice') || '' }).catch(() => {});
+  return new Promise((done) => {
+    try {
+      speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(String(text || '')); const v = pvPick(lang);
+      if (v) { u.voice = v; u.lang = v.lang; } else u.lang = lang;
+      u.rate = 0.95; u.onend = done; u.onerror = done; speechSynthesis.speak(u);
+    } catch (e) { done(); }
+  });
+}
+function phoneHush() { try { if (NATIVE && SN && SN.ttsStop) SN.ttsStop(); else speechSynthesis.cancel(); } catch (e) {} }
+// the phone's own ears in the Android app (1.9+): Android's speech recognition, offline where the phone has it
+const nativeEars = () => !!(NATIVE && SN && typeof SN.sttListen === 'function');
+
+// ---- Sakhi on the talk screen: her picture instead of Sneha's moving face ----
+const sakhiNow = () => TALK.persona === 'sakhi' || isFreeUser();
+const talkWho = () => (sakhiNow() ? T('सखी', 'Sakhi') : T('स्नेहा', 'Sneha'));
+function sakhiFace(on) {
+  const box = $('#v-talk .talk-face'); if (!box) return;
+  let img = $('#talk-sakhi');
+  if (!img) { img = document.createElement('img'); img.id = 'talk-sakhi'; img.className = 'talk-sakhi hidden'; img.alt = 'सखी / Sakhi'; img.src = 'sakhi.png';
+    // until her picture is in the app: a calm circle with her initial
+    img.onerror = () => { const m = document.createElement('div'); m.id = 'talk-sakhi'; m.className = img.className + ' mono'; m.textContent = 'स'; m.setAttribute('aria-label', 'सखी / Sakhi'); img.replaceWith(m); };
+    box.append(img); }
+  img.classList.toggle('hidden', !on); $('#talk-canvas').classList.toggle('hidden', !!on);
+  const tag = box.querySelector('.talk-ai'); if (tag) tag.textContent = on ? T('सखी – स्नेहा की सहेली (AI)', 'Sakhi – Sneha\'s friend (AI)') : T('स्नेहा – आपकी AI सहायिका', 'Sneha – your AI companion');
+}
+setInterval(() => { const img = $('#talk-sakhi'); if (img && !img.classList.contains('hidden')) img.classList.toggle('speaking', !!TALK.speaking); }, 250);
+const talkOpenBefore = talkOpen;
+talkOpen = async function () {
+  if (isFreeUser()) { TALK.persona = 'sakhi'; TALK.lang = ULANG[store.get('gs_ulang') || 'hi'] || 'hi-IN'; }
+  else if (TALK.personaDay !== istDay(new Date())) { TALK.persona = 'sneha'; TALK.personaDay = istDay(new Date()); }
+  sakhiFace(sakhiNow());
+  await talkOpenBefore();
+  if (sakhiNow()) talkState('बटन दबाकर सखी से बोलिए', 'Press the button and talk to Sakhi');
+};
+// native ears: one sentence, then the same send as everywhere
+async function talkListenNative(auto) {
+  try {
+    $('#talk-mic').classList.add('rec'); talkState('सुन रही हूँ… बोलिए 👂', 'Listening… speak 👂');
+    const r = await SN.sttListen({ lang: TALK.lang || 'hi-IN' });
+    $('#talk-mic').classList.remove('rec');
+    const text = String((r && r.text) || '').trim();
+    if (text) { talkSend(null, text); return true; }
+    if (auto >= 0 && auto < 2 && TALK.open) { talkNudge(auto + 1); return true; }
+    talkState('कुछ सुनाई नहीं दिया, फिर से दबाकर बोलिए', 'I heard nothing; press and speak again'); return true;
+  } catch (e) { $('#talk-mic').classList.remove('rec'); return false; }
+}
+
+// ---- the free home ----
+const LIKES = [['bollywood', 'नए फ़िल्मी गाने', 'New film songs'], ['old_songs', 'पुराने गाने', 'Old songs'], ['bhajan', 'भजन', 'Bhajans'], ['ghazal', 'ग़ज़ल', 'Ghazals'],
+  ['english_music', 'अंग्रेज़ी संगीत', 'English music'], ['news', 'ख़बरें', 'News'], ['cricket', 'क्रिकेट', 'Cricket'], ['movies', 'फ़िल्में', 'Films'], ['comedy', 'हँसी-मज़ाक', 'Comedy'],
+  ['yoga', 'योग', 'Yoga'], ['spiritual', 'सत्संग और प्रवचन', 'Satsang'], ['games', 'खेल और पहेलियाँ', 'Games & riddles'], ['learning', 'कुछ नया सीखना', 'Learning'], ['cooking', 'खाना बनाना', 'Cooking']];
+const ME = { me: null };
+function likesChips(box, picked) {
+  box.innerHTML = LIKES.map(([k, hi, en]) => `<button type="button" class="chip${picked.includes(k) ? ' on' : ''}" data-like="${k}" aria-pressed="${picked.includes(k)}">${T(hi, en)}</button>`).join('');
+  box.querySelectorAll('[data-like]').forEach((b) => b.addEventListener('click', () => { b.classList.toggle('on'); b.setAttribute('aria-pressed', b.classList.contains('on')); }));
+}
+const chipsOn = (box) => [...box.querySelectorAll('.chip.on')].map((b) => b.dataset.like);
+function freeTiles(likes) {
+  // the tiles they enjoy come first (Sakhi stays first, help stays last)
+  const box = $('#f-tiles'); const tiles = [...box.querySelectorAll('[data-like]')];
+  const score = (t) => t.dataset.like.split(' ').filter((k) => likes.includes(k)).length;
+  tiles.sort((a, b) => score(b) - score(a)).forEach((t) => box.insertBefore(t, $('#f-help')));
+}
+async function freeOpen() {
+  $('#f-date').textContent = new Date().toLocaleDateString(LANG === 'en' ? 'en-IN' : 'hi-IN', { weekday: 'long', day: 'numeric', month: 'long' });
+  const name = store.get('gs_uname') || '';
+  $('#f-name').textContent = name ? ', ' + name.split(' ')[0] + ' ' + T('जी', '') : '';
+  freeTiles(String(store.get('gs_ulikes') || '').split(',').filter(Boolean));
+  try {
+    const j = await meCall({ action: 'get' });
+    if (!j.ok) { if (j.why === 'key') { ['gs_user', 'gs_uname', 'gs_ulang', 'gs_ulikes'].forEach((k) => store.del(k)); show(entryView()); } return; }
+    ME.me = j.me;
+    if (j.me.name) { store.set('gs_uname', j.me.name); $('#f-name').textContent = ', ' + j.me.name.split(' ')[0] + ' ' + T('जी', ''); }
+    if (j.me.lang) store.set('gs_ulang', j.me.lang);
+    store.set('gs_ulikes', j.me.interests.join(',')); freeTiles(j.me.interests);
+    if (!j.me.tour_done) tourStart();
+  } catch (e) {}
+}
+document.querySelectorAll('[data-free]').forEach((b) => b.addEventListener('click', () => show(b.dataset.free)));
+$('#f-help').addEventListener('click', () => { ulog('tap', 'free-108'); location.href = 'tel:108'; });
+$('#f-sneha-voice').addEventListener('click', (e) => {
+  const lang = store.get('gs_ulang') || 'hi'; const a = new Audio(`voice/${lang}-1.mp3`); a.onerror = () => { a.src = 'voice/hi-1.mp3'; a.play().catch(() => {}); };
+  a.play().catch(() => {}); ulog('tap', 'sneha-sample');
+});
+$('#f-trial').addEventListener('click', () => { ulog('tap', 'free-trial'); store.set('gs_role', 'family'); show('buy'); });
+// settings: name, language, interests, Sakhi's voice
+$('#v-free .f-settings').addEventListener('toggle', (e) => {
+  if (!e.target.open) return;
+  $('#f-myname').value = store.get('gs_uname') || ''; $('#f-lang').value = store.get('gs_ulang') || 'hi';
+  likesChips($('#f-likes'), String(store.get('gs_ulikes') || '').split(',').filter(Boolean));
+});
+$('#f-save').addEventListener('click', async (e) => {
+  const b = e.currentTarget; busy(b, true, T('सहेज रहे हैं…', 'Saving…'));
+  const set = { action: 'set', name: $('#f-myname').value.trim(), lang: $('#f-lang').value, interests: chipsOn($('#f-likes')) };
+  try { const j = await meCall(set); if (j.ok) { store.set('gs_uname', j.me.name); store.set('gs_ulang', j.me.lang || 'hi'); store.set('gs_ulikes', j.me.interests.join(',')); $('#f-msg').textContent = T('सहेज लिया ✓', 'Saved ✓'); freeOpen(); } else $('#f-msg').textContent = T('सहेज नहीं पाए', 'Could not save'); }
+  catch (x) { $('#f-msg').textContent = T('इंटरनेट नहीं', 'Offline'); }
+  finally { busy(b, false); }
+});
+$('#f-voice').addEventListener('click', async () => {
+  const box = $('#f-voices'); box.classList.remove('hidden');
+  const lang = ULANG[$('#f-lang').value] || 'hi-IN', line = T('नमस्ते! मैं सखी हूँ, स्नेहा की सहेली।', 'Hello! I am Sakhi, Sneha\'s friend.');
+  let list = [];
+  if (NATIVE && SN && typeof SN.ttsVoices === 'function') { try { list = ((await SN.ttsVoices({ lang })) || {}).voices || []; } catch (e) {} }
+  else list = pvLoad().filter((v) => String(v.lang).toLowerCase().replace('_', '-').startsWith(lang.slice(0, 2))).map((v) => ({ name: v.name }));
+  if (!list.length) { box.innerHTML = `<p class="muted">${T('इस फ़ोन पर इस भाषा की आवाज़ नहीं मिली। फ़ोन की Settings → Text-to-speech → Google → Install voice data में भाषा डाउनलोड कीजिए।', 'No voice for this language on this phone. Download it in Settings → Text-to-speech → Google → Install voice data.')}</p>`; return; }
+  const cur = store.get('gs_pvoice');
+  box.innerHTML = `<p class="muted">${T('हर आवाज़ सुनकर वह चुनें जो महिला की और आपको अच्छी लगे।', 'Listen and choose a woman\'s voice you like.')}</p>` +
+    list.map((v, i) => `<div class="voice-row"><button class="btn secondary" type="button" data-try="${i}">▶ ${T('आवाज़', 'Voice')} ${i + 1}</button><button class="btn ${v.name === cur ? 'primary' : 'secondary'}" type="button" data-use="${i}">${v.name === cur ? '✓ ' + T('चुनी हुई', 'Chosen') : T('यही चुनें', 'Choose')}</button></div>`).join('');
+  box.querySelectorAll('[data-try]').forEach((b) => b.addEventListener('click', () => { store.set('gs_pvoice', list[+b.dataset.try].name); phoneSpeak(line, lang); if (cur) store.set('gs_pvoice', cur); }));
+  box.querySelectorAll('[data-use]').forEach((b) => b.addEventListener('click', () => { store.set('gs_pvoice', list[+b.dataset.use].name); phoneSpeak(line, lang); $('#f-voice').click(); }));
+});
+$('#f-out').addEventListener('click', () => {
+  if (!window.confirm(T('इस फ़ोन पर लॉग-आउट करें?', 'Sign out on this phone?'))) return;
+  ['gs_user', 'gs_uname', 'gs_ulang', 'gs_ulikes', 'gs_role'].forEach((k) => store.del(k)); show(entryView());
+});
+
+// ---- the one-time tour: what the app is, then what they enjoy ----
+const TOUR = [
+  ['💛', T('नमस्ते! मैं सखी हूँ', 'Hello! I am Sakhi'), T('स्नेहा की सहेली। गपशप, पहेलियाँ, अंताक्षरी, सवाल – कुछ भी पूछिए, मैं आपकी भाषा में बात करती हूँ।', 'Sneha\'s friend. Chat, riddles, antakshari, questions – I talk in your language.')],
+  ['🎶', T('गाने, रेडियो और टीवी', 'Songs, radio and TV'), T('पुराने-नए गाने, भजन, भारत और दुनिया के रेडियो, ख़बरें, क्रिकेट और फ़िल्में – सब मुफ़्त।', 'Old and new songs, bhajans, radio from India and the world, news, cricket and films – all free.')],
+  ['🧘', T('योग, सत्संग और खेल', 'Yoga, satsang and games'), T('रोज़ सुबह योग, शाम की भजन संध्या, रविवार सत्संग – घर बैठे लाइव जुड़िए।', 'Daily morning yoga, evening bhajan sandhya, Sunday satsang – join live from home.')],
+  ['👪', T('और माता-पिता के लिए स्नेहा', 'And Sneha for your parents'), T('दूर रहते हैं? स्नेहा रोज़ उनसे बात करती है और कुछ गड़बड़ हो तो आपको बताती है। 7 दिन मुफ़्त।', 'Far away? Sneha talks with them daily and tells you if anything is wrong. 7 days free.')],
+  ['✨', T('आपको क्या पसंद है?', 'What do you enjoy?'), T('चुनिए, ताकि आपकी पसंद की चीज़ें सबसे ऊपर दिखें (बाद में बदल सकते हैं)।', 'Choose, so your favourites come first (you can change it later).')],
+];
+let tourAt = 0;
+function tourDraw() {
+  const [ic, h, p] = TOUR[tourAt], last = tourAt === TOUR.length - 1;
+  $('#f-tour .tour-pages').innerHTML = `<div class="tour-ic">${tourAt === 0 ? '<img src="sakhi.png" alt="" onerror="this.replaceWith(document.createTextNode(\'💛\'))">' : ic}</div><h2>${h}</h2><p>${p}</p>${last ? '<div class="chips" id="tour-likes"></div>' : ''}`;
+  if (last) likesChips($('#tour-likes'), String(store.get('gs_ulikes') || '').split(',').filter(Boolean));
+  $('#f-tour .tour-dots').innerHTML = TOUR.map((x, i) => `<span class="${i === tourAt ? 'on' : ''}"></span>`).join('');
+  $('#tour-next').textContent = last ? T('शुरू करें', 'Start') : T('आगे', 'Next');
+  $('#tour-skip').classList.toggle('hidden', last);
+}
+function tourStart() { tourAt = 0; $('#f-tour').classList.remove('hidden'); tourDraw(); ulog('step', 'tour-start'); }
+async function tourEnd() {
+  const likes = $('#tour-likes') ? chipsOn($('#tour-likes')) : [];
+  $('#f-tour').classList.add('hidden'); store.set('gs_ulikes', likes.join(',')); freeTiles(likes);
+  try { await meCall({ action: 'set', tour_done: true, ...(likes.length ? { interests: likes } : {}) }); } catch (e) {}
+  ulog('step', 'tour-done', null, String(likes.length));
+}
+$('#tour-next').addEventListener('click', () => { if (tourAt < TOUR.length - 1) { tourAt++; tourDraw(); } else tourEnd(); });
+$('#tour-skip').addEventListener('click', () => { tourAt = TOUR.length - 1; tourDraw(); });
+
+// ---- routing: the free home is a home like the others ----
+const showBeforeFree = show;
+show = function (view) {
+  if (view === 'free' && !store.get('gs_user')) view = entryView();
+  showBeforeFree(view);
+  if (view === 'free') freeOpen();
+};
+// after sign-in: keep the free account's key (every signed-in person has one)
+function keepUser(r) { if (r && r.user && r.user.key) { store.set('gs_user', r.user.key); if (r.user.name) store.set('gs_uname', r.user.name); if (r.user.lang) store.set('gs_ulang', r.user.lang); } }
+// ---- Starting Sneha from the free home: for my parents, or for myself (v-buy), then the sign-up form ----
+// "For myself": the same form with the relation "Myself (the elder)", and after sign-up this phone becomes the elder's.
+// A free user's memories with Sakhi go along to the new family (app-me 'link'), so Sneha already knows them.
+function buyFill(self) {
+  const set = (k, v, lock) => { const f = $('#f-' + k); if (f && v && !f.value) { f.value = v; if (lock) { f.readOnly = true; f.classList.add('otp-ok'); } f.dispatchEvent(new Event('input')); } };
+  const phone = store.get('gs_phone_ok') || '', name = store.get('gs_uname') || store.get('gs_g_name') || '';
+  set('family_phone', phone, !!phone); set('family_name', name);
+  const rel = $('#f-relation');
+  if (rel && self) { const o = [...rel.options].find((x) => /स्वयं|Myself/.test(x.text)); if (o) { rel.value = o.value; rel.dispatchEvent(new Event('change')); } }
+  if (self) { set('elder_name', name); set('elder_phone', phone); }
+}
+document.querySelectorAll('[data-buy]').forEach((b) => b.addEventListener('click', () => {
+  const self = b.dataset.buy === 'self';
+  store.set('gs_buy', b.dataset.buy); store.set('gs_role', 'family'); ulog('tap', 'buy-' + b.dataset.buy);
+  show('signup'); setTimeout(() => buyFill(self), 350);
+}));
+// after sign-up: "see my service" opens the elder's simple home on this phone when it was for themselves
+$('#v-done [data-go="home"]').addEventListener('click', (e) => {
+  const self = store.get('gs_buy') === 'self';
+  if (store.get('gs_user') && store.get('gs_code')) meCall({ action: 'link', code: store.get('gs_code') }).catch(() => {});
+  store.del('gs_buy');
+  if (self) { e.preventDefault(); e.stopImmediatePropagation(); store.set('gs_role', 'elder'); show('elder'); }
+  else store.set('gs_role', 'family');
+}, true);
 </script>
 </body>
 </html>
