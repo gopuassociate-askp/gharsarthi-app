@@ -516,6 +516,10 @@ div.talk-sakhi.mono.hidden { display: none; }
 .pay-done { border: 2px solid #16a34a; text-align: center; }
 .pay-done .code { font-size: 26px; font-weight: 800; letter-spacing: 1px; margin: 6px 0 12px; }
 .pay-done .btn { display: block; width: 100%; margin-top: 10px; text-align: center; text-decoration: none; }
+
+.sakhi-site { text-align: center; margin: 8px 0 14px; }
+.sakhi-site img { width: min(320px, 80vw); height: auto; aspect-ratio: 1; border-radius: 50%; object-fit: cover; object-position: 50% 18%; border: 6px solid #14b8a6; box-shadow: 0 10px 30px rgba(15, 118, 110, .18); }
+#pg-sakhi .btn { width: 100%; max-width: 360px; display: block; margin: 14px auto 0; }
 </style>
 </head>
 <body>
@@ -558,7 +562,7 @@ div.talk-sakhi.mono.hidden { display: none; }
   <!-- Everyone's free home (signed in, no family plan): Sakhi, songs, radio, TV, yoga and games; Sneha for the family -->
   <section id="v-free" class="view hidden">
     <div class="card sn-head free-head">
-      <img src="sakhi.png" alt="सखी / Sakhi" width="76" height="76" class="sn-mini sakhi-img" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'sakhi-mono',textContent:'स'}))">
+      <img src="sakhi.jpg" alt="सखी / Sakhi" width="76" height="76" class="sn-mini sakhi-img" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'sakhi-mono',textContent:'स'}))">
       <div><h2 style="margin:4px 0"><span data-en="Namaste">नमस्ते</span><span id="f-name"></span> 🙏</h2>
       <p style="margin:0"><span data-en="I'm Sakhi, Sneha's friend – with you every day">मैं सखी, स्नेहा की सहेली – हर दिन आपके साथ</span></p></div>
     </div>
@@ -669,6 +673,19 @@ div.talk-sakhi.mono.hidden { display: none; }
         <p class="muted small no-native"><span data-en="From ₹449 a month · Cancel any time · No hidden charges">₹449 प्रति माह से · कभी भी बंद करें · कोई छुपा शुल्क नहीं</span></p>
         <a class="next" href="#pg-sneha" aria-label="आगे / Next">⌄</a>
       </div>
+    </div>
+
+    <div class="pg" id="pg-sakhi">
+      <p class="kicker"><span data-en="Meet Sakhi – free for everyone">सखी से मिलिए – सबके लिए मुफ़्त</span></p>
+      <h2><span data-en="Sneha's friend, with you every day">स्नेहा की सहेली, हर दिन आपके साथ</span></h2>
+      <div class="sakhi-site"><img src="sakhi-full.jpg" alt="सखी – स्नेहा की सहेली / Sakhi – Sneha's friend" width="320" height="320" loading="lazy"></div>
+      <ul class="ticks">
+        <li><b><span data-en="Talk about anything">कुछ भी बात करें</span></b> – <span data-en="chat, riddles, antakshari, questions, in your language.">गपशप, पहेली, अंताक्षरी, सवाल – आपकी अपनी भाषा में।</span></li>
+        <li><b><span data-en="Songs, radio and TV">गाने, रेडियो और टीवी</span></b> – <span data-en="old and new songs, bhajans, radio from India and the world, news and cricket.">पुराने-नए गाने, भजन, भारत और दुनिया के रेडियो, ख़बरें और क्रिकेट।</span></li>
+        <li><b><span data-en="Yoga, satsang and games">योग, सत्संग और खेल</span></b> – <span data-en="join live from home, every day.">रोज़ घर बैठे लाइव जुड़िए।</span></li>
+        <li><b><span data-en="Free, for every age">हर उम्र के लिए, मुफ़्त</span></b> – <span data-en="sign in with Google or your mobile number. Sakhi is an AI and says so.">Google या मोबाइल नंबर से लॉग इन। सखी एक AI है और यह साफ़ बताती है।</span></li>
+      </ul>
+      <button class="btn primary" type="button" data-door="start"><span data-en="Start free">मुफ़्त शुरू करें</span></button>
     </div>
 
     <div class="pg" id="pg-sneha">
@@ -4219,7 +4236,7 @@ $('#talk-report').addEventListener('click', async () => {
   if (i < 0) { toast(T('अभी स्नेहा ने कुछ कहा ही नहीं', 'Sneha has not said anything yet')); return; }
   const why = window.prompt(T(`स्नेहा ने कहा: "${h[i].t.slice(0, 120)}"\n\nक्या ग़लत लगा? (चाहें तो ख़ाली छोड़ दें)`, `Sneha said: "${h[i].t.slice(0, 120)}"\n\nWhat was wrong? (optional)`), '');
   if (why === null) return;
-  try { await fetch(API.talk, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ code: store.get('gs_code'), report: { reply: h[i].t, heard: (h[i - 1] && h[i - 1].r === 'u' ? h[i - 1].t : ''), why } }) }); } catch (e) {}
+  try { await fetch(API.talk, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ code: store.get('gs_code') || undefined, key: store.get('gs_code') ? undefined : store.get('gs_user'), report: { reply: h[i].t, heard: (h[i - 1] && h[i - 1].r === 'u' ? h[i - 1].t : ''), why } }) }); } catch (e) {}
   toast(T('धन्यवाद! हमारी टीम इसे देखेगी 🙏', 'Thank you! Our team will look at it 🙏'), 3000);
 });
 // hands-free "स्नेहा" (the Android app only)
@@ -4669,14 +4686,24 @@ const talkWho = () => (sakhiNow() ? T('सखी', 'Sakhi') : T('स्नेह
 function sakhiFace(on) {
   const box = $('#v-talk .talk-face'); if (!box) return;
   let img = $('#talk-sakhi');
-  if (!img) { img = document.createElement('img'); img.id = 'talk-sakhi'; img.className = 'talk-sakhi hidden'; img.alt = 'सखी / Sakhi'; img.src = 'sakhi.png';
+  if (!img) { img = document.createElement('img'); img.id = 'talk-sakhi'; img.className = 'talk-sakhi hidden'; img.alt = 'सखी / Sakhi'; img.src = 'sakhi.jpg';
     // until her picture is in the app: a calm circle with her initial
     img.onerror = () => { const m = document.createElement('div'); m.id = 'talk-sakhi'; m.className = img.className + ' mono'; m.textContent = 'स'; m.setAttribute('aria-label', 'सखी / Sakhi'); img.replaceWith(m); };
     box.append(img); }
   img.classList.toggle('hidden', !on); $('#talk-canvas').classList.toggle('hidden', !!on);
+  // family face recognition belongs to the family's phone; the report link names who answered
+  const fo = $('#face-open'); if (fo) fo.classList.toggle('hidden', isFreeUser());
+  const rp = $('#talk-report'); if (rp) rp.innerHTML = '🚩 ' + (on ? T('सखी का जवाब ठीक नहीं लगा? बताइए', 'Sakhi\'s reply felt wrong? Tell us') : T('स्नेहा का जवाब ठीक नहीं लगा? बताइए', 'Sneha\'s reply felt wrong? Tell us'));
   const tag = box.querySelector('.talk-ai'); if (tag) tag.textContent = on ? T('सखी – स्नेहा की सहेली (AI)', 'Sakhi – Sneha\'s friend (AI)') : T('स्नेहा – आपकी AI सहायिका', 'Sneha – your AI companion');
 }
-setInterval(() => { const img = $('#talk-sakhi'); if (img && !img.classList.contains('hidden')) img.classList.toggle('speaking', !!TALK.speaking); }, 250);
+// while she speaks, her open smile comes and goes with the voice, so she looks like she is talking
+const SAKHI_TALK = new Image(); SAKHI_TALK.src = 'sakhi-talk.jpg';
+setInterval(() => {
+  const img = $('#talk-sakhi'); if (!img || img.classList.contains('hidden') || img.tagName !== 'IMG') return;
+  img.classList.toggle('speaking', !!TALK.speaking);
+  const want = TALK.speaking && TALK.level > 0.5 ? 'sakhi-talk.jpg' : 'sakhi.jpg';
+  if (!img.src.endsWith(want)) img.src = want;
+}, 160);
 const talkOpenBefore = talkOpen;
 talkOpen = async function () {
   if (isFreeUser()) { TALK.persona = 'sakhi'; TALK.lang = ULANG[store.get('gs_ulang') || 'hi'] || 'hi-IN'; }
@@ -4778,7 +4805,7 @@ const TOUR = [
 let tourAt = 0;
 function tourDraw() {
   const [ic, h, p] = TOUR[tourAt], last = tourAt === TOUR.length - 1;
-  $('#f-tour .tour-pages').innerHTML = `<div class="tour-ic">${tourAt === 0 ? '<img src="sakhi.png" alt="" onerror="this.replaceWith(document.createTextNode(\'💛\'))">' : ic}</div><h2>${h}</h2><p>${p}</p>${last ? '<div class="chips" id="tour-likes"></div>' : ''}`;
+  $('#f-tour .tour-pages').innerHTML = `<div class="tour-ic">${tourAt === 0 ? '<img src="sakhi.jpg" alt="" onerror="this.replaceWith(document.createTextNode(\'💛\'))">' : ic}</div><h2>${h}</h2><p>${p}</p>${last ? '<div class="chips" id="tour-likes"></div>' : ''}`;
   if (last) likesChips($('#tour-likes'), String(store.get('gs_ulikes') || '').split(',').filter(Boolean));
   $('#f-tour .tour-dots').innerHTML = TOUR.map((x, i) => `<span class="${i === tourAt ? 'on' : ''}"></span>`).join('');
   $('#tour-next').textContent = last ? T('शुरू करें', 'Start') : T('आगे', 'Next');
