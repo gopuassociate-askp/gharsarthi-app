@@ -453,6 +453,24 @@
 /* Continue with Google (Firebase) */
 .btn.g-fb { background: #fff; color: #1f1f1f; border: 1px solid #747775; display: inline-flex; align-items: center; justify-content: center; gap: 10px; width: 100%; max-width: 320px; }
 .g-mark { font: 700 20px/1 Arial, sans-serif; color: #4285f4; }
+
+/* the single sign-in screen */
+.start-card { max-width: 460px; margin: 12px auto; }
+.start-head { display: flex; gap: 14px; align-items: center; margin-bottom: 14px; }
+.start-head img { width: 88px; height: 88px; border-radius: 50%; object-fit: cover; flex: none; }
+.start-head h1 { margin: 0 0 4px; font-size: 26px; }
+.start-head p { margin: 0; }
+#v-start .g-btn .g-fb { max-width: none; min-height: 56px; font-size: 18px; }
+.st-code { margin-top: 14px; border-top: 1px solid var(--line, #eadfd3); padding-top: 10px; }
+.st-code summary { cursor: pointer; min-height: 48px; display: flex; align-items: center; font-weight: 600; }
+.st-code input { width: 100%; font-size: 20px; text-align: center; margin: 6px 0; }
+.st-q { margin: 8px 0 6px; font-weight: 600; }
+.st-who { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.st-who .btn { width: 100%; }
+.st-legal { margin-top: 14px; text-align: center; }
+/* the website's one button: start or sign in */
+.door[data-door="start"] { background: linear-gradient(135deg, #c2410c, #ea580c); color: #fff; border-color: transparent; }
+.door[data-door="start"] small, .door[data-door="start"] .ico { color: #fff; opacity: .95; }
 </style>
 </head>
 <body>
@@ -465,6 +483,33 @@
 <div class="toran" aria-hidden="true"></div>
 
 <main>
+  <!-- The single way in: Google or mobile OTP; the server works out who it is (family, elder, circle member, new) -->
+  <section id="v-start" class="view hidden">
+    <div class="card start-card">
+      <div class="start-head">
+        <img src="sneha.jpg" width="88" height="88" alt="स्नेहा / Sneha">
+        <div>
+          <h1><span data-en="SadaSneha">सदा स्नेहा</span></h1>
+          <p class="muted"><span data-en="Talk with Sneha, songs, bhajans, radio, yoga and free family calls. And care for your parents from afar.">स्नेहा से बातें, गाने, भजन, रेडियो, योग और घर वालों से मुफ़्त कॉल। दूर रहकर भी माता-पिता का ध्यान।</span></p>
+        </div>
+      </div>
+      <div id="st-google" class="g-btn"></div>
+      <p id="st-gmsg" class="err" aria-live="polite"></p>
+      <p class="otp-or" id="st-or"><span data-en="or with your mobile number">या मोबाइल नंबर से</span></p>
+      <div id="st-otp" class="otp-box"></div>
+      <details class="st-code" id="st-code">
+        <summary><span data-en="Have a code? (GS-…)">कोड है? (GS-…)</span></summary>
+        <input id="st-code-in" autocomplete="off" autocapitalize="characters" placeholder="GS-XXXXXXXX" aria-label="कोड / Code">
+        <p class="st-q"><span data-en="Whose phone is this?">यह फ़ोन किसका है?</span></p>
+        <div class="st-who">
+          <button class="btn secondary" type="button" data-who="family"><span data-en="Mine (family)">मेरा (घर वाले का)</span></button>
+          <button class="btn secondary" type="button" data-who="elder"><span data-en="The elder's (to talk with Sneha)">बुज़ुर्ग का (स्नेहा से बात)</span></button>
+        </div>
+        <p id="st-code-err" class="err" aria-live="polite"></p>
+      </details>
+      <p class="muted small st-legal"><span data-en="By continuing you accept the">आगे बढ़कर आप</span> <a href="terms.html"><span data-en="terms">शर्तें</span></a> <span data-en="and the">और</span> <a href="privacy.html"><span data-en="privacy policy">गोपनीयता नीति</span></a><span data-en="."> मानते हैं।</span></p>
+    </div>
+  </section>
   <!-- Welcome: no code saved yet -->
   <section id="v-welcome" class="view">
     <div class="card sneha-hero">
@@ -491,8 +536,7 @@
         <h1><span data-en="You are far away. They are not alone.">आप दूर हैं, पर वे अकेले नहीं।</span></h1>
         <p class="lead"><span data-en="Sneha is a warm AI companion for your parents. She talks with them every day in their own language, plays their favourite old songs, reminds them of meals and medicines – and tells you at once if anything is wrong.">स्नेहा आपके माता-पिता की प्यारी AI साथी है। वह रोज़ उनकी अपनी भाषा में बात करती है, उनके पसंदीदा पुराने गाने सुनाती है, खाने-दवाई की याद दिलाती है – और कुछ भी गड़बड़ लगे तो तुरंत आपको बताती है।</span></p>
         <div class="doors">
-        <button class="door family" type="button" data-door="family"><svg class="ico" aria-hidden="true"><use href="#i-handshake"/></svg> <span data-en="For my parents / family">अपने माता-पिता / परिवार के लिए</span><small><span data-en="Sign up in 2 minutes, see how they are, get alerts">2 मिनट में पंजीकरण, रोज़ का हाल, ज़रूरी ख़बरें</span></small></button>
-        <button class="door elder" type="button" data-door="elder"><svg class="ico" aria-hidden="true"><use href="#i-hand-heart"/></svg> <span data-en="I will talk to Sneha myself">मैं ख़ुद स्नेहा से बात करूँगा / करूँगी</span><small><span data-en="Big, simple buttons: Sneha, songs, call family">बड़े, आसान बटन: स्नेहा, गाने, घर वालों को फ़ोन</span></small></button>
+        <button class="door family" type="button" data-door="start"><svg class="ico" aria-hidden="true"><use href="#i-hand-heart"/></svg> <span data-en="Start free / Sign in">मुफ़्त शुरू करें / लॉग इन</span><small><span data-en="With Google or your mobile number – one tap">Google या मोबाइल नंबर से – एक टैप</span></small></button>
       </div>
         <p class="muted small no-native"><span data-en="From ₹449 a month · Cancel any time · No hidden charges">₹449 प्रति माह से · कभी भी बंद करें · कोई छुपा शुल्क नहीं</span></p>
         <a class="next" href="#pg-sneha" aria-label="आगे / Next">⌄</a>
@@ -579,8 +623,7 @@
       <h2><span data-en="Our promise">हमारा वादा</span></h2>
       <p class="lead"><span data-en="Millions of parents in India live alone while their children work in other cities. SadaSneha was born in Jabalpur with one aim: that no parent feels alone, and no child lies awake worrying. Technology with a warm heart – always with love.">भारत में लाखों माता-पिता अकेले रहते हैं, जबकि बच्चे दूसरे शहरों में काम करते हैं। सदा स्नेहा का जन्म जबलपुर में एक ही लक्ष्य से हुआ: कोई माता-पिता अकेला महसूस न करे, और कोई बच्चा चिंता में जागता न रहे। दिल वाली तकनीक – सदा स्नेह के साथ।</span></p>
       <div class="doors">
-        <button class="door family" type="button" data-door="family"><svg class="ico" aria-hidden="true"><use href="#i-handshake"/></svg> <span data-en="For my parents / family">अपने माता-पिता / परिवार के लिए</span><small><span data-en="Sign up in 2 minutes, see how they are, get alerts">2 मिनट में पंजीकरण, रोज़ का हाल, ज़रूरी ख़बरें</span></small></button>
-        <button class="door elder" type="button" data-door="elder"><svg class="ico" aria-hidden="true"><use href="#i-hand-heart"/></svg> <span data-en="I will talk to Sneha myself">मैं ख़ुद स्नेहा से बात करूँगा / करूँगी</span><small><span data-en="Big, simple buttons: Sneha, songs, call family">बड़े, आसान बटन: स्नेहा, गाने, घर वालों को फ़ोन</span></small></button>
+        <button class="door family" type="button" data-door="start"><svg class="ico" aria-hidden="true"><use href="#i-hand-heart"/></svg> <span data-en="Start free / Sign in">मुफ़्त शुरू करें / लॉग इन</span><small><span data-en="With Google or your mobile number – one tap">Google या मोबाइल नंबर से – एक टैप</span></small></button>
       </div>
       <footer class="site-foot">
         <p><b>सदा स्नेहा – SadaSneha</b><br>Gopu Associate · 1809, Old Napier Town, Jabalpur, Madhya Pradesh, India</p>
@@ -1217,7 +1260,7 @@
       <p class="muted">Tap to tell them you will take care of it. Sneha will let them know, and nobody will be phoned about it.</p>
       <button class="btn primary" id="seen-btn" type="button"><span data-en="✅ Yes, I'll take care of it">✅ हाँ, मैं ध्यान रखूँगा / रखूँगी</span></button>
       <div id="seen-err" class="err"></div>
-      <button class="btn secondary hidden" id="seen-home" type="button" data-go="welcome">ऐप खोलें / Open the app</button>
+      <button class="btn secondary hidden" id="seen-home" type="button" data-go="start">ऐप खोलें / Open the app</button>
     </div>
   </section>
 
@@ -1502,7 +1545,7 @@ const store = {
 // the family's page in four tabs: आज (today), बात (talk), परिवार (family), खाता (account)
 let HOMETAB = 'today';
 const NAV = { skip: false };
-const ROOTS = ['elder', 'home', 'care', 'welcome', 'role'];
+const ROOTS = ['elder', 'home', 'care', 'welcome', 'role', 'start'];
 function toast(text, ms) { const t = document.createElement('div'); t.className = 'toast'; t.textContent = text; document.body.append(t); setTimeout(() => t.remove(), ms || 2200); }
 // the back key goes one screen back; on the first screen it asks for a second press instead of closing the app
 window.addEventListener('popstate', (e) => {
@@ -1528,7 +1571,7 @@ function homeTab(t) {
 function show(view) {
   ulog('view', view);
   if (FS) fsClose(true);
-  if (!NAV.skip) { try { const cur = history.state && history.state.view; if (!cur) { history.replaceState({ view: ROOTS.includes(view) ? view : homeView(), guard: true }, ''); history.pushState({ view }, ''); } else if (cur !== view && ['elder', 'home', 'care'].includes(view) && ['welcome', 'role', 'login', 'elogin', 'signup', 'done', 'join'].includes(cur)) history.replaceState({ view }, ''); else if (cur !== view) history.pushState({ view }, ''); } catch (e) {} }
+  if (!NAV.skip) { try { const cur = history.state && history.state.view; if (!cur) { history.replaceState({ view: ROOTS.includes(view) ? view : homeView(), guard: true }, ''); history.pushState({ view }, ''); } else if (cur !== view && ['elder', 'home', 'care'].includes(view) && ['welcome', 'role', 'start', 'login', 'elogin', 'signup', 'done', 'join'].includes(cur)) history.replaceState({ view }, ''); else if (cur !== view) history.pushState({ view }, ''); } catch (e) {} }
   document.querySelectorAll('.view').forEach((v) => v.classList.add('hidden'));
   $('#v-' + view).classList.remove('hidden');
   const tabbed = ['home', 'pay', 'meds', 'sneha', 'help'].includes(view);
@@ -1726,12 +1769,12 @@ function fmtDate(s) {
 }
 async function loadStatus() {
   const code = store.get('gs_code');
-  if (!code) return show('welcome');
+  if (!code) return show('start');
   $('#h-code').textContent = code;
   try {
     const r = await fetch(API.status + '?code=' + encodeURIComponent(code));
     const j = await r.json();
-    if (!j.ok) { $('#login-err').textContent = 'यह कोड नहीं मिला / Code not found'; store.del('gs_code'); return show('login'); }
+    if (!j.ok) { $('#st-code-err').textContent = T('यह कोड नहीं मिला। घर वालों से सही कोड पूछिए।', 'This code was not found.'); $('#st-code').open = true; store.del('gs_code'); return show('start'); }
     store.set('gs_last', JSON.stringify(j));
     try { accessBanner(); } catch (e) {}
     render(j);
@@ -1947,7 +1990,7 @@ const TIME_HI = { morning: T('सुबह', 'morning'), afternoon: T('दोप
 const FOOD_HI = { after: T('खाने के बाद', 'after food'), before: T('खाने से पहले', 'before food'), any: '' };
 const esc = (t) => String(t == null ? '' : t).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 async function loadMeds() {
-  const code = store.get('gs_code'); if (!code) return show('welcome');
+  const code = store.get('gs_code'); if (!code) return show('start');
   try {
     const j = await (await fetch(API.meds + '?code=' + encodeURIComponent(code))).json();
     if (!j.ok) return;
@@ -1988,7 +2031,7 @@ $('#login-go').addEventListener('click', () => {
   if (!/^GS-[A-Z0-9]{8}$/.test(c)) { $('#login-err').textContent = 'कोड ऐसा दिखना चाहिए: GS-XXXXXXXX'; return; }
   store.set('gs_code', c); $('#login-err').textContent = ''; show('home');
 });
-$('#logout').addEventListener('click', () => { store.del('gs_code'); store.del('gs_last'); store.del('gs_role'); show('role'); });
+$('#logout').addEventListener('click', () => { store.del('gs_code'); store.del('gs_last'); store.del('gs_role'); show(entryView()); });
 
 // ---- weather for the family's city (Open-Meteo, free, no key; kept 30 minutes on this phone) ----
 // Weather in plain words for Sneha and the app (Open-Meteo daily forecast).
@@ -3330,18 +3373,18 @@ function todayHtml(today) {
   return Object.values(last).map((c) => `<div class="rowline"><span>${esc(T(...(CHECK_NAME[c.checkin] || [c.checkin, c.checkin])))}</span><b>${c.answered ? T('✓ बात हुई', '✓ Talked') : T('फ़ोन नहीं उठा', 'No answer')}</b></div>`).join('');
 }
 
-// first open: the website, with both doors
+// first open (website): what SadaSneha is, and one button to start or sign in
 const PLANS = {"_note":"Membership plans and billing cycles. Prices are per month and INCLUDE GST once GST registration is on (until then no GST is charged or shown). Repriced 22 Nov 2026 with the founder: every plan keeps at least 40% margin on every cycle, worked out from 'costs' and each plan's 'usage' (see accounts.handler.js margin()).","gst":{"registered":false,"rate":0.18,"gstin":""},"plans":[{"key":"active","hi":"साथी (ऐप पर स्नेहा)","en":"Saathi","per_month":449,"includes":"Sneha in the app: talk, songs and bhajans, family circle, alerts","usage":{"call_min":0,"chats":150}},{"key":"plus","hi":"प्लस (रोज़ एक कॉल)","en":"Plus","per_month":1249,"includes":"Saathi + Sneha phones every day (about 2 minutes)","usage":{"call_min":60,"chats":150}},{"key":"care","hi":"केयर (पूरी देखभाल)","en":"Care","per_month":2799,"includes":"Plus + meal and medicine reminder calls, priority alerts","usage":{"call_min":150,"chats":300}},{"key":"founding","hi":"फ़ाउंडिंग फ़ैमिली (मुफ़्त)","en":"Founding family (free)","per_month":0,"includes":"Pilot families, free","usage":{"call_min":60,"chats":150}}],"cycles":[{"key":"monthly","hi":"हर महीने","en":"Monthly","months":1,"discount":0},{"key":"bimonthly","hi":"हर 2 महीने","en":"Every 2 months","months":2,"discount":0},{"key":"quarterly","hi":"हर 3 महीने","en":"Quarterly","months":3,"discount":0.05},{"key":"halfyearly","hi":"हर 6 महीने","en":"Half-yearly","months":6,"discount":0.1},{"key":"yearly","hi":"सालाना","en":"Yearly","months":12,"discount":0.15}],"expense_categories":["Calls (Bolna)","Voice (Sarvam)","n8n / server","Domain / email","Agent commission","Staff","Marketing","Software / tools","Office / travel","Bank / payment charges","Professional fees (CA, legal)","Other"],"costs":{"_note":"Estimated cost per family per month, from vendor price lists (Nov 2026): Bolna about Rs 5.5/min self-serve; app chat about Rs 0.85 (Sarvam speech in/out + Claude); overhead = server, email, tools spread over families; gateway = Razorpay 2% + 18% GST on the fee. Update when real bills come in; the admin panel recalculates margins.","call_per_min":5.5,"chat":0.85,"overhead_per_family":50,"gateway_rate":0.0236,"target_margin":0.4}};
+// one button: signed in already -> their own screen; otherwise the single sign-in screen
 document.querySelectorAll('[data-door]').forEach((d) => d.addEventListener('click', () => {
-  if (d.dataset.door === 'elder') { store.set('gs_role', 'elder'); show(store.get('gs_code') ? 'elder' : 'elogin'); }
-  else { store.set('gs_role', 'family'); show(store.get('gs_code') ? 'home' : 'welcome'); }
+  show(store.get('gs_code') ? (store.get('gs_role') === 'elder' ? 'elder' : 'home') : store.get('gs_member') ? 'care' : 'start');
 }));
 (function sitePlans() {
   const box = $('#site-plans'); if (!box || !PLANS.plans) return;
   box.innerHTML = PLANS.plans.filter((p) => p.per_month > 0).map((p, i) => `<div class="plan ${p.key === 'plus' ? 'best' : ''}"><h3>${esc(p.hi.split(' (')[0])} <small class="muted">${esc(p.en)}</small>${p.key === 'plus' ? ' <span class="pill ok" style="font-size:14px">' + T('सबसे पसंदीदा', 'Most chosen') + '</span>' : ''}</h3>` +
     `<div class="rs">₹${p.per_month.toLocaleString('en-IN')}<small> / ${T('माह', 'month')}</small></div><p>${esc(T(PLAN_HI[p.key] || p.includes, p.includes))}</p>` +
     `<button class="btn ${p.key === 'plus' ? 'primary' : 'secondary'}" type="button" data-plan="${p.key}">${T('यह प्लान चुनें', 'Choose this plan')}</button></div>`).join('');
-  box.querySelectorAll('[data-plan]').forEach((b) => b.addEventListener('click', () => { store.set('gs_plan_pick', b.dataset.plan); store.set('gs_role', 'family'); show(store.get('gs_code') ? 'pay' : 'welcome'); }));
+  box.querySelectorAll('[data-plan]').forEach((b) => b.addEventListener('click', () => { store.set('gs_plan_pick', b.dataset.plan); store.set('gs_role', 'family'); show(store.get('gs_code') ? 'pay' : 'start'); }));
 })();
 $('#ecode-go').addEventListener('click', () => {
   const c = $('#ecode-in').value.trim().toUpperCase().replace(/\s/g, '');
@@ -3541,7 +3584,7 @@ async function onJoinGoogle(cred) {
 async function loadCare() {
   try {
     const j = await circleCall({ action: 'care', key: store.get('gs_member') });
-    if (!j.ok) { if (j.why === 'key') { store.del('gs_member'); show('role'); } return; }
+    if (!j.ok) { if (j.why === 'key') { store.del('gs_member'); show(entryView()); } return; }
     const who = j.family.address_as || j.family.elder_name; CARE_ELDER = who;
     const friend = j.level === 'friend';
     $('#c-friend').classList.toggle('hidden', !friend); $('#c-carepart').classList.toggle('hidden', friend);
@@ -3573,7 +3616,7 @@ $('#c-send').addEventListener('click', async () => {
   try { const j = await circleCall({ action: 'message', key: store.get('gs_member'), text }); $('#c-send-msg').textContent = j.ok ? T('✓ भेज दिया। स्नेहा उन्हें पढ़कर सुनाएगी।', '✓ Sent. Sneha will read it to them.') : T('नहीं भेज पाए।', 'Could not send.'); if (j.ok) { $('#c-text').value = ''; loadCare(); } }
   catch (e) { $('#c-send-msg').textContent = T('इंटरनेट नहीं', 'Offline'); }
 });
-$('#c-out').addEventListener('click', () => { if (window.confirm(T('इस फ़ोन पर लॉग-आउट करें?', 'Sign out on this phone?'))) { store.del('gs_member'); store.del('gs_role'); show('role'); } });
+$('#c-out').addEventListener('click', () => { if (window.confirm(T('इस फ़ोन पर लॉग-आउट करें?', 'Sign out on this phone?'))) { store.del('gs_member'); store.del('gs_role'); show(entryView()); } });
 
 // ---- Talk to Sneha: her live face (base picture + mouth moved by her voice), one button to speak ----
 API.talk = API_BASE + '/app-talk';
@@ -4216,7 +4259,7 @@ if (params.get('wake') === '1' && store.get('gs_code')) {
 show(params.get('ack') ? 'seen' : params.get('join') ? 'join' : params.get('health') && (store.get('gs_code') || store.get('gs_member')) ? 'health' : params.get('trip') && (store.get('gs_code') || store.get('gs_member')) ? 'trip' : params.get('chat') && (store.get('gs_code') || store.get('gs_member')) ? 'chat'
   : store.get('gs_code') ? (location.hash === '#talk' || params.get('talk') === '1' ? 'talk' : store.get('gs_role') === 'elder' ? 'elder' : 'home')
   : store.get('gs_member') ? 'care'
-  : params.get('view') === 'signup' ? 'signup' : store.get('gs_role') === 'family' ? 'welcome' : 'role');
+  : params.get('view') === 'signup' ? 'signup' : NATIVE ? 'start' : 'role');
 // ---- Sign in with the mobile number: Google (Firebase) sends the OTP by SMS; our server checks Google's proof
 // and finds the family whose own or elder's mobile it is. New numbers go on to sign up, already verified.
 API.otp = API_BASE + '/app-otp';
@@ -4352,23 +4395,7 @@ async function onGoogleToken(id_token) {
   try { const m = await circleCall({ action: 'login', cred: id_token }); if (m.ok) { store.set('gs_member', m.key); return show('care'); } } catch (e) {}
   askPermsThen('signup');
 }
-if (!window.__PREVIEW) googleButton($('#g-btn'), $('#g-msg'), onGoogleToken);
-if (NATIVE && !nativeGoogle()) { const t = $('#g-msg') && $('#g-msg').nextElementSibling; if (t) t.classList.add('hidden'); }
 
-// the two sign-in screens
-(function () {
-  const fam = document.createElement('div'); fam.id = 'otp-family'; fam.className = 'otp-box';
-  const famCard = $('#code-in') && $('#code-in').closest('.card');
-  if (famCard) { famCard.querySelector('h2').insertAdjacentHTML('afterend', `<p class="muted">${T('अपने मोबाइल नंबर से – OTP आएगा', 'With your mobile number – you get an OTP')}</p>`); famCard.querySelector('p.muted').after(fam);
-    fam.insertAdjacentHTML('afterend', `<p class="otp-or"><span>${T('या कोड से', 'or with your code')}</span></p>`);
-    otpBox(fam, { id: 'otpf', done: (r, p) => otpSignedIn(r, p, '') });
-    if (!NATIVE || nativeGoogle()) { const g = document.createElement('div'); g.className = 'g-btn'; const gm = document.createElement('p'); gm.className = 'err';
-      fam.before(g, gm); googleButton(g, gm, onGoogleToken); g.insertAdjacentHTML('afterend', `<p class="otp-or"><span>${T('या मोबाइल नंबर से', 'or with your mobile number')}</span></p>`); } }
-  const eld = document.createElement('div'); eld.id = 'otp-elder'; eld.className = 'otp-box';
-  const eCard = $('#ecode-in') && $('#ecode-in').closest('.card');
-  if (eCard) { eCard.querySelector('p.muted').after(eld); eld.insertAdjacentHTML('afterend', `<p class="otp-or"><span>${T('या घर वालों का कोड', 'or the family\'s code')}</span></p>`);
-    otpBox(eld, { id: 'otpe', done: (r, p) => otpSignedIn(r, p, 'elder') }); }
-})();
 // sign-up: the family's own mobile must be verified by OTP before the form is sent
 function signupPhoneGuard() {
   const f = $('#f-family_phone'); if (!f || f.dataset.otp) return; f.dataset.otp = '1';
@@ -4422,6 +4449,31 @@ function accessBanner() {
 // a family meeting is a paid feature (joining one you are invited to is always possible)
 const gvStartBefore = gvStart;
 gvStart = function (list, video) { if (isLocked('meeting')) { toast(T('परिवार की मीटिंग पेड प्लान में है; एक-एक करके कॉल हमेशा मुफ़्त है।', 'Family meetings are in the paid plan; one-to-one calls are always free.'), 4500); return; } return gvStartBefore(list, video); };
+// ---- The single way in (v-start): Google or mobile OTP for everyone. Who it is (family, elder, circle member or
+// someone new) is worked out from the verified number or Gmail, not asked first. A GS-… code still works, with one
+// question: whose phone is this?
+(function startScreen() {
+  const box = $('#st-otp'); if (!box) return;
+  otpBox(box, { id: 'otpst', done: (r, p) => otpSignedIn(r, p, '') });
+  if (!NATIVE || nativeGoogle()) googleButton($('#st-google'), $('#st-gmsg'), onGoogleToken);
+  else { $('#st-google').classList.add('hidden'); $('#st-or').classList.add('hidden'); }
+  $('#v-start').querySelectorAll('[data-who]').forEach((b) => b.addEventListener('click', async () => {
+    const err = $('#st-code-err'), c = $('#st-code-in').value.trim().toUpperCase().replace(/\s/g, '');
+    if (!/^GS-[A-Z0-9]{8}$/.test(c)) { err.textContent = T('कोड ऐसा दिखना चाहिए: GS-XXXXXXXX', 'The code looks like GS-XXXXXXXX'); return; }
+    busy(b, true, T('जाँच रहे हैं…', 'Checking…')); err.textContent = '';
+    try {
+      const j = await (await fetch(API.status + '?code=' + encodeURIComponent(c))).json();
+      if (!j.ok) { err.textContent = T('यह कोड नहीं मिला। घर वालों से सही कोड पूछिए।', 'This code was not found. Ask your family for the right code.'); return; }
+      const elder = b.dataset.who === 'elder';
+      store.set('gs_code', c); store.set('gs_role', elder ? 'elder' : 'family'); try { localStorage.removeItem('gs_last'); } catch (e) {}
+      ulog('step', 'code-login', null, elder ? 'elder' : 'family');
+      show(elder ? 'elder' : 'home');
+    } catch (e) { err.textContent = T('इंटरनेट नहीं; फिर कोशिश कीजिए।', 'Offline; please try again.'); }
+    finally { busy(b, false); }
+  }));
+})();
+// where "sign in" leads: the app goes straight to it; the website shows what SadaSneha is first
+const entryView = () => (NATIVE ? 'start' : 'role');
 </script>
 </body>
 </html>
