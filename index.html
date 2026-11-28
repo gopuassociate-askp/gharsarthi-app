@@ -520,6 +520,9 @@ div.talk-sakhi.mono.hidden { display: none; }
 .sakhi-site { text-align: center; margin: 8px 0 14px; }
 .sakhi-site img { width: min(320px, 80vw); height: auto; aspect-ratio: 1; border-radius: 50%; object-fit: cover; object-position: 50% 18%; border: 6px solid #14b8a6; box-shadow: 0 10px 30px rgba(15, 118, 110, .18); }
 #pg-sakhi .btn { width: 100%; max-width: 360px; display: block; margin: 14px auto 0; }
+
+.sakhi-clip video { width: 100%; height: auto; aspect-ratio: 16 / 9; object-fit: cover; border-radius: 18px; border: 3px solid #14b8a6; background: #ccfbf1; display: block; }
+#v-free .sakhi-clip { margin-bottom: 10px; }
 </style>
 </head>
 <body>
@@ -566,6 +569,8 @@ div.talk-sakhi.mono.hidden { display: none; }
       <div><h2 style="margin:4px 0"><span data-en="Namaste">नमस्ते</span><span id="f-name"></span> 🙏</h2>
       <p style="margin:0"><span data-en="I'm Sakhi, Sneha's friend – with you every day">मैं सखी, स्नेहा की सहेली – हर दिन आपके साथ</span></p></div>
     </div>
+    <div class="clip sakhi-clip hidden" id="f-clip"><video src="video/sakhi.mp4" poster="video/sakhi-poster.jpg" controls playsinline preload="none" aria-label="सखी का परिचय / Sakhi introduces herself"></video></div>
+    <button class="btn secondary" id="f-meet" type="button" style="width:100%;margin:0 0 10px">▶ <span data-en="Meet Sakhi">सखी से मिलिए</span></button>
     <p class="muted" id="f-date" style="margin:0 0 10px;text-align:center"></p>
     <div class="tiles" id="f-tiles">
       <button class="tile big" data-free="talk" type="button"><span class="ic"><svg class="ico" aria-hidden="true"><use href="#i-mic"/></svg></span><span data-en="Talk to Sakhi">सखी से बात</span><small data-en="Chat, riddles, antakshari, anything">गपशप, पहेली, अंताक्षरी, कुछ भी</small></button>
@@ -678,7 +683,7 @@ div.talk-sakhi.mono.hidden { display: none; }
     <div class="pg" id="pg-sakhi">
       <p class="kicker"><span data-en="Meet Sakhi – free for everyone">सखी से मिलिए – सबके लिए मुफ़्त</span></p>
       <h2><span data-en="Sneha's friend, with you every day">स्नेहा की सहेली, हर दिन आपके साथ</span></h2>
-      <div class="sakhi-site"><img src="sakhi-full.jpg" alt="सखी – स्नेहा की सहेली / Sakhi – Sneha's friend" width="320" height="320" loading="lazy"></div>
+      <div class="clip sakhi-clip"><video src="video/sakhi.mp4" poster="video/sakhi-poster.jpg" controls playsinline preload="none" aria-label="सखी का परिचय / Sakhi introduces herself"></video></div>
       <ul class="ticks">
         <li><b><span data-en="Talk about anything">कुछ भी बात करें</span></b> – <span data-en="chat, riddles, antakshari, questions, in your language.">गपशप, पहेली, अंताक्षरी, सवाल – आपकी अपनी भाषा में।</span></li>
         <li><b><span data-en="Songs, radio and TV">गाने, रेडियो और टीवी</span></b> – <span data-en="old and new songs, bhajans, radio from India and the world, news and cricket.">पुराने-नए गाने, भजन, भारत और दुनिया के रेडियो, ख़बरें और क्रिकेट।</span></li>
@@ -4868,6 +4873,9 @@ show = function (view) {
 };
 // after sign-in: keep the free account's key (every signed-in person has one)
 function keepUser(r) { if (r && r.user && r.user.key) { store.set('gs_user', r.user.key); if (r.user.name) store.set('gs_uname', r.user.name); if (r.user.lang) store.set('gs_ulang', r.user.lang); } }
+
+// Sakhi's own short introduction (video), on the free home
+$('#f-meet').addEventListener('click', () => { const c = $('#f-clip'); c.classList.remove('hidden'); $('#f-meet').classList.add('hidden'); const v = c.querySelector('video'); v.play().catch(() => {}); ulog('tap', 'sakhi-video'); });
 // ---- Starting Sneha from the free home: for my parents, or for myself (v-buy), then the sign-up form ----
 // "For myself": the same form with the relation "Myself (the elder)", and after sign-up this phone becomes the elder's.
 // A free user's memories with Sakhi go along to the new family (app-me 'link'), so Sneha already knows them.
