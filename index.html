@@ -4088,21 +4088,8 @@ function talkBargeStop() {
 // "जी…" in Hindi; हो… (Marathi), હા… (Gujarati), ਜੀ… (Punjabi), হ্যাঁ… (Bangla), ହଁ… (Odia), సరే…, சரி…, ಸರಿ…, ശരി…, Mm-hmm… (English)
 const HMM_LANGS = ['hi', 'mr', 'gu', 'pa', 'bn', 'or', 'te', 'ta', 'kn', 'ml', 'en'];
 const hmmFile = () => { const l = String(TALK.lang || 'hi-IN').slice(0, 2); return 'face/hmm/' + (HMM_LANGS.includes(l) ? l : 'hi') + '.mp3'; };
-// What to say while she thinks, from what they just said (when the phone already wrote it down):
-// asked to play or open something -> "हाँ जी, अभी लगाती हूँ…"; to do or call -> "हाँ जी, करती हूँ…"; a question -> "हाँ जी, अभी देखती हूँ…";
-// anything sad or worrying -> only a soft "जी…"; otherwise "जी…" or "हाँ जी…". If the answer takes long: "बस एक पल…".
-const HMM_SOFT = /उदास|दुख|दुःख|रो रह|अकेल|डर|घबरा|दर्द|तबीयत|तबियत|बीमार|चक्कर|कमज़ोर|कमजोर|परेशान|मन नहीं|sad|pain|lonely|scared/i;
-function hmmKind(text) {
-  const t = String(text || '');
-  if (!t) return '';
-  if (HMM_SOFT.test(t)) return 'soft';
-  // only a clear "play / put on <a song, bhajan, radio, TV>" gets a specific line; everything else a neutral one,
-  // so the filler never promises something the answer then does not do (or contradicts "I could not hear")
-  if (/(गाना|गाने|भजन|रेडियो|टीवी|चैनल)/i.test(t) && /(चलाओ|चलाइए|लगाओ|लगाइए|सुनाओ|सुनाइए|बजाओ|बजाइए|दिखाओ|दिखाइए|play)/i.test(t)) return 'play';
-  return '';
-}
-const SNEHA_HMM = { play: 'hi-laga', soft: 'hi', long: 'hi-pal' };
-const SAKHI_HMM = { play: 'ज़रूर! अभी लगाती हूँ।', soft: 'मैं सुन रही हूँ…', plain: ['अच्छा…', 'जी…'], long: 'बस एक सेकंड…' };
+// Fillers, kept to the plainest words so they fit whatever the answer turns out to be:
+// Sneha – only "जी…" or "हाँ जी…" (her own voice, recorded once); Sakhi – only "अच्छा…" or "हाँ…" (the phone's voice).
 function hmmPlay(file) {
   return new Promise((done) => {
     try {
@@ -4114,29 +4101,17 @@ function hmmPlay(file) {
     } catch (e) { done(); }
   });
 }
-async function hmmSay(kind, second) {
-  const l = String(TALK.lang || 'hi-IN').slice(0, 2);
-  if (typeof sakhiNow === 'function' && sakhiNow()) {
-    // Sakhi: her own words, in the phone's voice (free); Hindi only, other languages stay quiet rather than mix
-    if (l !== 'hi') return;
-    const line = second ? SAKHI_HMM.long : kind ? SAKHI_HMM[kind] : SAKHI_HMM.plain[Math.floor(Math.random() * SAKHI_HMM.plain.length)];
-    TALK.speaking = true; await Promise.race([phoneSpeak(line, TALK.lang), new Promise((ok) => setTimeout(ok, 3000))]); TALK.speaking = false;
-    return;
-  }
-  // Sneha: short pieces recorded once in her own voice (Hindi); other languages keep their one "जी…"
-  if (l !== 'hi') { if (!second) await hmmPlay(HMM_LANGS.includes(l) ? l : 'hi'); return; }
-  await hmmPlay(second ? SNEHA_HMM.long : kind ? SNEHA_HMM[kind] : (Math.random() < 0.55 ? 'hi' : 'hi-haanji'));
-}
-async function talkHmm(heard) {
+async function talkHmm() {
   // about a second into the wait, like a person who has listened and is about to answer; skipped if her reply is already here
-  const kind = hmmKind(heard);
   await new Promise((ok) => setTimeout(ok, 900));
   if (TALK.replyIn || TALK.cut) return;
-  await hmmSay(kind, false);
-  // still thinking well after that: one more gentle line (never after something sad: she just waits, listening)
-  await new Promise((ok) => setTimeout(ok, 1800));
-  if (TALK.replyIn || TALK.cut || kind === 'soft') return;
-  await hmmSay(kind, true);
+  const l = String(TALK.lang || 'hi-IN').slice(0, 2);
+  if (typeof sakhiNow === 'function' && sakhiNow()) {
+    if (l !== 'hi') return;   // other languages: she stays quiet rather than mix
+    TALK.speaking = true; await Promise.race([phoneSpeak(Math.random() < 0.5 ? 'अच्छा…' : 'हाँ…', TALK.lang), new Promise((ok) => setTimeout(ok, 2000))]); TALK.speaking = false;
+    return;
+  }
+  await hmmPlay(l !== 'hi' ? (HMM_LANGS.includes(l) ? l : 'hi') : (Math.random() < 0.55 ? 'hi' : 'hi-haanji'));
 }
 // Sneha's reply: her first sentence comes voiced with the answer; the later sentences are voiced
 // on request at the same moment, so they are ready by the time the first one ends.
@@ -4345,7 +4320,7 @@ setInterval(async () => {
 async function talkSend(blob, typed) {
   TALK.busy = true; $('#talk-mic').disabled = true; talkState(`${talkWho()} सोच रही है…`, `${talkWho()} is thinking…`);
   TALK.replyIn = false;
-  const hmm = talkHmm(typed);
+  const hmm = talkHmm();
   const whoNow = TALK.cam && TALK.who && Date.now() - TALK.who.at < 8000 ? TALK.who.w : null;
   const b64 = blob ? await new Promise((ok) => { const r = new FileReader(); r.onload = () => ok(String(r.result).split(',')[1]); r.readAsDataURL(blob); }) : '';
   try {
@@ -5095,10 +5070,16 @@ function openInAppLink(code) {
 // the app gives everyone for free and why Sneha matters for parents. Sakhi's face is her video (silent) and her voice
 // is the phone's own, the same voice she talks with in the app. Subtitles throughout (a phone may have no Hindi voice).
 const INTRO_SAKHI = [
-  'धन्यवाद स्नेहा! नमस्ते, मैं सखी हूँ, स्नेहा की सहेली।',
-  'मुझसे कुछ भी बात कीजिए – गपशप, पहेलियाँ, अंताक्षरी या कोई सवाल, आपकी अपनी भाषा में।',
-  'गाने, भजन, रेडियो, टीवी, रोज़ का योग और सत्संग – सब मुफ़्त, सब एक जगह।',
-  'और अगर आपके माता-पिता आपसे दूर रहते हैं, तो स्नेहा रोज़ उनसे प्यार से बात करती है, और कुछ भी गड़बड़ लगे तो तुरंत आपको बताती है।',
+  'धन्यवाद स्नेहा! नमस्ते, मैं सखी हूँ – स्नेहा की सहेली, और अब आपकी भी। मैं एक AI हूँ, पर आपकी सच्ची साथी।',
+  'सदा स्नेहा ऐप में मैं हर उम्र के लोगों की रोज़ की साथी हूँ – और यह सब मुफ़्त है।',
+  'मुझसे कुछ भी बात कीजिए – गपशप, सवाल, पहेलियाँ, अंताक्षरी – आपकी अपनी भाषा में। मैं आपकी बातें याद भी रखती हूँ।',
+  'बस कहिए, "सखी, गाना सुनाओ" – पुराने गाने, नए गाने, भजन या ग़ज़ल – मैं लगा दूँगी।',
+  'भारत और दुनिया के रेडियो, टीवी पर ख़बरें, क्रिकेट और फ़िल्में – सब एक ही जगह।',
+  'रोज़ सुबह योग, शाम को भजन संध्या, और रविवार को सत्संग – घर बैठे लाइव जुड़िए।',
+  'घर वालों से ऐप से ऐप मुफ़्त वॉइस और वीडियो कॉल, और ज़रूरत पड़े तो मदद का बटन – सीधा 108।',
+  'और अब मेरी सहेली स्नेहा की बात। अगर आपके माता-पिता आपसे दूर रहते हैं, तो स्नेहा रोज़ उनसे प्यार से, उनकी भाषा में बात करती है।',
+  'वह दवाई की याद दिलाती है, BP और शुगर का ध्यान रखती है, और कुछ भी गड़बड़ लगे तो तुरंत आपके फ़ोन पर ख़बर देती है। आप दूर रहें, पर वे अकेले नहीं।',
+  'स्नेहा को 7 दिन मुफ़्त आज़माइए – अपने माता-पिता के लिए, या अपने लिए।',
   'चलिए, शुरू करते हैं! सखी – बातें भी, मुस्कान भी।',
 ];
 const INTRO_SNEHA_CC = 'नमस्ते, मैं स्नेहा हूँ। मैं रोज़ आपका हालचाल पूछूँगी और हमेशा आपके साथ रहूँगी।';   // her words in video/welcome.mp4
@@ -5172,7 +5153,7 @@ function introClose() {
 // the button, on the website's first page and on the sign-in screen
 (function introButtons() {
   const make = () => { const b = document.createElement('button'); b.type = 'button'; b.className = 'btn intro-go';
-    b.innerHTML = `<span class="intro-faces"><img src="sneha.jpg" alt=""><img src="sakhi.jpg" alt=""></span><span>▶ ${T('स्नेहा और सखी से मिलिए', 'Meet Sneha and Sakhi')}<small>${T('1 मिनट का परिचय', 'A one-minute introduction')}</small></span>`;
+    b.innerHTML = `<span class="intro-faces"><img src="sneha.jpg" alt=""><img src="sakhi.jpg" alt=""></span><span>▶ ${T('स्नेहा और सखी से मिलिए', 'Meet Sneha and Sakhi')}<small>${T('2 मिनट का परिचय', 'A two-minute introduction')}</small></span>`;
     b.onclick = introOpen; return b; };
   const hero = $('#v-role .hero-in .lead'); if (hero) hero.after(make());
   const st = $('#v-start .start-head'); if (st) st.after(make());
