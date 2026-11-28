@@ -552,10 +552,24 @@ div.talk-sakhi.speaking { box-shadow: 0 0 0 10px rgba(20, 184, 166, .25), 0 0 0 
 .intro.hidden { display: none; }
 .intro-card { background: var(--card); color: inherit; border-radius: 24px; padding: 16px; width: 100%; max-width: 440px; text-align: center; }
 .intro-who { margin: 0 0 8px; font-weight: 700; color: #0f766e; }
-.intro-stage { position: relative; width: 100%; aspect-ratio: 1; border-radius: 50%; overflow: hidden; border: 6px solid #f59e0b; background: #fde68a; }
-.intro-stage video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
-.intro-stage video.hidden { display: none; }
-.intro-stage:has(.iv-sakhi:not(.hidden)) { border-color: #14b8a6; background: #ccfbf1; }
+.intro-stage { position: relative; width: 100%; aspect-ratio: 1; }
+.intro-stage .if { position: absolute; border-radius: 50%; overflow: hidden; transition: all .8s cubic-bezier(.3, .8, .3, 1); box-shadow: 0 6px 20px rgba(0, 0, 0, .15); }
+.intro-stage .if video { width: 100%; height: 100%; object-fit: cover; display: block; }
+.if-sneha { border: 5px solid #f59e0b; background: #fde68a; }
+.if-sakhi { border: 5px solid #14b8a6; background: #ccfbf1; }
+.if-name { position: absolute; left: 50%; bottom: 6%; transform: translateX(-50%); background: rgba(255, 255, 255, .92); color: #7c2d12; font-size: 14px; font-weight: 700; padding: 2px 10px; border-radius: 99px; opacity: 0; transition: opacity .4s; white-space: nowrap; }
+.if-sakhi .if-name { color: #0f766e; }
+/* Sneha alone */
+.intro-stage[data-mode="sneha"] .if-sneha { left: 0; top: 0; width: 100%; height: 100%; }
+.intro-stage[data-mode="sneha"] .if-sakhi { left: 70%; top: 35%; width: 30%; height: 30%; opacity: 0; transform: scale(.4); }
+/* the two friends side by side */
+.intro-stage[data-mode="together"] .if-sneha { left: 0; top: 22%; width: 52%; height: 52%; }
+.intro-stage[data-mode="together"] .if-sakhi { left: 48%; top: 22%; width: 52%; height: 52%; opacity: 1; transform: none; }
+.intro-stage[data-mode="together"] .if-name { opacity: 1; }
+/* Sakhi in front, Sneha stays in the corner */
+.intro-stage[data-mode="sakhi"] .if-sakhi, .intro-stage[data-mode="end"] .if-sakhi { left: 8%; top: 0; width: 92%; height: 92%; opacity: 1; transform: none; z-index: 1; }
+.intro-stage[data-mode="sakhi"] .if-sneha, .intro-stage[data-mode="end"] .if-sneha { left: 0; top: 66%; width: 32%; height: 32%; z-index: 2; }
+.intro-stage[data-mode="sakhi"] .if-sneha .if-name, .intro-stage[data-mode="end"] .if-sneha .if-name, .intro-stage[data-mode="end"] .if-sakhi .if-name { opacity: 1; }
 .intro-cc { min-height: 4.6em; margin: 12px 0; font-size: 18px; line-height: 1.5; }
 .intro-btns { display: grid; gap: 10px; }
 .intro-btns .btn.hidden { display: none; }
@@ -5088,49 +5102,70 @@ const INTRO_SAKHI = [
   'चलिए, शुरू करते हैं! सखी – बातें भी, मुस्कान भी।',
 ];
 const INTRO_SNEHA_CC = 'नमस्ते, मैं स्नेहा हूँ। मैं रोज़ आपका हालचाल पूछूँगी और हमेशा आपके साथ रहूँगी।';   // her words in video/welcome.mp4
+const INTRO_HANDOVER = 'और अब मिलिए मेरी सबसे प्यारी सहेली, सखी से!';   // Sneha's voice: video/sneha-handover.mp3
+const wait = (ms) => new Promise((ok) => setTimeout(ok, ms));
 function introOpen() {
   let box = $('#intro');
   if (!box) {
     box = document.createElement('div'); box.id = 'intro'; box.className = 'intro'; box.setAttribute('role', 'dialog'); box.setAttribute('aria-modal', 'true'); box.setAttribute('aria-label', T('स्नेहा और सखी से मिलिए', 'Meet Sneha and Sakhi'));
-    box.innerHTML = `<div class="intro-card"><p class="intro-who"></p><div class="intro-stage"><video class="iv-sneha" src="video/welcome.mp4" poster="sneha.jpg" playsinline preload="auto"></video>
-      <video class="iv-sakhi hidden" src="face-sakhi/talk.mp4" poster="face-sakhi/rest.jpg" muted playsinline loop preload="auto"></video></div>
+    box.innerHTML = `<div class="intro-card"><p class="intro-who"></p>
+      <div class="intro-stage" data-mode="sneha">
+        <div class="if if-sneha"><video class="iv-sneha" src="video/welcome.mp4" poster="sneha.jpg" playsinline preload="auto"></video><span class="if-name">${T('स्नेहा', 'Sneha')}</span></div>
+        <div class="if if-sakhi"><video class="iv-sakhi" src="face-sakhi/talk.mp4" poster="face-sakhi/rest.jpg" muted playsinline loop preload="auto"></video><span class="if-name">${T('सखी', 'Sakhi')}</span></div>
+      </div>
       <p class="intro-cc" aria-live="polite"></p>
       <div class="intro-btns"><button class="btn secondary" type="button" data-intro="skip">${T('छोड़ें', 'Skip')}</button><button class="btn primary hidden" type="button" data-intro="start">${T('शुरू करें', 'Start')}</button></div></div>`;
     document.body.append(box);
     box.querySelector('[data-intro="skip"]').onclick = introClose;
     box.querySelector('[data-intro="start"]').onclick = () => { introClose(); if (!store.get('gs_code') && !store.get('gs_user') && !store.get('gs_member')) show('start'); };
   }
-  INTRO.run = (INTRO.run || 0) + 1; const run = INTRO.run;
+  INTRO.run = (INTRO.run || 0) + 1; const run = INTRO.run; const live = () => run === INTRO.run;
   box.classList.remove('hidden'); try { mediaPauseAll(); } catch (e) {}
-  const who = box.querySelector('.intro-who'), cc = box.querySelector('.intro-cc'), vs = box.querySelector('.iv-sneha'), vk = box.querySelector('.iv-sakhi');
-  box.querySelector('[data-intro="start"]').classList.add('hidden');
+  const stage = box.querySelector('.intro-stage'), who = box.querySelector('.intro-who'), cc = box.querySelector('.intro-cc');
+  const vs = box.querySelector('.iv-sneha'), vk = box.querySelector('.iv-sakhi');
+  box.querySelector('[data-intro="start"]').classList.add('hidden'); box.querySelector('[data-intro="skip"]').classList.remove('hidden');
   // 1) Sneha, her own video
-  who.textContent = T('स्नेहा', 'Sneha'); cc.textContent = INTRO_SNEHA_CC; vk.classList.add('hidden'); vs.classList.remove('hidden');
-  vs.currentTime = 0;
-  const sakhi = async () => {
-    if (run !== INTRO.run) return;
-    // 2) Sakhi takes over: her face talks while her (the phone's) voice speaks, line by line, with subtitles
-    who.textContent = T('सखी – स्नेहा की सहेली', 'Sakhi – Sneha\'s friend'); vs.classList.add('hidden'); vk.classList.remove('hidden');
+  stage.dataset.mode = 'sneha'; who.textContent = T('स्नेहा', 'Sneha'); cc.textContent = INTRO_SNEHA_CC;
+  vs.muted = false; vs.currentTime = 0;
+  const handover = async () => {
+    if (!live()) return;
+    // 2) Sneha, in her own voice, introduces her friend – and Sakhi appears beside her
+    cc.textContent = INTRO_HANDOVER;
+    const a = new Audio('video/sneha-handover.mp3'); INTRO.audio = a;
+    vs.muted = true; try { vs.currentTime = 0.4; } catch (e) {} vs.play().catch(() => {});   // her lips move while she speaks
+    const said = new Promise((ok) => { a.onended = a.onerror = ok; a.play().catch(ok); setTimeout(ok, 6000); });
+    await wait(1400); if (!live()) return;
+    stage.dataset.mode = 'together'; who.textContent = T('स्नेहा और सखी', 'Sneha and Sakhi');
+    await said; vs.pause(); if (!live()) return;
+    await wait(900); if (!live()) return;
+    // 3) Sakhi in front, Sneha stays in the corner; Sakhi talks (her face, the phone's voice), line by line, with subtitles
+    stage.dataset.mode = 'sakhi'; who.textContent = T('सखी – स्नेहा की सहेली', 'Sakhi – Sneha\'s friend');
+    await wait(500);
     for (const line of INTRO_SAKHI) {
-      if (run !== INTRO.run) return;
+      if (!live()) return;
       cc.textContent = line; vk.play().catch(() => {});
       const t0 = performance.now();
-      await Promise.race([phoneSpeak(line, 'hi-IN'), new Promise((ok) => setTimeout(ok, 1500 + line.length * 85))]);
-      // no voice on this phone (spoke at once): give time to read the line
-      const read = 1200 + line.length * 45 - (performance.now() - t0); if (read > 0) { vk.pause(); await new Promise((ok) => setTimeout(ok, read)); }
+      await Promise.race([phoneSpeak(line, 'hi-IN'), wait(1500 + line.length * 85)]);
+      const read = 1200 + line.length * 45 - (performance.now() - t0); if (read > 0) { vk.pause(); await wait(read); }   // no voice on this phone: time to read
     }
-    if (run !== INTRO.run) return;
-    vk.pause(); box.querySelector('[data-intro="start"]').classList.remove('hidden'); box.querySelector('[data-intro="skip"]').classList.add('hidden');
+    if (!live()) return;
+    vk.pause(); stage.dataset.mode = 'end';
+    box.querySelector('[data-intro="start"]').classList.remove('hidden'); box.querySelector('[data-intro="skip"]').classList.add('hidden');
     try { localStorage.setItem('gs_intro_seen', '1'); } catch (e) {}
   };
-  vs.onended = sakhi;
-  vs.play().catch(() => sakhi());
+  let handed = false; const go = () => { if (handed || !live()) return; handed = true; vs.onended = vs.onerror = null; handover(); };
+  vs.onended = go; vs.onerror = go;
+  vs.play().catch(go);
+  // a phone that cannot play her video (or stalls): carry on anyway after its length and a little more
+  setTimeout(() => { if (!handed && (vs.paused || vs.readyState < 2 || vs.currentTime < 0.2)) go(); }, 4000);
+  setTimeout(go, 9500);
   ulog('tap', 'intro');
 }
 const INTRO = { run: 0 };
 function introClose() {
   INTRO.run++; const box = $('#intro'); if (!box) return;
-  box.querySelectorAll('video').forEach((v) => { try { v.pause(); } catch (e) {} });
+  box.querySelectorAll('video').forEach((v) => { try { v.pause(); v.onended = null; } catch (e) {} });
+  if (INTRO.audio) { try { INTRO.audio.pause(); } catch (e) {} }
   try { phoneHush(); } catch (e) {}
   box.classList.add('hidden'); box.querySelector('[data-intro="skip"]').classList.remove('hidden');
 }
