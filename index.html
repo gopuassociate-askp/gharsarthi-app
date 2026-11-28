@@ -512,6 +512,10 @@
 .buy-pick:hover, .buy-pick:focus-visible { border-color: #ea580c; }
 div.talk-sakhi.mono { display: flex; align-items: center; justify-content: center; width: 260px; height: 260px; margin: 24px auto; border-radius: 50%; background: #ccfbf1; color: #0f766e; font-size: 120px; font-weight: 800; border: 6px solid #14b8a6; }
 div.talk-sakhi.mono.hidden { display: none; }
+
+.pay-done { border: 2px solid #16a34a; text-align: center; }
+.pay-done .code { font-size: 26px; font-weight: 800; letter-spacing: 1px; margin: 6px 0 12px; }
+.pay-done .btn { display: block; width: 100%; margin-top: 10px; text-align: center; text-decoration: none; }
 </style>
 </head>
 <body>
@@ -576,6 +580,18 @@ div.talk-sakhi.mono.hidden { display: none; }
       <button class="btn primary" id="f-trial" type="button"><span data-en="Try it free for 7 days">7 दिन मुफ़्त आज़माइए</span></button>
       <p class="muted small"><span data-en="For your parents, or for yourself. No payment for 7 days.">माता-पिता के लिए, या अपने लिए। 7 दिन कोई पैसा नहीं।</span></p>
     </div>
+
+    <details class="card st-code" id="f-code">
+      <summary>🔑 <span data-en="Have a code? (GS-…)">कोड है? (GS-…)</span></summary>
+      <p class="muted"><span data-en="The code from your family, or the one you got after starting Sneha.">घर वालों से मिला कोड, या स्नेहा शुरू करने पर मिला कोड।</span></p>
+      <input id="f-code-in" autocomplete="off" autocapitalize="characters" placeholder="GS-XXXXXXXX" aria-label="कोड / Code">
+      <p class="st-q"><span data-en="Whose phone is this?">यह फ़ोन किसका है?</span></p>
+      <div class="st-who">
+        <button class="btn secondary" type="button" data-who="family"><span data-en="Mine (family)">मेरा (घर वाले का)</span></button>
+        <button class="btn secondary" type="button" data-who="elder"><span data-en="The elder's (Sneha talks here)">बुज़ुर्ग का (स्नेहा यहाँ बात करेगी)</span></button>
+      </div>
+      <p id="f-code-err" class="err" aria-live="polite"></p>
+    </details>
 
     <details class="card f-settings">
       <summary>⚙ <span data-en="My settings">मेरी सेटिंग</span></summary>
@@ -1386,6 +1402,7 @@ div.talk-sakhi.mono.hidden { display: none; }
       <p class="note"><span data-en="Keep this code safe. It opens your service in this app.">इस कोड को सँभाल कर रखें। इसी से आप ऐप में अपनी सेवा देख सकते हैं।</span><br><span class="muted">Keep this code safe; it opens your service in this app.</span></p>
       <div id="done-notes" class="err"></div>
       <div id="done-plan-box" class="note hidden"><b>आपके जवाबों से सुझाव / Suggested from your answers:</b><br><span id="done-plan"></span><br><span class="muted"><span data-en="This is only a suggestion; you and the elder decide. Sneha keeps learning from conversations and will tell you if needs change.">यह सिर्फ़ सुझाव है; आप और वरिष्ठजन तय करेंगे। स्नेहा बातचीत से समझती रहेगी और ज़रूरत बदलने पर बताएगी।</span></span></div>
+      <button class="btn primary no-native" data-go="pay" id="done-pay">अभी प्लान लें / Choose the plan now</button>
       <button class="btn primary" data-go="home">मेरी सेवा देखें / See my service</button>
     </div>
   </section>
@@ -2550,7 +2567,7 @@ $('#pn-go').addEventListener('click', async () => {
           const v = await payCall({ action: 'verify', code: store.get('gs_code'), order_id: r.razorpay_order_id, payment_id: r.razorpay_payment_id });
           msg(v.ok ? `✓ भुगतान मिल गया, धन्यवाद! अगली तारीख़: ${v.next_payment || '—'} · रसीद: ${v.reference}` : 'भुगतान की पुष्टि नहीं हुई। पैसा कटा हो तो care@sadasneha.in पर लिखें।',
             v.ok ? `✓ Payment received, thank you! Next due: ${v.next_payment || '—'} · Receipt: ${v.reference}` : 'Could not confirm. If money was taken, write to care@sadasneha.in.');
-          if (v.ok) loadStatus();
+          if (v.ok) { loadStatus(); payDone(store.get('gs_code')); }
         } catch (e) { msg('इंटरनेट नहीं', 'Offline'); }
       } });
     rz.on('payment.failed', () => msg('भुगतान नहीं हुआ। फिर कोशिश करें।', 'Payment failed; try again.'));
@@ -2559,6 +2576,16 @@ $('#pn-go').addEventListener('click', async () => {
 });
 
 
+
+// after a payment on the website: the code, and the way back into the app (Sneha switches on there with it)
+function payDone(code) {
+  let box = $('#pn-done'); if (!box) { box = document.createElement('div'); box.id = 'pn-done'; box.className = 'card pay-done'; $('#pn-msg').after(box); }
+  box.innerHTML = `<h2>✓ ${T('भुगतान मिल गया', 'Payment received')}</h2><p>${T('आपका कोड', 'Your code')}:</p><div class="code">${esc(code)}</div>
+    <a class="btn primary" href="${openInAppLink(code)}">📱 ${T('ऐप में खोलें – स्नेहा चालू करें', 'Open in the app – switch Sneha on')}</a>
+    <p class="muted small">${T('ऐप नहीं है? Play Store से "सदा स्नेहा" डाउनलोड करें, फिर "कोड है?" में यह कोड डालें। माता-पिता के फ़ोन में भी यही कोड डालें और "बुज़ुर्ग का" चुनें।', 'No app? Download "SadaSneha" from the Play Store, then enter this code under "Have a code?". On your parents\' phone enter the same code and choose "the elder\'s".')}</p>
+    <button class="btn secondary" type="button" data-go="home">${T('यहीं अपनी सेवा देखें', 'See my service here')}</button>`;
+  box.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
 // ---- Free video calls inside the family: WebRTC, phone to phone; our server only passes the "offer" and "answer" ----
 API.call = API_BASE + '/app-call';
 const VC = { pc: null, local: null, id: null, polling: null, ringPoll: null, incoming: null, facing: 'user', tone: null };
@@ -4468,7 +4495,7 @@ function otpSignedIn(r, phone, want) {
   }
   if (want === 'elder') { toast(T('यह नंबर अभी किसी परिवार में नहीं जुड़ा। घर वालों से लिंक माँगिए।', 'This number is not in a family yet. Ask your family for the link.'), 5000); return; }
   // someone new: their free home (Sakhi, songs, radio, yoga…); a family plan starts from "स्नेहा से मिलिए" with the number already checked
-  store.set('gs_role', 'free'); ulog('step', 'free-signup', null, 'otp'); show('free');
+  store.set('gs_role', 'free'); ulog('step', 'free-signup', null, 'otp'); show(!NATIVE && store.get('gs_plan_pick') ? 'buy' : 'free');
 }
 // ---- Continue with Google, through the same Firebase project (sadasneha-85005) ----
 // Google does not allow its sign-in page inside an app's web view: the Android app (1.8+) uses Android's own account
@@ -4513,7 +4540,7 @@ async function onGoogleToken(id_token) {
   store.set('gs_g_email', r.email); store.set('gs_g_name', r.name || ''); keepUser(r);
   if (r.matches && r.matches.length) { store.set('gs_code', r.matches[0].code); store.set('gs_role', 'family'); try { localStorage.removeItem('gs_last'); } catch (e) {} return askPermsThen('home'); }
   try { const m = await circleCall({ action: 'login', cred: id_token }); if (m.ok) { store.set('gs_member', m.key); return show('care'); } } catch (e) {}
-  store.set('gs_role', 'free'); ulog('step', 'free-signup', null, 'google'); show('free');
+  store.set('gs_role', 'free'); ulog('step', 'free-signup', null, 'google'); show(!NATIVE && store.get('gs_plan_pick') ? 'buy' : 'free');
 }
 
 // sign-up: the family's own mobile must be verified by OTP before the form is sent
@@ -4572,25 +4599,29 @@ gvStart = function (list, video) { if (isLocked('meeting')) { toast(T('परि
 // ---- The single way in (v-start): Google or mobile OTP for everyone. Who it is (family, elder, circle member or
 // someone new) is worked out from the verified number or Gmail, not asked first. A GS-… code still works, with one
 // question: whose phone is this?
+// a GS-… code (from the family, or from the payment page): checked, then this phone opens as the family's or the elder's
+async function codeLogin(raw, who, err, btn) {
+  const c = String(raw || '').trim().toUpperCase().replace(/\s/g, '');
+  if (!/^GS-[A-Z0-9]{8}$/.test(c)) { err.textContent = T('कोड ऐसा दिखना चाहिए: GS-XXXXXXXX', 'The code looks like GS-XXXXXXXX'); return; }
+  busy(btn, true, T('जाँच रहे हैं…', 'Checking…')); err.textContent = '';
+  try {
+    const j = await (await fetch(API.status + '?code=' + encodeURIComponent(c))).json();
+    if (!j.ok) { err.textContent = T('यह कोड नहीं मिला। सही कोड देखकर फिर डालिए।', 'This code was not found. Check it and try again.'); return; }
+    const elder = who === 'elder';
+    store.set('gs_code', c); store.set('gs_role', elder ? 'elder' : 'family'); try { localStorage.removeItem('gs_last'); } catch (e) {}
+    if (store.get('gs_user')) meCall({ action: 'link', code: c }).catch(() => {});   // Sakhi's memories go along (only if it is theirs)
+    ulog('step', 'code-login', null, elder ? 'elder' : 'family');
+    show(elder ? 'elder' : 'home');
+  } catch (e) { err.textContent = T('इंटरनेट नहीं; फिर कोशिश कीजिए।', 'Offline; please try again.'); }
+  finally { busy(btn, false); }
+}
+function codeBox(scope, input, err) { scope.querySelectorAll('[data-who]').forEach((b) => b.addEventListener('click', () => codeLogin(input.value, b.dataset.who, err, b))); }
 (function startScreen() {
   const box = $('#st-otp'); if (!box) return;
   otpBox(box, { id: 'otpst', done: (r, p) => otpSignedIn(r, p, '') });
   if (!NATIVE || nativeGoogle()) googleButton($('#st-google'), $('#st-gmsg'), onGoogleToken);
   else { $('#st-google').classList.add('hidden'); $('#st-or').classList.add('hidden'); }
-  $('#v-start').querySelectorAll('[data-who]').forEach((b) => b.addEventListener('click', async () => {
-    const err = $('#st-code-err'), c = $('#st-code-in').value.trim().toUpperCase().replace(/\s/g, '');
-    if (!/^GS-[A-Z0-9]{8}$/.test(c)) { err.textContent = T('कोड ऐसा दिखना चाहिए: GS-XXXXXXXX', 'The code looks like GS-XXXXXXXX'); return; }
-    busy(b, true, T('जाँच रहे हैं…', 'Checking…')); err.textContent = '';
-    try {
-      const j = await (await fetch(API.status + '?code=' + encodeURIComponent(c))).json();
-      if (!j.ok) { err.textContent = T('यह कोड नहीं मिला। घर वालों से सही कोड पूछिए।', 'This code was not found. Ask your family for the right code.'); return; }
-      const elder = b.dataset.who === 'elder';
-      store.set('gs_code', c); store.set('gs_role', elder ? 'elder' : 'family'); try { localStorage.removeItem('gs_last'); } catch (e) {}
-      ulog('step', 'code-login', null, elder ? 'elder' : 'family');
-      show(elder ? 'elder' : 'home');
-    } catch (e) { err.textContent = T('इंटरनेट नहीं; फिर कोशिश कीजिए।', 'Offline; please try again.'); }
-    finally { busy(b, false); }
-  }));
+  codeBox($('#v-start'), $('#st-code-in'), $('#st-code-err'));
 })();
 // where "sign in" leads: the app goes straight to it; the website shows what SadaSneha is first
 const entryView = () => (NATIVE ? 'start' : 'role');
@@ -4796,6 +4827,30 @@ $('#v-done [data-go="home"]').addEventListener('click', (e) => {
   if (self) { e.preventDefault(); e.stopImmediatePropagation(); store.set('gs_role', 'elder'); show('elder'); }
   else store.set('gs_role', 'family');
 }, true);
+
+codeBox($('#f-code'), $('#f-code-in'), $('#f-code-err'));
+
+// ---- coming back from the payment page with a code: "?unlock=GS-…" (the app opens with it; the website too) ----
+(function unlockFromLink() {
+  const c = String(new URLSearchParams(location.search).get('unlock') || '').toUpperCase();
+  if (!/^GS-[A-Z0-9]{8}$/.test(c)) return;
+  try { history.replaceState(history.state, '', location.pathname); } catch (e) {}
+  if (store.get('gs_code') === c) { toast(T('भुगतान मिल गया ✓ स्नेहा चालू है', 'Payment received ✓ Sneha is on'), 4000); return; }
+  setTimeout(() => {
+    show(store.get('gs_user') ? 'free' : 'start');
+    const box = store.get('gs_user') ? $('#f-code') : $('#st-code'); const inp = store.get('gs_user') ? $('#f-code-in') : $('#st-code-in');
+    if (box && inp) { box.open = true; inp.value = c; box.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+    toast(T('भुगतान का कोड मिला। बताइए यह फ़ोन किसका है, और स्नेहा चालू।', 'Your code is here. Choose whose phone this is, and Sneha is on.'), 6000);
+  }, 600);
+})();
+
+// ---- on the website: a plan chosen before signing in carries on to "who is it for", then sign-up, then payment ----
+const PLAY_URL = 'https://play.google.com/store/apps/details?id=in.sadasneha.app';
+function openInAppLink(code) {
+  // Android: opens our app by its name with the code (no Play Console needed); without the app, the website with the code
+  const back = encodeURIComponent('https://sadasneha.in/?unlock=' + code);
+  return /Android/i.test(navigator.userAgent) ? `intent://sadasneha.in/unlock?code=${code}#Intent;scheme=https;package=in.sadasneha.app;S.browser_fallback_url=${back};end` : 'https://sadasneha.in/?unlock=' + code;
+}
 </script>
 </body>
 </html>
