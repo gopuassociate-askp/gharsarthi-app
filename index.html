@@ -3960,17 +3960,55 @@ function talkBargeStop() {
 // "जी…" in Hindi; हो… (Marathi), હા… (Gujarati), ਜੀ… (Punjabi), হ্যাঁ… (Bangla), ହଁ… (Odia), సరే…, சரி…, ಸರಿ…, ശരി…, Mm-hmm… (English)
 const HMM_LANGS = ['hi', 'mr', 'gu', 'pa', 'bn', 'or', 'te', 'ta', 'kn', 'ml', 'en'];
 const hmmFile = () => { const l = String(TALK.lang || 'hi-IN').slice(0, 2); return 'face/hmm/' + (HMM_LANGS.includes(l) ? l : 'hi') + '.mp3'; };
-async function talkHmm() {
+// What to say while she thinks, from what they just said (when the phone already wrote it down):
+// asked to play or open something -> "हाँ जी, अभी लगाती हूँ…"; to do or call -> "हाँ जी, करती हूँ…"; a question -> "हाँ जी, अभी देखती हूँ…";
+// anything sad or worrying -> only a soft "जी…"; otherwise "जी…" or "हाँ जी…". If the answer takes long: "बस एक पल…".
+const HMM_SOFT = /उदास|दुख|दुःख|रो रह|अकेल|डर|घबरा|दर्द|तबीयत|तबियत|बीमार|चक्कर|कमज़ोर|कमजोर|परेशान|मन नहीं|sad|pain|lonely|scared/i;
+function hmmKind(text) {
+  const t = String(text || '');
+  if (!t) return '';
+  if (HMM_SOFT.test(t)) return 'soft';
+  if (/(फ़ोन|फोन|कॉल|call|मिलाओ|मिलाइए|भेज|याद दिला|लिख ल|नोट कर)/i.test(t)) return 'do';
+  if (/(गाना|गाने|भजन|रेडियो|टीवी|चैनल|चलाओ|चलाइए|लगाओ|लगाइए|सुनाओ|सुनाइए|बजाओ|बजाइए|दिखाओ|दिखाइए|खोलो|खोलिए|play)/i.test(t)) return 'play';
+  if (/[?？]|क्या|कब|कैसे|कौन|कहाँ|कहां|कितन|क्यों|बताओ|बताइए|मौसम|तिथि|त्योहार|what|when|how|who|where|why/i.test(t)) return 'look';
+  return '';
+}
+const SNEHA_HMM = { play: 'hi-laga', do: 'hi-kar', look: 'hi-dekh', soft: 'hi', long: 'hi-pal' };
+const SAKHI_HMM = { play: 'ज़रूर! अभी लगाती हूँ।', do: 'ज़रूर, करती हूँ।', look: 'चलिए, देखती हूँ…', soft: 'हाँ, मैं सुन रही हूँ…', plain: ['अच्छा…', 'हम्म…', 'ज़रूर…'], long: 'बस एक सेकंड…' };
+function hmmPlay(file) {
+  return new Promise((done) => {
+    try {
+      const a = new Audio('face/hmm/' + file + '.mp3'); TALK.audio = a;
+      try { const src = TALK.ac.createMediaElementSource(a); src.connect(TALK.an); } catch (e) {}
+      a.onplay = () => { TALK.speaking = true; };
+      const end = () => { TALK.speaking = false; done(); };
+      a.onended = a.onerror = end; a.play().catch(end); setTimeout(end, 2500);
+    } catch (e) { done(); }
+  });
+}
+async function hmmSay(kind, second) {
+  const l = String(TALK.lang || 'hi-IN').slice(0, 2);
+  if (typeof sakhiNow === 'function' && sakhiNow()) {
+    // Sakhi: her own words, in the phone's voice (free); Hindi only, other languages stay quiet rather than mix
+    if (l !== 'hi') return;
+    const line = second ? SAKHI_HMM.long : kind ? SAKHI_HMM[kind] : SAKHI_HMM.plain[Math.floor(Math.random() * SAKHI_HMM.plain.length)];
+    TALK.speaking = true; await Promise.race([phoneSpeak(line, TALK.lang), new Promise((ok) => setTimeout(ok, 3000))]); TALK.speaking = false;
+    return;
+  }
+  // Sneha: short pieces recorded once in her own voice (Hindi); other languages keep their one "जी…"
+  if (l !== 'hi') { if (!second) await hmmPlay(HMM_LANGS.includes(l) ? l : 'hi'); return; }
+  await hmmPlay(second ? SNEHA_HMM.long : kind ? SNEHA_HMM[kind] : (Math.random() < 0.55 ? 'hi' : 'hi-haanji'));
+}
+async function talkHmm(heard) {
   // about a second into the wait, like a person who has listened and is about to answer; skipped if her reply is already here
+  const kind = hmmKind(heard);
   await new Promise((ok) => setTimeout(ok, 900));
   if (TALK.replyIn || TALK.cut) return;
-  try {
-    const a = new Audio(hmmFile()); TALK.audio = a;
-    try { const src = TALK.ac.createMediaElementSource(a); src.connect(TALK.an); } catch (e) {}
-    a.onplay = () => { TALK.speaking = true; };
-    await new Promise((ok) => { a.onended = a.onerror = ok; a.play().catch(ok); setTimeout(ok, 2500); });
-    TALK.speaking = false;
-  } catch (e) {}
+  await hmmSay(kind, false);
+  // still thinking well after that: one more gentle line (never after something sad: she just waits, listening)
+  await new Promise((ok) => setTimeout(ok, 1800));
+  if (TALK.replyIn || TALK.cut || kind === 'soft') return;
+  await hmmSay(kind, true);
 }
 // Sneha's reply: her first sentence comes voiced with the answer; the later sentences are voiced
 // on request at the same moment, so they are ready by the time the first one ends.
@@ -4179,7 +4217,7 @@ setInterval(async () => {
 async function talkSend(blob, typed) {
   TALK.busy = true; $('#talk-mic').disabled = true; talkState(`${talkWho()} सोच रही है…`, `${talkWho()} is thinking…`);
   TALK.replyIn = false;
-  const hmm = talkHmm();
+  const hmm = talkHmm(typed);
   const whoNow = TALK.cam && TALK.who && Date.now() - TALK.who.at < 8000 ? TALK.who.w : null;
   const b64 = blob ? await new Promise((ok) => { const r = new FileReader(); r.onload = () => ok(String(r.result).split(',')[1]); r.readAsDataURL(blob); }) : '';
   try {
