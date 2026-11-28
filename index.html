@@ -528,14 +528,19 @@ div.talk-sakhi.mono.hidden { display: none; }
 div.talk-sakhi:not(.mono) { position: relative; width: 100%; max-width: 320px; aspect-ratio: 1; margin: 0 auto; border-radius: 50%; overflow: hidden; border: 6px solid #14b8a6; background: #ccfbf1; transition: box-shadow .2s; }
 div.talk-sakhi.hidden { display: none; }
 .talk-sakhi .sk-rest, .talk-sakhi .sk-talk { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
-.talk-sakhi .sk-talk { opacity: 0; transition: opacity .18s; }
-.talk-sakhi.speaking .sk-talk { opacity: 1; }
 div.talk-sakhi.speaking { box-shadow: 0 0 0 10px rgba(20, 184, 166, .25), 0 0 0 20px rgba(20, 184, 166, .12); }
 
 .signout { text-align: center; margin: 18px 0 8px; }
 .signout .linkbtn { font-size: 16px; color: var(--muted, #6b5548); min-height: 48px; }
 .acct-pick { margin-top: 14px; border-top: 1px solid var(--line); padding-top: 12px; }
 .acct-pick .btn { width: 100%; margin: 6px 0; }
+
+#install-bar.away { display: none !important; }
+.draft-card { border: 2px dashed #ea580c; }
+.draft-card p { margin: 0 0 8px; }
+.draft-card .btn { width: 100%; }
+.form-later { display: block; margin: 10px auto 0; font-size: 16px; min-height: 48px; }
+#signup-form.self .self-hide, #signup-form [hidden] { display: none !important; }
 </style>
 </head>
 <body>
@@ -1485,7 +1490,7 @@ div.talk-sakhi.speaking { box-shadow: 0 0 0 10px rgba(20, 184, 166, .25), 0 0 0 
 // हिंदी / English: each family chooses; remembered on this phone. Switching reloads the page.
 const LANG = (() => { try { return localStorage.getItem('gs_lang') || 'hi'; } catch (e) { return 'hi'; } })();
 const T = (hi, en) => (LANG === 'en' ? en : hi);
-const FIELDS = [{"key":"family_name","label":"आपका नाम / Your name","type":"text","required":true},{"key":"relation","label":"वरिष्ठजन से आपका रिश्ता / Your relation to the elder","type":"dropdown","options":["मैं स्वयं (वरिष्ठजन) / Myself (the elder)","बेटा / Son","बेटी / Daughter","बहू / Daughter-in-law","दामाद / Son-in-law","पोता-पोती / Grandchild","अन्य / Other"],"required":true},{"key":"family_phone","label":"आपका मोबाइल नंबर / Your mobile","type":"text","placeholder":"98XXXXXXXX","required":true},{"key":"family_email","label":"आपका ईमेल / Your email","type":"email","required":true},{"key":"pincode","label":"वरिष्ठजन के घर का पिन कोड / PIN code of the elder's home","type":"text","placeholder":"482001","required":false},{"key":"locality","label":"मोहल्ला / इलाका / Area or locality","type":"text","required":false},{"key":"city","label":"शहर / ज़िला / City or district","type":"text","required":true},{"key":"state","label":"राज्य / State","type":"dropdown","options":["अंडमान-निकोबार / Andaman & Nicobar","आंध्र प्रदेश / Andhra Pradesh","अरुणाचल प्रदेश / Arunachal Pradesh","असम / Assam","बिहार / Bihar","चंडीगढ़ / Chandigarh","छत्तीसगढ़ / Chhattisgarh","दादरा-नगर हवेली और दमन-दीव / Dadra & Nagar Haveli and Daman & Diu","दिल्ली / Delhi","गोवा / Goa","गुजरात / Gujarat","हरियाणा / Haryana","हिमाचल प्रदेश / Himachal Pradesh","जम्मू-कश्मीर / Jammu & Kashmir","झारखंड / Jharkhand","कर्नाटक / Karnataka","केरल / Kerala","लद्दाख / Ladakh","लक्षद्वीप / Lakshadweep","मध्य प्रदेश / Madhya Pradesh","महाराष्ट्र / Maharashtra","मणिपुर / Manipur","मेघालय / Meghalaya","मिज़ोरम / Mizoram","नागालैंड / Nagaland","ओडिशा / Odisha","पुडुचेरी / Puducherry","पंजाब / Punjab","राजस्थान / Rajasthan","सिक्किम / Sikkim","तमिलनाडु / Tamil Nadu","तेलंगाना / Telangana","त्रिपुरा / Tripura","उत्तर प्रदेश / Uttar Pradesh","उत्तराखंड / Uttarakhand","पश्चिम बंगाल / West Bengal"],"required":false},{"key":"elder_name","label":"वरिष्ठजन का नाम / Elder's name","type":"text","required":true},{"key":"elder_gender","label":"वरिष्ठजन हैं / The elder is","type":"dropdown","options":["पुरुष / Male","महिला / Female"],"required":true},{"key":"address_as","label":"स्नेहा उन्हें प्यार से क्या कहकर बुलाए? / What would they love Sneha to call them?","type":"dropdown","options":["पापा जी","पिता जी","बाबू जी","बाउजी","दादा जी","नाना जी","अंकल जी","ताऊ जी","चाचा जी","मामा जी","भाई साहब","मम्मी जी","माता जी","अम्मा जी","माँ जी","बीजी","दादी जी","नानी जी","आंटी जी","ताई जी","चाची जी","मामी जी","बहन जी","अन्य (नीचे लिखें) / Other (write below)"],"required":true,"by_gender":{"पुरुष / Male":["पापा जी","पिता जी","बाबू जी","बाउजी","दादा जी","नाना जी","अंकल जी","ताऊ जी","चाचा जी","मामा जी","भाई साहब","अन्य (नीचे लिखें) / Other (write below)"],"महिला / Female":["मम्मी जी","माता जी","अम्मा जी","माँ जी","बीजी","दादी जी","नानी जी","आंटी जी","ताई जी","चाची जी","मामी जी","बहन जी","अन्य (नीचे लिखें) / Other (write below)"]}},{"key":"address_as_other","label":"अन्य हो तो यहाँ लिखें / If other, write it here","type":"text","placeholder":"जैसे: शर्मा जी, बड़े पापा","required":false},{"key":"sneha_intro","label":"स्नेहा अपना परिचय कैसे दे? / How should Sneha introduce herself?","type":"dropdown","options":["आपकी बेटी स्नेहा","आपकी पोती स्नेहा","आपकी नातिन स्नेहा","आपकी बहू स्नेहा","सदा स्नेहा सेवा से स्नेहा"],"required":true},{"key":"elder_age","label":"उम्र / Age","type":"number","required":true},{"key":"elder_birthday","label":"जन्मदिन (वैकल्पिक) / Birthday, optional","type":"text","placeholder":"15 अगस्त / 15-08","required":false},{"key":"elder_phone","label":"वरिष्ठजन का मोबाइल नंबर / Elder's mobile","type":"text","placeholder":"98XXXXXXXX","required":true},{"key":"phone_type","label":"उनका फ़ोन / Their phone","type":"dropdown","options":["कीपैड / Keypad","एंड्रॉयड / Android","आईफ़ोन / iPhone"],"required":true},{"key":"language","label":"स्नेहा किस भाषा में बात करे? / Sneha's language","type":"dropdown","options":["हिंदी / Hindi","मराठी / Marathi","ગુજરાતી / Gujarati","ਪੰਜਾਬੀ / Punjabi","ଓଡ଼ିଆ / Odia","বাংলা / Bengali","తెలుగు / Telugu","தமிழ் / Tamil","ಕನ್ನಡ / Kannada","മലയാളം / Malayalam"],"required":true},{"key":"wake_time","label":"सुबह उठने का समय / Wake-up time","type":"text","placeholder":"6:30 AM","required":false},{"key":"breakfast_time","label":"नाश्ते का समय / Breakfast time","type":"text","placeholder":"9:30 AM","required":true},{"key":"lunch_time","label":"दोपहर के खाने का समय / Lunch time","type":"text","placeholder":"1:30 PM","required":true},{"key":"medicine_time","label":"रात की दवाई का समय / Night medicine time","type":"text","placeholder":"8:30 PM","required":true},{"key":"no_call_hours","label":"किस समय कॉल न करें? / When should Sneha not call?","type":"text","placeholder":"2:30 PM to 4 PM (आराम / rest)","required":false},{"key":"health_notes","label":"स्वास्थ्य (वैकल्पिक) / Health, optional","type":"textarea","placeholder":"BP, शुगर, कम सुनाई देता है","required":false},{"key":"contact2_name","label":"देखभाल करने वाले 1: नाम / Caretaker 1: name (needed if you are the elder)","type":"text","required":false},{"key":"contact2_relation","label":"देखभाल करने वाले 1: रिश्ता / relation","type":"text","placeholder":"भतीजा, पड़ोसी, बेटा","required":false},{"key":"contact2_phone","label":"देखभाल करने वाले 1: मोबाइल / mobile","type":"text","required":false},{"key":"contact2_role","label":"देखभाल करने वाले 1: किस काम के लिए? / for what?","type":"dropdown","options":["आपात स्थिति और रोज़ की ख़बर / Emergencies and daily updates","सिर्फ़ आपात स्थिति / Emergencies only","सिर्फ़ रोज़ की ख़बर / Daily updates only"],"required":false},{"key":"contact3_name","label":"देखभाल करने वाले 2: नाम / Caretaker 2: name","type":"text","required":false},{"key":"contact3_relation","label":"देखभाल करने वाले 2: रिश्ता / relation","type":"text","required":false},{"key":"contact3_phone","label":"देखभाल करने वाले 2: मोबाइल / mobile","type":"text","required":false},{"key":"contact3_role","label":"देखभाल करने वाले 2: किस काम के लिए? / for what?","type":"dropdown","options":["आपात स्थिति और रोज़ की ख़बर / Emergencies and daily updates","सिर्फ़ आपात स्थिति / Emergencies only","सिर्फ़ रोज़ की ख़बर / Daily updates only"],"required":false},{"key":"ab_goes_out","label":"क्या वे अकेले बाहर जाते हैं (बाज़ार, सैर)? / Do they go out alone (market, walk)?","type":"dropdown","options":["हाँ / Yes","कभी-कभी / Sometimes","चल सकते हैं, पर सुरक्षा के लिए हम बाहर नहीं जाने देते / Can, but we keep them in for safety","नहीं / No"],"required":true},{"key":"ab_strength","label":"चलने-फिरने में कमज़ोरी या धीमापन? / Weakness or slowness when walking?","type":"dropdown","options":["नहीं / No","थोड़े धीमे हैं / A little slow","हाँ, कमज़ोर हैं या सहारा चाहिए / Yes, weak or need support"],"required":true},{"key":"ab_own_medicines","label":"क्या वे अपनी दवाई ख़ुद, बिना याद दिलाए लेते हैं? / Do they take their medicines themselves, without reminders?","type":"dropdown","options":["हाँ / Yes","कोई दवाई नहीं / No medicines","कभी भूल जाते हैं / Sometimes forget","नहीं, याद दिलाना पड़ता है / No, they need reminding"],"required":true},{"key":"ab_med_count","label":"रोज़ कितनी दवाइयाँ? / How many medicines a day?","type":"dropdown","options":["0–2","3 या ज़्यादा / 3 or more"],"required":true},{"key":"ab_fall","label":"पिछले एक साल में कभी गिरे? / Any fall in the last year?","type":"dropdown","options":["नहीं / No","हाँ / Yes"],"required":true},{"key":"ab_hospital","label":"पिछले एक साल में अस्पताल में भर्ती हुए? / In hospital in the last year?","type":"dropdown","options":["नहीं / No","हाँ / Yes"],"required":true},{"key":"ab_memory","label":"क्या वे बातें अक्सर भूल जाते हैं या उलझ जाते हैं? / Do they often forget things or get confused?","type":"dropdown","options":["नहीं / No","थोड़ा / A little","हाँ / Yes"],"required":true},{"key":"ab_hearing","label":"फ़ोन पर सुनने या देखने में दिक्कत? / Difficulty hearing on the phone, or seeing?","type":"dropdown","options":["नहीं / No","हाँ / Yes"],"required":true},{"key":"ab_alone","label":"क्या वे अकेले रहते हैं, या दिन में अकेले रहते हैं? / Do they live alone, or are they alone during the day?","type":"dropdown","options":["नहीं / No","हाँ / Yes"],"required":true},{"key":"ab_serious","label":"कोई गंभीर बीमारी (दिल, लकवा, किडनी, पार्किंसन…)? / Any serious illness (heart, stroke, kidney, Parkinson's…)?","type":"dropdown","options":["नहीं / No","सिर्फ़ बीपी या शुगर / Only BP or sugar","हाँ / Yes"],"required":true},{"key":"cautions","label":"परिवार की सावधानियाँ: स्नेहा प्यार से इनका ध्यान रखवाए (वैकल्पिक) / Family precautions Sneha should gently keep, optional","type":"checkbox","required":false,"options":["बाहर अकेले न जाएँ / Not to go out alone","सीढ़ियाँ न चढ़ें / Not to climb stairs","भारी सामान न उठाएँ / Not to lift heavy things","गैस-चूल्हा अकेले न जलाएँ / Not to use the gas stove alone","गाड़ी या स्कूटर न चलाएँ / Not to drive","रात में उठें तो लाइट जलाकर, धीरे चलें / At night, light on and walk slowly"]},{"key":"plan","label":"प्लान / Plan","type":"dropdown","options":["फ़ाउंडिंग फ़ैमिली (मुफ़्त) / Founding family (free)"],"required":true},{"key":"consent","label":"सहमति / Consent","type":"checkbox","required":true,"options":["वरिष्ठजन को इसकी जानकारी है और वे सहमत हैं / The elder knows and agrees","सदा स्नेहा एम्बुलेंस या डॉक्टर नहीं है; आपात स्थिति में पहले 108/112 पर कॉल करें / SadaSneha is not an ambulance or doctor; in an emergency call 108/112 first","सुरक्षा के लिए कॉल रिकॉर्ड हो सकती हैं; जानकारी निजी रहेगी और माँगने पर मिटा दी जाएगी / Calls may be recorded for safety; data stays private and is deleted on request"]},{"key":"health_consent","label":"स्वास्थ्य जानकारी (वैकल्पिक) / Health details, optional","type":"checkbox","required":false,"options":["दवाइयों और बीपी/शुगर की जानकारी रखने और याद दिलाने की अनुमति / Allow keeping medicine and BP/sugar details for reminders"]}];
+const FIELDS = [{"key":"family_name","label":"आपका नाम / Your name","type":"text","required":true},{"key":"relation","label":"वरिष्ठजन से आपका रिश्ता / Your relation to the elder","type":"dropdown","options":["मैं स्वयं (वरिष्ठजन) / Myself (the elder)","बेटा / Son","बेटी / Daughter","बहू / Daughter-in-law","दामाद / Son-in-law","पोता-पोती / Grandchild","अन्य / Other"],"required":true},{"key":"family_phone","label":"आपका मोबाइल नंबर / Your mobile","type":"text","placeholder":"98XXXXXXXX","required":true},{"key":"family_email","label":"आपका ईमेल (वैकल्पिक, बाद में भी दे सकते हैं) / Your email (optional, can add later)","type":"email","required":false},{"key":"pincode","label":"वरिष्ठजन के घर का पिन कोड / PIN code of the elder's home","type":"text","placeholder":"482001","required":false},{"key":"locality","label":"मोहल्ला / इलाका / Area or locality","type":"text","required":false},{"key":"city","label":"शहर / ज़िला / City or district","type":"text","required":false},{"key":"state","label":"राज्य / State","type":"dropdown","options":["अंडमान-निकोबार / Andaman & Nicobar","आंध्र प्रदेश / Andhra Pradesh","अरुणाचल प्रदेश / Arunachal Pradesh","असम / Assam","बिहार / Bihar","चंडीगढ़ / Chandigarh","छत्तीसगढ़ / Chhattisgarh","दादरा-नगर हवेली और दमन-दीव / Dadra & Nagar Haveli and Daman & Diu","दिल्ली / Delhi","गोवा / Goa","गुजरात / Gujarat","हरियाणा / Haryana","हिमाचल प्रदेश / Himachal Pradesh","जम्मू-कश्मीर / Jammu & Kashmir","झारखंड / Jharkhand","कर्नाटक / Karnataka","केरल / Kerala","लद्दाख / Ladakh","लक्षद्वीप / Lakshadweep","मध्य प्रदेश / Madhya Pradesh","महाराष्ट्र / Maharashtra","मणिपुर / Manipur","मेघालय / Meghalaya","मिज़ोरम / Mizoram","नागालैंड / Nagaland","ओडिशा / Odisha","पुडुचेरी / Puducherry","पंजाब / Punjab","राजस्थान / Rajasthan","सिक्किम / Sikkim","तमिलनाडु / Tamil Nadu","तेलंगाना / Telangana","त्रिपुरा / Tripura","उत्तर प्रदेश / Uttar Pradesh","उत्तराखंड / Uttarakhand","पश्चिम बंगाल / West Bengal"],"shown_english_first":true,"required":false},{"key":"elder_name","label":"वरिष्ठजन का नाम / Elder's name","type":"text","required":true},{"key":"elder_gender","label":"वरिष्ठजन हैं / The elder is","type":"dropdown","options":["पुरुष / Male","महिला / Female"],"required":true},{"key":"address_as","label":"स्नेहा उन्हें प्यार से क्या कहकर बुलाए? / What would they love Sneha to call them?","type":"dropdown","options":["पापा जी","पिता जी","बाबू जी","बाउजी","दादा जी","नाना जी","अंकल जी","ताऊ जी","चाचा जी","मामा जी","भाई साहब","मम्मी जी","माता जी","अम्मा जी","माँ जी","बीजी","दादी जी","नानी जी","आंटी जी","ताई जी","चाची जी","मामी जी","बहन जी","अन्य (नीचे लिखें) / Other (write below)"],"required":true,"by_gender":{"पुरुष / Male":["पापा जी","पिता जी","बाबू जी","बाउजी","दादा जी","नाना जी","अंकल जी","ताऊ जी","चाचा जी","मामा जी","भाई साहब","अन्य (नीचे लिखें) / Other (write below)"],"महिला / Female":["मम्मी जी","माता जी","अम्मा जी","माँ जी","बीजी","दादी जी","नानी जी","आंटी जी","ताई जी","चाची जी","मामी जी","बहन जी","अन्य (नीचे लिखें) / Other (write below)"]}},{"key":"address_as_other","label":"अन्य हो तो यहाँ लिखें / If other, write it here","type":"text","placeholder":"जैसे: शर्मा जी, बड़े पापा","required":false},{"key":"sneha_intro","label":"स्नेहा अपना परिचय कैसे दे? / How should Sneha introduce herself?","type":"dropdown","options":["आपकी बेटी स्नेहा","आपकी पोती स्नेहा","आपकी नातिन स्नेहा","आपकी बहू स्नेहा","आपकी सहेली स्नेहा","सदा स्नेहा सेवा से स्नेहा","अन्य – ख़ुद लिखें / Other – write your own"],"required":true},{"key":"sneha_intro_other","label":"अन्य हो तो लिखें, जैसे: \"आपकी भतीजी स्नेहा\" / If other, write it","type":"text","placeholder":"आपकी … स्नेहा","required":false},{"key":"elder_age","label":"उम्र / Age","type":"number","required":false},{"key":"elder_birthday","label":"जन्मदिन (वैकल्पिक) / Birthday, optional","type":"text","placeholder":"15 अगस्त / 15-08","required":false},{"key":"elder_phone","label":"वरिष्ठजन का मोबाइल नंबर / Elder's mobile","type":"text","placeholder":"98XXXXXXXX","required":true},{"key":"phone_type","label":"उनका फ़ोन / Their phone","type":"dropdown","options":["कीपैड / Keypad","एंड्रॉयड / Android","आईफ़ोन / iPhone"],"required":true},{"key":"language","label":"स्नेहा किस भाषा में बात करे? (एक से ज़्यादा चुन सकते हैं; पहली चुनी हुई मुख्य) / Sneha's language (choose one or more; the first is the main one)","type":"checkbox","min":1,"options":["हिंदी / Hindi","मराठी / Marathi","ગુજરાતી / Gujarati","ਪੰਜਾਬੀ / Punjabi","ଓଡ଼ିଆ / Odia","বাংলা / Bengali","తెలుగు / Telugu","தமிழ் / Tamil","ಕನ್ನಡ / Kannada","മലയാളം / Malayalam"],"required":true},{"key":"wake_time","label":"सुबह उठने का समय / Wake-up time","type":"text","placeholder":"6:30 AM","required":false},{"key":"breakfast_time","label":"नाश्ते का समय / Breakfast time","type":"text","placeholder":"9:30 AM","required":false},{"key":"lunch_time","label":"दोपहर के खाने का समय / Lunch time","type":"text","placeholder":"1:30 PM","required":false},{"key":"medicine_time","label":"रात की दवाई का समय / Night medicine time","type":"text","placeholder":"8:30 PM","required":false},{"key":"no_call_hours","label":"किस समय कॉल न करें? / When should Sneha not call?","type":"text","placeholder":"2:30 PM to 4 PM (आराम / rest)","required":false},{"key":"health_notes","label":"स्वास्थ्य (वैकल्पिक) / Health, optional","type":"textarea","placeholder":"BP, शुगर, कम सुनाई देता है","required":false},{"key":"contact2_name","label":"देखभाल करने वाले 1: नाम / Caretaker 1: name (needed if you are the elder)","type":"text","required":false},{"key":"contact2_relation","label":"देखभाल करने वाले 1: रिश्ता / relation","type":"text","placeholder":"भतीजा, पड़ोसी, बेटा","required":false},{"key":"contact2_phone","label":"देखभाल करने वाले 1: मोबाइल / mobile","type":"text","required":false},{"key":"contact2_role","label":"देखभाल करने वाले 1: किस काम के लिए? / for what?","type":"dropdown","options":["आपात स्थिति और रोज़ की ख़बर / Emergencies and daily updates","सिर्फ़ आपात स्थिति / Emergencies only","सिर्फ़ रोज़ की ख़बर / Daily updates only"],"required":false},{"key":"contact3_name","label":"देखभाल करने वाले 2: नाम / Caretaker 2: name","type":"text","required":false},{"key":"contact3_relation","label":"देखभाल करने वाले 2: रिश्ता / relation","type":"text","required":false},{"key":"contact3_phone","label":"देखभाल करने वाले 2: मोबाइल / mobile","type":"text","required":false},{"key":"contact3_role","label":"देखभाल करने वाले 2: किस काम के लिए? / for what?","type":"dropdown","options":["आपात स्थिति और रोज़ की ख़बर / Emergencies and daily updates","सिर्फ़ आपात स्थिति / Emergencies only","सिर्फ़ रोज़ की ख़बर / Daily updates only"],"required":false},{"key":"ab_goes_out","label":"क्या वे अकेले बाहर जाते हैं (बाज़ार, सैर)? / Do they go out alone (market, walk)?","type":"dropdown","options":["हाँ / Yes","कभी-कभी / Sometimes","चल सकते हैं, पर सुरक्षा के लिए हम बाहर नहीं जाने देते / Can, but we keep them in for safety","नहीं / No"],"required":false},{"key":"ab_strength","label":"चलने-फिरने में कमज़ोरी या धीमापन? / Weakness or slowness when walking?","type":"dropdown","options":["नहीं / No","थोड़े धीमे हैं / A little slow","हाँ, कमज़ोर हैं या सहारा चाहिए / Yes, weak or need support"],"required":false},{"key":"ab_own_medicines","label":"क्या वे अपनी दवाई ख़ुद, बिना याद दिलाए लेते हैं? / Do they take their medicines themselves, without reminders?","type":"dropdown","options":["हाँ / Yes","कोई दवाई नहीं / No medicines","कभी भूल जाते हैं / Sometimes forget","नहीं, याद दिलाना पड़ता है / No, they need reminding"],"required":false},{"key":"ab_med_count","label":"रोज़ कितनी दवाइयाँ? / How many medicines a day?","type":"dropdown","options":["0–2","3 या ज़्यादा / 3 or more"],"required":false},{"key":"ab_fall","label":"पिछले एक साल में कभी गिरे? / Any fall in the last year?","type":"dropdown","options":["नहीं / No","हाँ / Yes"],"required":false},{"key":"ab_hospital","label":"पिछले एक साल में अस्पताल में भर्ती हुए? / In hospital in the last year?","type":"dropdown","options":["नहीं / No","हाँ / Yes"],"required":false},{"key":"ab_memory","label":"क्या वे बातें अक्सर भूल जाते हैं या उलझ जाते हैं? / Do they often forget things or get confused?","type":"dropdown","options":["नहीं / No","थोड़ा / A little","हाँ / Yes"],"required":false},{"key":"ab_hearing","label":"फ़ोन पर सुनने या देखने में दिक्कत? / Difficulty hearing on the phone, or seeing?","type":"dropdown","options":["नहीं / No","हाँ / Yes"],"required":false},{"key":"ab_alone","label":"क्या वे अकेले रहते हैं, या दिन में अकेले रहते हैं? / Do they live alone, or are they alone during the day?","type":"dropdown","options":["नहीं / No","हाँ / Yes"],"required":false},{"key":"ab_serious","label":"कोई गंभीर बीमारी (दिल, लकवा, किडनी, पार्किंसन…)? / Any serious illness (heart, stroke, kidney, Parkinson's…)?","type":"dropdown","options":["नहीं / No","सिर्फ़ बीपी या शुगर / Only BP or sugar","हाँ / Yes"],"required":false},{"key":"cautions","label":"परिवार की सावधानियाँ: स्नेहा प्यार से इनका ध्यान रखवाए (वैकल्पिक) / Family precautions Sneha should gently keep, optional","type":"checkbox","required":false,"options":["बाहर अकेले न जाएँ / Not to go out alone","सीढ़ियाँ न चढ़ें / Not to climb stairs","भारी सामान न उठाएँ / Not to lift heavy things","गैस-चूल्हा अकेले न जलाएँ / Not to use the gas stove alone","गाड़ी या स्कूटर न चलाएँ / Not to drive","रात में उठें तो लाइट जलाकर, धीरे चलें / At night, light on and walk slowly"]},{"key":"plan","label":"प्लान / Plan","type":"dropdown","options":["फ़ाउंडिंग फ़ैमिली (मुफ़्त) / Founding family (free)"],"required":true},{"key":"consent","label":"सहमति / Consent","type":"checkbox","required":true,"options":["वरिष्ठजन को इसकी जानकारी है और वे सहमत हैं / The elder knows and agrees","सदा स्नेहा एम्बुलेंस या डॉक्टर नहीं है; आपात स्थिति में पहले 108/112 पर कॉल करें / SadaSneha is not an ambulance or doctor; in an emergency call 108/112 first","सुरक्षा के लिए कॉल रिकॉर्ड हो सकती हैं; जानकारी निजी रहेगी और माँगने पर मिटा दी जाएगी / Calls may be recorded for safety; data stays private and is deleted on request"]},{"key":"health_consent","label":"स्वास्थ्य जानकारी (वैकल्पिक) / Health details, optional","type":"checkbox","required":false,"options":["दवाइयों और बीपी/शुगर की जानकारी रखने और याद दिलाने की अनुमति / Allow keeping medicine and BP/sugar details for reminders"]}];
 // The page is hosted on a normal web host; n8n runs only these two services.
 const API_BASE = 'https://app.sadasneha.in/webhook';
 const API = { signup: API_BASE + '/app-signup', status: API_BASE + '/app-status', meds: API_BASE + '/app-medicines', message: API_BASE + '/app-message',
@@ -1794,8 +1799,8 @@ document.addEventListener('click', (e) => {
 function buildForm() {
   const f = $('#signup-form');
   const groups = [
-    ['आपकी जानकारी / About you', ['family_name', 'relation', 'family_phone', 'family_email', 'pincode', 'locality', 'city', 'state']],
-    ['वरिष्ठजन की जानकारी / About the elder', ['elder_name', 'elder_gender', 'address_as', 'address_as_other', 'sneha_intro', 'elder_age', 'elder_birthday', 'elder_phone', 'phone_type', 'language']],
+    ['आपकी जानकारी / About you', ['family_name', 'relation', 'family_phone', 'family_email', 'pincode', 'state', 'city', 'locality']],
+    ['वरिष्ठजन की जानकारी / About the elder', ['elder_name', 'elder_gender', 'address_as', 'address_as_other', 'sneha_intro', 'sneha_intro_other', 'elder_age', 'elder_birthday', 'elder_phone', 'phone_type', 'language']],
     ['दिनचर्या / Daily routine', ['wake_time', 'breakfast_time', 'lunch_time', 'medicine_time', 'no_call_hours']],
     ['वे क्या-क्या ख़ुद कर लेते हैं? / What can they do themselves?', FIELDS.filter((x) => x.key.startsWith('ab_')).map((x) => x.key)],
     ['स्वास्थ्य / Health', ['health_notes', 'cautions']],
@@ -1811,12 +1816,12 @@ function buildForm() {
       const req = x.required ? ' <span class="req">*</span>' : '';
       const ph = x.placeholder ? ` placeholder="${x.placeholder}"` : '';
       if (x.type === 'checkbox') {
-        html += `<label>${x.label}${req}</label>` + x.options.map((o, i) =>
+        html += `<label${x.min ? ` data-min="${x.min}" data-key="${k}"` : ''}>${x.label}${req}</label>` + x.options.map((o, i) =>
           `<label class="check"><input type="checkbox" name="${k}" value="${o.replace(/"/g, '&quot;')}"> <span>${o}</span></label>`).join('');
       } else if (x.type === 'dropdown') {
         html += `<label for="f-${k}">${x.label}${req}</label><select id="f-${k}" name="${k}"${x.required ? ' data-req="1"' : ''}>` +
           (x.options.length > 1 ? '<option value="">चुनें / Choose</option>' : '') +
-          x.options.map((o) => `<option>${o}</option>`).join('') + '</select>';
+          x.options.map((o) => x.shown_english_first ? `<option value="${o.replace(/"/g, '&quot;')}">${o.split(' / ').reverse().join(' / ')}</option>` : `<option>${o}</option>`).join('') + '</select>';
       } else if (x.type === 'textarea') {
         html += `<label for="f-${k}">${x.label}${req}</label><textarea id="f-${k}" name="${k}"${ph}${x.required ? ' data-req="1"' : ''}></textarea>`;
       } else {
@@ -1836,16 +1841,21 @@ function buildForm() {
     const nav = document.createElement('div'); nav.className = 'step-nav';
     nav.innerHTML = `<button type="button" class="btn secondary" data-step="-1">${ico('arrow-left')} ${T('पीछे', 'Back')}</button><button type="button" class="btn primary" data-step="1">${T('आगे', 'Next')}</button>`;
     submit.before(nav);
+    const later = document.createElement('button'); later.type = 'button'; later.className = 'linkbtn form-later'; later.textContent = T('💾 सहेजें, बाद में पूरा करें', '💾 Save and finish later');
+    later.onclick = () => { draftSave(); toast(T('सहेज लिया ✓ जब चाहें यहीं से आगे भरिए।', 'Saved ✓ Carry on from here whenever you like.'), 3500); show(homeView()); };
+    nav.after(later);
     let at = 0;
-    const go = (i) => { at = i; sets.forEach((x, j) => { x.hidden = j !== i; });
+    const go = (i) => { at = i; f.dataset.step = i; draftSave(); sets.forEach((x, j) => { x.hidden = j !== i; });
       nav.querySelector('[data-step="-1"]').hidden = i === 0; nav.querySelector('[data-step="1"]').hidden = i === sets.length - 1; submit.hidden = i !== sets.length - 1;
       prog.innerHTML = `<b>${T('चरण', 'Step')} ${i + 1} / ${sets.length}</b> · ${esc(sets[i].querySelector('legend').textContent.split(' / ')[LANG === 'en' ? 1 : 0] || '')}<span class="step-bar"><span style="width:${Math.round((i + 1) / sets.length * 100)}%"></span></span>`;
       window.scrollTo({ top: Math.max(0, f.getBoundingClientRect().top + window.scrollY - 70) }); };
     nav.addEventListener('click', (e) => { const b = e.target.closest('[data-step]'); if (!b) return;
       const d = +b.dataset.step;
-      if (d > 0) { const miss = [...sets[at].querySelectorAll('[data-req]')].find((el) => !String(el.value || '').trim()); if (miss) { miss.focus(); toast(T('यह भरना ज़रूरी है', 'This is needed')); return; } }
+      if (d > 0) { const miss = [...sets[at].querySelectorAll('[data-req]')].find((el) => !String(el.value || '').trim() && !el.closest('.self-hide')); if (miss) { miss.focus(); toast(T('यह भरना ज़रूरी है', 'This is needed')); return; }
+        const mins = [...sets[at].querySelectorAll('label[data-min]')].find((l) => sets[at].querySelectorAll(`input[name="${l.dataset.key}"]:checked`).length < +l.dataset.min);
+        if (mins) { mins.scrollIntoView({ block: 'center' }); toast(T('कम से कम एक चुनें', 'Choose at least one')); return; } }
       go(Math.max(0, Math.min(sets.length - 1, at + d))); });
-    go(0);
+    f._go = go; go(0);
   })();
   try { signupPhoneGuard(); } catch (e) {}
   for (const k of ['wake_time', 'breakfast_time', 'lunch_time', 'medicine_time']) { const el = $('#f-' + k); if (el) swapForPick(el, timePick); }
@@ -1866,7 +1876,7 @@ function buildForm() {
         const hit = PIN_CACHE[pre][pin.value];
         if (!hit) { note.textContent = 'यह पिन कोड नहीं मिला; नीचे शहर ख़ुद लिखें / PIN not found; type the city below'; return; }
         const [state, district, places] = hit;
-        const st = $('#f-state'); if (st && [...st.options].some((o) => o.value === state || o.text === state)) st.value = state;
+        const st = $('#f-state'); if (st && [...st.options].some((o) => o.value === state)) { st.value = state; st.dispatchEvent(new Event('change')); }
         const city = $('#f-city'); if (city && !city.dataset.typed) city.value = district;
         const list = [...new Set(places.split('|').map((x) => x.trim()).filter(Boolean))];
         dl.innerHTML = list.map((x) => `<option value="${x.replace(/"/g, '&quot;')}">`).join('');
@@ -1876,6 +1886,26 @@ function buildForm() {
     });
     const city = $('#f-city'); if (city) city.addEventListener('input', () => { city.dataset.typed = '1'; });
   }
+  // no PIN? choose the state, then the city from that state's list (or type it)
+  const stSel = $('#f-state'), cityIn = $('#f-city');
+  if (stSel && cityIn) {
+    const cl = document.createElement('datalist'); cl.id = 'city-list'; cityIn.setAttribute('list', 'city-list'); cityIn.after(cl);
+    cityIn.setAttribute('placeholder', T('राज्य चुनने के बाद सूची से चुनें, या लिखें', 'Pick from the list after the state, or type'));
+    let DIST = null;
+    stSel.addEventListener('change', async () => {
+      try { DIST = DIST || await (await fetch('pin/districts.json')).json(); } catch (e) { return; }
+      cl.innerHTML = (DIST[stSel.value] || []).map((d) => `<option value="${d.replace(/"/g, '&quot;')}">`).join('');
+    });
+  }
+  // filling it for oneself: "आप" instead of "वे", and name and mobile are not asked twice
+  const rel = $('#f-relation');
+  if (rel) { rel.addEventListener('change', () => signupSelf(/स्वयं|Myself/.test(rel.value))); }
+  // "Sneha introduces herself as…": their own words
+  const si = $('#f-sneha_intro'), sio = $('#f-sneha_intro_other');
+  if (si && sio) { const fit = () => { const other = /Other|अन्य/.test(si.value); sio.closest('label') ; sio.hidden = !other; const lb = $('label[for="f-sneha_intro_other"]'); if (lb) lb.hidden = !other; }; si.addEventListener('change', fit); fit(); }
+  // every change is kept on this phone, so nothing is lost on "back" or a closed app
+  f.addEventListener('input', draftSave); f.addEventListener('change', draftSave);
+  draftLoad();
   const nc = $('#f-no_call_hours'); if (nc) swapForPick(nc, rangePick);
   const bd = $('#f-elder_birthday'); if (bd) swapForPick(bd, (h) => datePick(h, 'dm'));
   // what Sneha calls them: only the forms that fit a man or a woman
@@ -1892,12 +1922,62 @@ function buildForm() {
 }
 
 
+// ---- the form for oneself: their own words, no repeated name and mobile ----
+const SELF_WORDS = [[/वरिष्ठजन के घर का/g, 'आपके घर का'], [/वरिष्ठजन की जानकारी/g, 'आपके बारे में और'], [/वरिष्ठजन हैं/g, 'आप हैं'], [/वरिष्ठजन का/g, 'आपका'], [/वरिष्ठजन/g, 'आप'],
+  [/क्या वे/g, 'क्या आप'], [/स्नेहा उन्हें/g, 'स्नेहा आपको'], [/उनका/g, 'आपका'], [/उनकी/g, 'आपकी'], [/उनके/g, 'आपके'], [/उन्हें/g, 'आपको'], [/\bवे\b/g, 'आप'],
+  [/Do they/g, 'Do you'], [/Are they/g, 'Are you'], [/do they/g, 'do you'], [/are they/g, 'are you'], [/\bthey\b/g, 'you'], [/\btheir\b/g, 'your'], [/\bthem\b/g, 'you'],
+  [/The elder is/g, 'You are'], [/the elder's/gi, 'your'], [/Elder's/g, 'Your'], [/the elder/g, 'you']];
+function signupSelf(on) {
+  const f = $('#signup-form'); if (!f) return; f.classList.toggle('self', on);
+  f.querySelectorAll('label:not(.check), legend, .check span').forEach((el) => {
+    if (el.dataset.orig === undefined) el.dataset.orig = el.innerHTML;
+    let h = el.dataset.orig; if (on) for (const [a, b] of SELF_WORDS) h = h.replace(a, b);
+    if (on && /वरिष्ठजन को इसकी जानकारी है|knows and agrees/.test(el.dataset.orig)) h = 'मैं अपने लिए ख़ुद पंजीकरण कर रहा/रही हूँ और सहमत हूँ / I am signing up for myself and agree';
+    el.innerHTML = h;
+  });
+  // name and mobile: already given at the top
+  for (const k of ['elder_name', 'elder_phone']) { const el = $('#f-' + k), lb = $(`label[for="f-${k}"]`); if (el) { el.closest('label'); el.hidden = on; el.classList.toggle('self-hide', on); } if (lb) lb.hidden = on; }
+}
+// ---- the draft: kept on this phone while filling, cleared after sending ----
+const DRAFT_KEY = 'gs_signup_draft';
+function draftSave() {
+  const f = $('#signup-form'); if (!f) return;
+  const out = { step: +(f.dataset.step || 0), at: Date.now(), v: {} };
+  f.querySelectorAll('input[name], select[name], textarea[name]').forEach((el) => {
+    if (el.type === 'checkbox') { (out.v[el.name] = out.v[el.name] || []); if (el.checked) out.v[el.name].push(el.value); }
+    else if (el.value) out.v[el.name] = el.value;
+  });
+  try { localStorage.setItem(DRAFT_KEY, JSON.stringify(out)); } catch (e) {}
+}
+function draftLoad() {
+  let d = null; try { d = JSON.parse(localStorage.getItem(DRAFT_KEY) || 'null'); } catch (e) {}
+  const f = $('#signup-form'); if (!d || !f) return;
+  for (const [k, v] of Object.entries(d.v || {})) {
+    f.querySelectorAll(`[name="${k}"]`).forEach((el) => {
+      if (el.type === 'checkbox') el.checked = Array.isArray(v) && v.includes(el.value);
+      else if (!el.readOnly) { el.value = v; if (el.tagName === 'SELECT') el.dispatchEvent(new Event('change')); }
+    });
+  }
+  const rel = $('#f-relation'); if (rel) signupSelf(/स्वयं|Myself/.test(rel.value));
+  if (f._go && d.step) f._go(Math.min(d.step, f.querySelectorAll('fieldset').length - 1));
+}
+// what is still empty (for "finish later" and the reminder)
+function draftPending() {
+  let d = null; try { d = JSON.parse(localStorage.getItem(DRAFT_KEY) || 'null'); } catch (e) {}
+  if (!d) return null;
+  const want = ['family_name', 'family_phone', 'elder_gender', 'address_as', 'language', 'elder_age', 'breakfast_time', 'lunch_time', 'consent'];
+  return { at: d.at, left: want.filter((k) => !d.v[k] || (Array.isArray(d.v[k]) && !d.v[k].length)).length };
+}
+
 async function submitForm(e) {
   e.preventDefault();
   const fd = new FormData(e.target);
   const data = {};
   for (const x of FIELDS) data[x.key] = x.type === 'checkbox' ? fd.getAll(x.key) : (fd.get(x.key) || '').trim();
-  const missing = FIELDS.filter((x) => x.required && (x.type === 'checkbox' ? data[x.key].length < x.options.length : !data[x.key]));
+  const self = /स्वयं|Myself/.test(data.relation || '');
+  if (self) { data.elder_name = data.elder_name || data.family_name; data.elder_phone = data.elder_phone || data.family_phone; }
+  if (/Other|अन्य/.test(data.sneha_intro || '') && data.sneha_intro_other) data.sneha_intro = data.sneha_intro_other;
+  const missing = FIELDS.filter((x) => x.required && (x.type === 'checkbox' ? data[x.key].length < (x.min || x.options.length) : !data[x.key]));
   if (typeof signupPhoneOk === 'function' && !signupPhoneOk()) { $('#signup-err').textContent = T('पहले अपना मोबाइल नंबर OTP से पक्का कीजिए (पहले चरण में)', 'First verify your mobile number by OTP (in the first step)'); return; }
   if (missing.length) {
     $('#signup-err').textContent = 'कृपया ये भरें / Please fill: ' + missing.map((x) => x.label.split(' / ')[0]).join(', ');
@@ -1910,7 +1990,7 @@ async function submitForm(e) {
     const r = await fetch(API.signup, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(data) });
     const j = await r.json();
     if (!j.ok) throw new Error(j.error || 'failed');
-    store.set('gs_code', j.code);
+    store.set('gs_code', j.code); try { localStorage.removeItem(DRAFT_KEY); } catch (x) {}
     $('#done-code').textContent = j.code;
     $('#done-notes').textContent = j.status === 'Needs check' ? 'कुछ जानकारी ठीक नहीं लगी; हम फ़ोन करके पक्की करेंगे। / Some details need checking; we will call you.' : '';
     const PLAN = { active: '🌿 एक्टिव – दोस्त जैसी स्नेहा, रोज़ संदेश / Active: friendly messages', plus: '☀️ प्लस – रोज़ एक कॉल / Plus: one call a day', care: '🏡 केयर – पूरी देखभाल / Care: full care' };
@@ -4762,7 +4842,8 @@ function sakhiFace(on) {
   if (!face) {
     // her calm face, and the same face talking (the founder's video, silent): the video plays only while her voice sounds
     face = document.createElement('div'); face.id = 'talk-sakhi'; face.className = 'talk-sakhi hidden'; face.setAttribute('role', 'img'); face.setAttribute('aria-label', 'सखी / Sakhi');
-    face.innerHTML = '<img class="sk-rest" src="face-sakhi/rest.jpg" alt=""><video class="sk-talk" src="face-sakhi/talk.mp4" muted playsinline loop preload="auto" aria-hidden="true"></video>';
+    face.innerHTML = '<video class="sk-talk" src="face-sakhi/talk.mp4" poster="face-sakhi/rest.jpg" muted playsinline loop preload="auto" aria-hidden="true"></video>';
+    const v = face.querySelector('video'); v.addEventListener('loadedmetadata', () => { try { v.currentTime = SK_REST[SK_REST.length - 1]; } catch (e) {} }, { once: true });
     box.append(face);
   }
   face.classList.toggle('hidden', !on); $('#talk-canvas').classList.toggle('hidden', !!on);
@@ -4771,18 +4852,24 @@ function sakhiFace(on) {
   const rp = $('#talk-report'); if (rp) rp.innerHTML = '🚩 ' + (on ? T('सखी का जवाब ठीक नहीं लगा? बताइए', 'Sakhi\'s reply felt wrong? Tell us') : T('स्नेहा का जवाब ठीक नहीं लगा? बताइए', 'Sneha\'s reply felt wrong? Tell us'));
   const tag = box.querySelector('.talk-ai'); if (tag) tag.textContent = on ? T('सखी – स्नेहा की सहेली (AI)', 'Sakhi – Sneha\'s friend (AI)') : T('स्नेहा – आपकी AI सहायिका', 'Sneha – your AI companion');
 }
-// while her voice sounds, she talks (lips, face and head from the video); a moment of quiet and she rests again
-let skVoiceAt = 0;
+// One picture throughout: the video itself. While her voice sounds it plays (lips, face and head move); when she
+// stops, it plays on to the next moment her mouth is calmly closed and rests there – no switch, no jump.
+// (moments found in the clip: tools note in docs/sakhi-script.md; the blink at the very start is left out)
+const SK_REST = [1.458, 1.958, 2.792, 3.208, 3.917, 4.75, 5.167, 5.667, 6.083, 6.667, 7.375, 7.667, 8.167, 8.5, 9.25, 9.5];
+let skVoiceAt = 0, skStopAt = null;
 setInterval(() => {
   const face = $('#talk-sakhi'); if (!face || face.classList.contains('hidden')) return;
   const v = face.querySelector('.sk-talk'); if (!v) return;
   const now = performance.now();
   if (TALK.speaking) skVoiceAt = now;
-  const talking = now - skVoiceAt < 300;
+  const talking = now - skVoiceAt < 250;
   face.classList.toggle('speaking', talking);
-  if (talking && v.paused) { v.play().catch(() => {}); }
-  if (!talking && !v.paused) v.pause();
-}, 100);
+  if (talking) { skStopAt = null; if (v.paused) v.play().catch(() => {}); return; }
+  if (v.paused) return;
+  const t = v.currentTime;
+  if (skStopAt === null) skStopAt = SK_REST.find((r) => r > t + 0.04) ?? SK_REST[0];
+  if (t >= skStopAt && t < skStopAt + 0.5) { v.pause(); try { v.currentTime = skStopAt; } catch (e) {} skStopAt = null; }
+}, 40);
 const talkOpenBefore = talkOpen;
 talkOpen = async function () {
   if (isFreeUser()) { TALK.persona = 'sakhi'; TALK.lang = ULANG[store.get('gs_ulang') || 'hi'] || 'hi-IN'; }
@@ -4906,9 +4993,24 @@ show = function (view) {
   if (view === 'free' && !store.get('gs_user')) view = entryView();
   showBeforeFree(view);
   if (view === 'free') freeOpen();
+  // "put SadaSneha on your phone": only on the website's first page and the home screens, never over a form
+  const bar = $('#install-bar'); if (bar) bar.classList.toggle('away', !['role', 'free', 'home'].includes(view));
+  if (['free', 'home', 'buy'].includes(view)) draftCard(view);
 };
 // after sign-in: keep the free account's key (every signed-in person has one)
 function keepUser(r) { if (r && r.user && r.user.key) { store.set('gs_user', r.user.key); if (r.user.name) store.set('gs_uname', r.user.name); if (r.user.lang) store.set('gs_ulang', r.user.lang); } }
+
+// an unfinished sign-up: a gentle reminder with what is left, and one tap to carry on where they stopped
+function draftCard(view) {
+  const sec = $('#v-' + view); if (!sec) return;
+  let c = sec.querySelector('.draft-card'); const d = typeof draftPending === 'function' ? draftPending() : null;
+  if (!d || store.get('gs_code') && view !== 'home') { if (c) c.remove(); return; }
+  if (view === 'home' && store.get('gs_code')) { if (c) c.remove(); return; }
+  if (!c) { c = document.createElement('div'); c.className = 'card draft-card'; const at = sec.querySelector('.tiles, .buy-card') || sec.firstElementChild; at.before(c); }
+  c.innerHTML = `<p><b>📝 ${T('आपका पंजीकरण अधूरा है', 'Your sign-up is not finished')}</b>${d.left ? ' – ' + T(`${d.left} बातें बाक़ी`, `${d.left} things left`) : ''}</p>
+    <button class="btn primary" type="button">${T('जहाँ छोड़ा था, वहीं से पूरा करें', 'Carry on where you stopped')}</button>`;
+  c.querySelector('button').onclick = () => { store.set('gs_role', 'family'); show('signup'); setTimeout(() => { try { draftLoad(); } catch (e) {} }, 300); };
+}
 // ---- Starting Sneha from the free home: for my parents, or for myself (v-buy), then the sign-up form ----
 // "For myself": the same form with the relation "Myself (the elder)", and after sign-up this phone becomes the elder's.
 // A free user's memories with Sakhi go along to the new family (app-me 'link'), so Sneha already knows them.
