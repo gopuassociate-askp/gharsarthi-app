@@ -62,6 +62,15 @@
     <p class="en">A trip starts only when the elder taps "Yes, start the trip". The phone then sends its location to our server about every 5 minutes so that the family (the owner and family-level members, not friends) can see on a map where they have reached. A notice with an "end trip" button stays on the phone throughout. The trip ends by itself on arrival or after 24 hours, and all its locations are deleted 24 hours after it ends; only notes such as "arrived at 9:57" remain. Maps by OpenStreetMap.</p>
   </div>
 
+  <h2>मोबाइल नंबर की पुष्टि (OTP) / Mobile number check (OTP)</h2>
+  <div class="card">
+    <ul>
+      <li>लॉग इन या पंजीकरण के समय आपका मोबाइल नंबर Google (Firebase) को जाता है, जो उस पर एक SMS कोड (OTP) भेजता है।</li>
+      <li>कोड सही होने पर हमारा सर्वर सिर्फ़ यह देखता है कि नंबर किस परिवार में जुड़ा है। नंबर और पुष्टि का समय हमारे पास रहता है, कोड नहीं।</li>
+    </ul>
+    <p class="en">When you sign in or sign up, your mobile number goes to Google (Firebase), which sends an SMS code (OTP) to it. Once the code is right, our server only checks which family the number belongs to. We keep the number and the time it was checked, never the code.</p>
+  </div>
+
   <h2>"स्नेहा" बोलकर बुलाना / Hands-free "Sneha"</h2>
   <div class="card">
     <ul>

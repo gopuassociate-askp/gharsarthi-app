@@ -444,6 +444,11 @@
   .homebtn, #chat-back { display: none !important; }
   .backbar { gap: 10px; }
   .backbar .bb-home { flex: 0 0 auto; padding: 0 22px; }
+  .otp-row { display: flex; gap: 8px; align-items: stretch; } .otp-cc { display: flex; align-items: center; padding: 0 12px; border: 2px solid var(--line); border-radius: 14px; font-weight: 800; }
+  .otp-row input { flex: 1; font-size: 22px; letter-spacing: 1px; } .otp-in { font-size: 26px; letter-spacing: 8px; text-align: center; }
+  .otp-box { margin: 6px 0 4px; } .otp-or { text-align: center; color: var(--muted); margin: 14px 0 6px; } .otp-or span { background: var(--card); padding: 0 10px; }
+  input.otp-ok { border-color: #16a34a !important; background: #f0fdf4; } .otp-inline .btn { margin-top: 8px; }
+  .lock-card { border: 2px dashed #fdba74; } .access-banner { margin: 10px 0 0; padding: 8px 12px; background: rgba(255,255,255,.75); border-radius: 12px; font-size: 16px; font-weight: 700; }
 </style>
 </head>
 <body>
@@ -1633,6 +1638,7 @@ function buildForm() {
       go(Math.max(0, Math.min(sets.length - 1, at + d))); });
     go(0);
   })();
+  try { signupPhoneGuard(); } catch (e) {}
   for (const k of ['wake_time', 'breakfast_time', 'lunch_time', 'medicine_time']) { const el = $('#f-' + k); if (el) swapForPick(el, timePick); }
   // PIN code -> state, district and a list of localities (from India Post, files in pin/)
   const pin = $('#f-pincode'), loc = $('#f-locality');
@@ -1683,6 +1689,7 @@ async function submitForm(e) {
   const data = {};
   for (const x of FIELDS) data[x.key] = x.type === 'checkbox' ? fd.getAll(x.key) : (fd.get(x.key) || '').trim();
   const missing = FIELDS.filter((x) => x.required && (x.type === 'checkbox' ? data[x.key].length < x.options.length : !data[x.key]));
+  if (typeof signupPhoneOk === 'function' && !signupPhoneOk()) { $('#signup-err').textContent = T('पहले अपना मोबाइल नंबर OTP से पक्का कीजिए (पहले चरण में)', 'First verify your mobile number by OTP (in the first step)'); return; }
   if (missing.length) {
     $('#signup-err').textContent = 'कृपया ये भरें / Please fill: ' + missing.map((x) => x.label.split(' / ')[0]).join(', ');
     return;
@@ -1721,8 +1728,9 @@ async function loadStatus() {
     const r = await fetch(API.status + '?code=' + encodeURIComponent(code));
     const j = await r.json();
     if (!j.ok) { $('#login-err').textContent = 'यह कोड नहीं मिला / Code not found'; store.del('gs_code'); return show('login'); }
-    render(j);
     store.set('gs_last', JSON.stringify(j));
+    try { accessBanner(); } catch (e) {}
+    render(j);
     $('#h-updated').textContent = 'अभी अपडेट हुआ / Updated just now';
   } catch (e) {
     const last = store.get('gs_last');
@@ -4214,6 +4222,150 @@ show(params.get('ack') ? 'seen' : params.get('join') ? 'join' : params.get('heal
   : store.get('gs_code') ? (location.hash === '#talk' || params.get('talk') === '1' ? 'talk' : store.get('gs_role') === 'elder' ? 'elder' : 'home')
   : store.get('gs_member') ? 'care'
   : params.get('view') === 'signup' ? 'signup' : store.get('gs_role') === 'family' ? 'welcome' : 'role');
+// ---- Sign in with the mobile number: Google (Firebase) sends the OTP by SMS; our server checks Google's proof
+// and finds the family whose own or elder's mobile it is. New numbers go on to sign up, already verified.
+API.otp = API_BASE + '/app-otp';
+const OTP = { fb: null, confirm: null, verifier: null, phone: '' };
+function otpScripts() {
+  if (window.firebase && window.firebase.auth) return Promise.resolve();
+  const load = (src) => new Promise((ok, no) => { const s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = no; document.head.append(s); });
+  return load('https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js').then(() => load('https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js'));
+}
+async function otpFirebase() {
+  if (OTP.fb) return OTP.fb;
+  await otpScripts();
+  const c = await (await fetch(API.push, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ action: 'fcm_config' }) })).json();
+  const cfg = c && (c.firebase || c);
+  if (!cfg || !cfg.apiKey || !cfg.projectId) throw new Error('config');
+  const app = window.firebase.apps.length ? window.firebase.app() : window.firebase.initializeApp({ apiKey: cfg.apiKey, authDomain: cfg.projectId + '.firebaseapp.com', projectId: cfg.projectId });
+  OTP.fb = app.auth(); OTP.fb.languageCode = 'hi';
+  return OTP.fb;
+}
+// the small "mobile → OTP" box, used on both sign-in screens and in sign-up
+function otpBox(box, opts) {
+  box.innerHTML = `<label><span data-en="Mobile number">मोबाइल नंबर</span></label>
+    <div class="otp-row"><span class="otp-cc">+91</span><input type="tel" inputmode="numeric" maxlength="10" class="otp-phone" placeholder="98XXXXXXXX" value="${esc(opts.phone || '')}"></div>
+    <button type="button" class="btn primary otp-send">${T('OTP भेजें', 'Send OTP')}</button>
+    <div class="otp-code hidden"><label><span data-en="The 6-digit code from the SMS">SMS में आया 6 अंकों का कोड</span></label>
+      <input type="tel" inputmode="numeric" maxlength="6" class="otp-in" placeholder="______" autocomplete="one-time-code">
+      <button type="button" class="btn primary otp-check">${T('पक्का करें', 'Verify')}</button></div>
+    <p class="err otp-msg" aria-live="polite"></p><div class="otp-captcha" id="${opts.id}-captcha"></div>`;
+  const msg = (t) => { box.querySelector('.otp-msg').textContent = t; };
+  box.querySelector('.otp-send').onclick = async (e) => {
+    const p = box.querySelector('.otp-phone').value.replace(/\D/g, '');
+    if (!/^[6-9]\d{9}$/.test(p)) return msg(T('10 अंकों का मोबाइल नंबर लिखिए', 'Write the 10-digit mobile number'));
+    busy(e.currentTarget, true, T('भेज रहे हैं…', 'Sending…')); msg('');
+    try {
+      const auth = await otpFirebase();
+      if (OTP.verifier) { try { OTP.verifier.clear(); } catch (x) {} }
+      OTP.verifier = new window.firebase.auth.RecaptchaVerifier(`${opts.id}-captcha`, { size: 'invisible' });
+      OTP.confirm = await auth.signInWithPhoneNumber('+91' + p, OTP.verifier); OTP.phone = p;
+      box.querySelector('.otp-code').classList.remove('hidden'); box.querySelector('.otp-in').focus();
+      msg(T(`+91 ${p} पर कोड भेज दिया। (1–2 मिनट तक लग सकते हैं)`, `Code sent to +91 ${p}. (It can take a minute or two)`));
+      ulog('step', 'otp-sent');
+    } catch (x) {
+      const code = String((x && x.code) || x && x.message || x);
+      msg(/too-many|quota/.test(code) ? T('बहुत बार कोशिश हो गई; थोड़ी देर बाद फिर कीजिए', 'Too many tries; please wait a little') : /billing|operation-not-allowed|config|unauthorized-domain/.test(code)
+        ? T('मोबाइल से लॉग इन अभी चालू नहीं है; नीचे अपना कोड (GS-…) डालिए', 'Mobile sign-in is not on yet; use your code (GS-…) below') : T('कोड नहीं भेज पाए, फिर कोशिश कीजिए', 'Could not send the code; try again'));
+      ulog('error', 'otp-send', null, code.slice(0, 120));
+    } finally { busy(e.currentTarget, false); }
+  };
+  box.querySelector('.otp-check').onclick = async (e) => {
+    const c = box.querySelector('.otp-in').value.replace(/\D/g, '');
+    if (c.length !== 6 || !OTP.confirm) return msg(T('6 अंकों का कोड लिखिए', 'Write the 6-digit code'));
+    busy(e.currentTarget, true, T('जाँच रहे हैं…', 'Checking…'));
+    try {
+      const cred = await OTP.confirm.confirm(c);
+      const id_token = await cred.user.getIdToken();
+      const r = await (await fetch(API.otp, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ id_token }) })).json();
+      if (!r.ok) throw new Error(r.why || 'server');
+      store.set('gs_phone_ok', OTP.phone); ulog('step', 'otp-verified');
+      try { await OTP.fb.signOut(); } catch (x) {}
+      opts.done(r, OTP.phone);
+    } catch (x) { msg(T('कोड ग़लत है या पुराना हो गया; फिर से भेजिए', 'Wrong or old code; send it again')); }
+    finally { busy(e.currentTarget, false); }
+  };
+}
+// after a verified number: open that family, choose if there are several, or go on to sign up
+function otpSignedIn(r, phone, want) {
+  const m = (r.matches || []).filter((x) => !want || x.role === want);
+  const open = (x) => { store.set('gs_code', x.code); store.set('gs_role', x.role); try { localStorage.removeItem('gs_last'); } catch (e) {} toast(T('स्वागत है! 🙏', 'Welcome! 🙏')); show(x.role === 'elder' ? 'elder' : 'home'); };
+  if (m.length === 1) return open(m[0]);
+  if (m.length > 1) {
+    const box = $(want === 'elder' ? '#otp-elder' : '#otp-family');
+    box.insertAdjacentHTML('beforeend', `<p><b>${T('कौन-सा परिवार?', 'Which family?')}</b></p>` + m.map((x, i) => `<button type="button" class="btn secondary" data-pick="${i}">${esc(x.elder)} ${x.role === 'elder' ? T('(बुज़ुर्ग का फ़ोन)', '(elder\'s phone)') : ''}</button>`).join(''));
+    box.querySelectorAll('[data-pick]').forEach((b) => { b.onclick = () => open(m[+b.dataset.pick]); });
+    return;
+  }
+  if (want === 'elder') { toast(T('यह नंबर अभी किसी परिवार में नहीं जुड़ा। घर वालों से लिंक माँगिए।', 'This number is not in a family yet. Ask your family for the link.'), 5000); return; }
+  // a new family: sign-up, with this number filled in and already checked
+  show('signup'); setTimeout(() => { const f = $('#f-family_phone'); if (f) { f.value = phone; f.readOnly = true; f.classList.add('otp-ok'); } }, 300);
+}
+// the two sign-in screens
+(function () {
+  const fam = document.createElement('div'); fam.id = 'otp-family'; fam.className = 'otp-box';
+  const famCard = $('#code-in') && $('#code-in').closest('.card');
+  if (famCard) { famCard.querySelector('h2').insertAdjacentHTML('afterend', `<p class="muted">${T('अपने मोबाइल नंबर से – OTP आएगा', 'With your mobile number – you get an OTP')}</p>`); famCard.querySelector('p.muted').after(fam);
+    fam.insertAdjacentHTML('afterend', `<p class="otp-or"><span>${T('या कोड से', 'or with your code')}</span></p>`);
+    otpBox(fam, { id: 'otpf', done: (r, p) => otpSignedIn(r, p, '') }); }
+  const eld = document.createElement('div'); eld.id = 'otp-elder'; eld.className = 'otp-box';
+  const eCard = $('#ecode-in') && $('#ecode-in').closest('.card');
+  if (eCard) { eCard.querySelector('p.muted').after(eld); eld.insertAdjacentHTML('afterend', `<p class="otp-or"><span>${T('या घर वालों का कोड', 'or the family\'s code')}</span></p>`);
+    otpBox(eld, { id: 'otpe', done: (r, p) => otpSignedIn(r, p, 'elder') }); }
+})();
+// sign-up: the family's own mobile must be verified by OTP before the form is sent
+function signupPhoneGuard() {
+  const f = $('#f-family_phone'); if (!f || f.dataset.otp) return; f.dataset.otp = '1';
+  const b = document.createElement('div'); b.className = 'otp-inline';
+  b.innerHTML = `<button type="button" class="btn secondary otp-verify">${T('📱 OTP से नंबर पक्का करें', '📱 Verify the number by OTP')}</button><div class="otp-box hidden" id="otp-signup"></div>`;
+  f.after(b);
+  const mark = () => { const ok = store.get('gs_phone_ok') && f.value.replace(/\D/g, '').slice(-10) === store.get('gs_phone_ok'); f.classList.toggle('otp-ok', !!ok); b.querySelector('.otp-verify').classList.toggle('hidden', !!ok); return ok; };
+  f.addEventListener('input', mark); mark();
+  b.querySelector('.otp-verify').onclick = () => { const box = $('#otp-signup'); box.classList.remove('hidden');
+    otpBox(box, { id: 'otps', phone: f.value.replace(/\D/g, '').slice(-10), done: (r, p) => { f.value = p; mark(); box.classList.add('hidden'); toast(T('नंबर पक्का हो गया ✓', 'Number verified ✓')); } }); };
+}
+function signupPhoneOk() { const f = $('#f-family_phone'); return !f || (store.get('gs_phone_ok') && f.value.replace(/\D/g, '').slice(-10) === store.get('gs_phone_ok')); }
+// ---- Free and paid (the server decides: safety/n8n/access.js). Safety is never locked. Inside the Android app
+// (Google Play's rule) there is no price and no way to pay: it only says the feature is not in the plan.
+function accessNow() {
+  try { if (store.get('gs_role') === 'elder') return (ELDER && ELDER.access) || null; return (JSON.parse(store.get('gs_last') || 'null') || {}).access || null; } catch (e) { return null; }
+}
+const isLocked = (feature) => { const a = accessNow(); return !!(a && (a.locked || []).includes(feature)); };
+function lockedCard(box, what) {
+  const fam = store.get('gs_role') !== 'elder';
+  box.innerHTML = `<div class="card lock-card"><h2>${ico('key-round')} ${T('यह सुविधा पेड प्लान में है', 'This is part of the paid plan')}</h2>
+    <p>${esc(what)}</p>
+    <p class="muted">${T('मदद का बटन, 108, घर वालों से कॉल और बातचीत, टीवी, रेडियो और गाने हमेशा मुफ़्त हैं।', 'The help button, 108, family calls and chat, TV, radio and songs are always free.')}</p>` +
+    (fam && !NATIVE ? `<button class="btn primary" type="button" data-go="pay">${T('प्लान देखें', 'See the plans')}</button>` : fam ? '' : `<p class="muted">${T('घर वालों से बात कर लीजिए।', 'Please talk to your family.')}</p>`) + '</div>';
+}
+// the paid screens: health, travel companion; events inside मिलन और खेल; starting a family meeting
+const PAID_VIEWS = { health: ['health', T('दवाई ली या नहीं, BP और शुगर का रिकॉर्ड, घर वालों को सूचना।', 'Medicines taken, BP and sugar records, notes to the family.')],
+  trip: ['trip', T('सफ़र में घर वाले देखें कि आप कहाँ तक पहुँचे।', 'On a trip, the family sees where you have reached.')] };
+const showBefore = show;
+show = function (view) {
+  showBefore(view);
+  const p = PAID_VIEWS[view], sec = $('#v-' + view);
+  if (p && sec) {   // the screen stays as it is underneath; a lock card covers it while the plan does not include it
+    const lock = isLocked(p[0]); let card = sec.querySelector(':scope > .lock-wrap');
+    [...sec.children].forEach((c) => { if (c !== card) c.classList.toggle('hidden', lock); });
+    if (lock && !card) { card = document.createElement('div'); card.className = 'lock-wrap'; sec.prepend(card); lockedCard(card, p[1]); }
+    if (!lock && card) card.remove();
+  }
+  if (view === 'fun' && isLocked('events')) { const ev = $('#fun-events'); if (ev) lockedCard(ev, T('रोज़ का योग, भजन संध्या और सत्संग में घर बैठे जुड़ना।', 'Joining daily yoga, bhajan sandhya and satsang from home.')); }
+  if (view === 'home') accessBanner();
+};
+// the family's first screen: trial days left, or "free plan"
+function accessBanner() {
+  const a = accessNow(), hero = $('#hero'); if (!a || !hero) return;
+  let b = $('#access-banner');
+  if (!b) { b = document.createElement('p'); b.id = 'access-banner'; b.className = 'access-banner'; hero.append(b); }
+  if (a.tier === 'trial') { const d = Math.max(1, Math.ceil((Date.parse(a.trial_ends) - Date.now()) / 864e5)); b.textContent = T(`🎁 मुफ़्त ट्रायल: ${d} दिन बाक़ी – सब सुविधाएँ चालू`, `🎁 Free trial: ${d} day(s) left – everything is on`); b.classList.remove('hidden'); }
+  else if (a.tier === 'free') { b.textContent = T('मुफ़्त प्लान: कॉल, बातचीत, टीवी, रेडियो, गाने और मदद बटन; स्नेहा रोज़ 10 जवाब', 'Free plan: calls, chat, TV, radio, songs and the help button; Sneha 10 replies a day'); b.classList.remove('hidden'); }
+  else b.classList.add('hidden');
+}
+// a family meeting is a paid feature (joining one you are invited to is always possible)
+const gvStartBefore = gvStart;
+gvStart = function (list, video) { if (isLocked('meeting')) { toast(T('परिवार की मीटिंग पेड प्लान में है; एक-एक करके कॉल हमेशा मुफ़्त है।', 'Family meetings are in the paid plan; one-to-one calls are always free.'), 4500); return; } return gvStartBefore(list, video); };
 </script>
 </body>
 </html>
