@@ -166,7 +166,7 @@
 </main>
 <script>
 const API = 'https://app.sadasneha.in/webhook/';
-const STATUSES = ['New', 'Needs check', 'Verified', 'Active', 'Paused', 'Declined', 'Test'];
+const STATUSES = ['New', 'Needs check', 'Verified', 'Active', 'Founding', 'Paused', 'Declined', 'Test'];   // Founding: free forever, full Sneha (your choice per family)
 const $ = (s) => document.querySelector(s);
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const ist = (iso) => iso ? new Date(iso).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }) : '—';
